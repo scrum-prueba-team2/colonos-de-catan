@@ -1,5 +1,6 @@
 import { Room, Client, CloseCode, Delayed } from "colyseus";
 import { MyRoomState, Player } from "./schema/MyRoomState.js";
+import { text } from "express";
 
 /** How long a player has to act before their turn is skipped. */
 const TURN_DURATION = 15_000;
@@ -35,10 +36,19 @@ export class MyRoom extends Room<{ state: MyRoomState }> {
     privatemessage: (client: Client, message: any) => {
       console.log("private message received from", client.sessionId, ":", message);
 
+      
+
       //enviamos el mensaje al cliente que se especifica en el campo 'to' del mensaje, este debe ser el sessionId del ciente
       const targetSessionId = message.to;
+
+      if (!targetSessionId || !message.text) return; // payload inválido, ignora
       // buscamos el cliente con el sessionId especificado
       const targetClient = this.clients.find(c => c.sessionId === targetSessionId);
+
+      if (!targetClient) {
+        client.send("error", { message: "Ese jugador ya no está en la sala" });
+        return; 
+      }
 
       //enviamos el mensaje solo a ese cliente
       targetClient.send("privatemessage", {
@@ -68,6 +78,7 @@ export class MyRoom extends Room<{ state: MyRoomState }> {
   };
 
   onCreate(options: any) {
+    console.log("room created!", this.roomId);
   }
 
   onJoin(client: Client, options: any) {
@@ -77,6 +88,7 @@ export class MyRoom extends Room<{ state: MyRoomState }> {
     if (this.state.players.size === this.maxClients) {
       this.lock(); // full: stop the matchmaker from sending anyone else
       this.nextTurn();
+      this.state.phase = "playing"; //cambiando el estado de la sala a 'playing' cuando se llena la sala
     }
   }
 

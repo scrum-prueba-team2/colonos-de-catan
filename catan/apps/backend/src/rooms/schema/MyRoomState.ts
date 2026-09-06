@@ -17,5 +17,7 @@ export const MyRoomState = schema({
 
   turnCount: t.uint16().default(0),
 
+  phase: t.string().default("lobby"), // Estado por defecto de la sala
+
 });
 export type MyRoomState = SchemaType<typeof MyRoomState>;
