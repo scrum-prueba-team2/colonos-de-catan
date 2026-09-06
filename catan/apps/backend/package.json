@@ -1,8 +1,8 @@
 {
   "private": true,
-  "name": "@catan/backend",
+  "name": "backend",
   "version": "0.1.0",
-  "description": "Colyseus server",
+  "description": "A Colyseus multiplayer server",
   "type": "module",
   "main": "build/index.js",
   "engines": {
@@ -13,8 +13,7 @@
     "loadtest": "tsx loadtest/example.ts --room my_room --numClients 2",
     "build": "npm run clean && tsc -p tsconfig.build.json",
     "clean": "rimraf build",
-    "test": "mocha -r tsx test/**.test.ts --exit --timeout 15000",
-    "typecheck": "tsc --noEmit"
+    "test": "mocha -r tsx test/**.test.ts --exit --timeout 15000"
   },
   "author": "",
   "license": "UNLICENSED",
@@ -30,12 +29,9 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@colyseus/schema": "^5.0.14",
-    "@colyseus/tools": "^0.18.1",
-    "colyseus": "^0.18.2",
+    "@colyseus/schema": "^5.0.27",
+    "@colyseus/tools": "^0.18.3",
+    "colyseus": "^0.18.5",
     "express": "^5.2.1"
-  },
-  "exports": {
-    "./*": "./src/*.ts"
   }
 }

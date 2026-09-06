@@ -5,7 +5,7 @@ import { MyRoomState, Player } from "./schema/MyRoomState.js";
 const TURN_DURATION = 15_000;
 
 export class MyRoom extends Room<{ state: MyRoomState }> {
-  maxClients = 2;
+  maxClients = 4;
   state = new MyRoomState();
 
   private turnTimeout?: Delayed;
@@ -24,6 +24,39 @@ export class MyRoom extends Room<{ state: MyRoomState }> {
       player.score++;
       this.nextTurn();
     },
+    message: (client: Client, message: any) => {
+      console.log("message received from", client.sessionId, ":", message);
+
+      this.broadcast("message", {
+        text: message,
+        from: client.sessionId
+      });
+    },
+    privatemessage: (client: Client, message: any) => {
+      console.log("private message received from", client.sessionId, ":", message);
+
+      const targetSessionId = message.to;
+      const targetClient = this.clients.find(c => c.sessionId === targetSessionId);
+
+      targetClient.send("privatemessage", {
+        text: message.text,
+        from: client.sessionId
+      });
+
+    },
+    rollDice: (client: Client, message: any) => {
+      if (this.state.currentTurn !== client.sessionId) { return; }
+
+      const diceRoll = Math.floor(Math.random() * 6) + 1; // Roll a dice (1-6)
+      console.log("dice rolled by", client.sessionId, ":", diceRoll);
+
+      this.broadcast("diceRolled", {
+        result: diceRoll,
+        from: client.sessionId
+      });
+
+      this.nextTurn();
+    }
   };
 
   onCreate(options: any) {
