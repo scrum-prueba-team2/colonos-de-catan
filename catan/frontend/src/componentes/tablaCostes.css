@@ -1,0 +1,84 @@
+/* Tabla de costes de la columna izquierda.
+   Los iconos vienen del sprite public/svg/piezas.svg y toman su color de la
+   propiedad color, porque estan dibujados con fill="currentColor". Por eso
+   aqui si quedan reglas de color: no tinen texto, dibujan los iconos. */
+.tcMarco {
+    font-size: clamp(8px, 4.4cqw, 16px);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.33em;
+    padding: 0.66em 0.75em;
+    box-sizing: border-box;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.tcTitulo {
+    font-size: 0.83em;
+    color: #888;
+}
+
+.tcLista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+/* Una fila por construccion: a la izquierda la pieza, a la derecha lo que paga */
+.tcFila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.66em;
+    padding: 0.4em 0;
+    border-bottom: 1px solid #EDF1F2;
+    min-width: 0;
+}
+.tcFila:last-child { border-bottom: 0; }
+
+.tcPieza {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    min-width: 0;
+    color: #2C4049;
+}
+
+.tcIconoPieza { width: 1.42em; height: 1.42em; flex: none; }
+
+.tcNombre {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tcPaga {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    flex: none;
+}
+
+.tcCosto { display: flex; align-items: center; gap: 0.08em; }
+.tcRecurso { width: 1.5em; height: 1.5em; }
+
+.tcCantidad {
+    font-size: 0.92em;
+}
+
+/* El color de cada recurso. */
+.tcRec-madera   { color: #2F6B44; }
+.tcRec-ladrillo { color: #BF6437; }
+.tcRec-lana     { color: #7FA84B; }
+.tcRec-trigo    { color: #D9A22C; }
+.tcRec-piedra   { color: #7A8391; }
+
+/* Las cartas de desarrollo estan fuera de esta version */
+.tcInactiva { opacity: .38; }
+

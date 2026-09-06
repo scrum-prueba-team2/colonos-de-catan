@@ -1,0 +1,57 @@
+/* Ficha de un jugador en la barra de arriba.
+   El tamano base del texto se mide en cqw: un porcentaje del ancho de la
+   ficha. Todo lo de adentro se expresa en em, o sea en multiplos de ese
+   tamano base, asi que basta cambiar una linea para escalar la ficha entera.
+   El clamp le pone piso y techo para que no se vuelva ilegible ni gigante. */
+.infoJugador {
+    --color-jugador: #999;
+    font-size: clamp(9px, 3.7cqw, 15px);
+    border-top: 0.33em solid var(--color-jugador);
+    background: #fff;
+    padding: 0.5em 0.85em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.35em;
+    min-width: 0;
+    overflow: hidden;
+    opacity: .55;
+    transition: opacity .15s, background .15s;
+}
+
+/* Jugador en turno. Tres senales a la vez, porque una sola se pierde de vista
+   en medio de la partida: se enciende, se tine y le sale un anillo. */
+.ijTurno {
+    opacity: 1;
+    background: color-mix(in srgb, var(--color-jugador) 14%, white);
+    box-shadow: inset 0 0 0 0.2em var(--color-jugador);
+}
+
+.ijNombre {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    min-width: 0;
+}
+
+.ijNombre strong {
+    font-size: 1.17em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* El puntito del color del jugador */
+.ijPunto {
+    width: 0.85em;
+    height: 0.85em;
+    border-radius: 50%;
+    flex: none;
+    background: var(--color-jugador);
+}
+
+.ijDatos {
+    display: flex;
+    gap: 1em;
+    min-width: 0;
+}

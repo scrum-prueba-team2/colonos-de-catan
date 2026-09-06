@@ -15,7 +15,7 @@ interface NavigationContextType {
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
 
 export function NavigationProvider({ children }: { children: ReactNode }) {
-  const [pantallaActual, setPantallaActual] = useState<Pantalla>('login');
+  const [pantallaActual, setPantallaActual] = useState<Pantalla>('partida');
 
   const navegarA = (pantalla: Pantalla) => {
     setPantallaActual(pantalla);

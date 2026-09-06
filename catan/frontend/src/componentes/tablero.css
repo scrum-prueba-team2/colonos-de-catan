@@ -1,0 +1,76 @@
+/* Tablero de Catan.
+   Todo se dibuja en un solo SVG. En SVG, fill y stroke son propiedades
+   normales de CSS, por eso todos los colores viven aqui y el componente solo
+   pone clases.
+
+   Los textos de este archivo NO llevan unidades: los numeros de un SVG estan
+   en las coordenadas del viewBox, no en pixeles de pantalla, asi que ya
+   escalan solos junto con el dibujo. Son relativos al contenedor por
+   naturaleza y no hace falta cqw. */
+.tablero { background: #BFD8E8; }
+
+.tbSvg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.tbHex {
+    stroke: #F3EDE0;
+    stroke-width: 3;
+}
+
+/* Mapeo de terrenos. FALTA CONFIRMARLO con el equipo de reglas: por conteo
+   sabemos que los terrenos 1, 2 y 3 salen 4 veces cada uno (bosque, pasto y
+   campo) y que el 4 y el 5 salen 3 veces (colina y montana), pero no cual
+   numero es cual. */
+.tbTerreno-0 { fill: #E4D3A8; }   /* Desierto */
+.tbTerreno-1 { fill: #2F6B44; }   /* Bosque, da madera */
+.tbTerreno-2 { fill: #8FC65A; }   /* Pasto, da lana */
+.tbTerreno-3 { fill: #E9B93E; }   /* Campo, da trigo */
+.tbTerreno-4 { fill: #BF6437; }   /* Colina, da ladrillo */
+.tbTerreno-5 { fill: #8D96A3; }   /* Montana, da piedra */
+
+/* Aristas: los lados donde van los caminos */
+.tbArista {
+    stroke: #00000018;
+    stroke-width: 6;
+    stroke-linecap: round;
+}
+.tbAristaOcupada { stroke: #2C4049; stroke-width: 9; }
+
+/* Vertices: las esquinas donde van poblados y ciudades */
+.tbVertice {
+    fill: #ffffff;
+    stroke: #00000030;
+    stroke-width: 1.5;
+}
+.tbVerticeOcupado { fill: #2C4049; }
+
+/* Ficha con el numero del hexagono */
+.tbFichaFondo { fill: #F6EFDD; stroke: #00000022; }
+
+.tbFichaNumero {
+    font-size: 21px;
+    fill: #2A2A2A;
+    text-anchor: middle;
+    dominant-baseline: central;
+}
+
+.tbPip { fill: #6A6A6A; }
+
+/* El 6 y el 8 son los numeros mas probables, por eso van en rojo */
+.tbFichaRoja .tbFichaNumero,
+.tbFichaRoja .tbPip { fill: #B3261E; }
+
+.tbLadron { fill: #2B2B2B; }
+
+/* Puertos: el muelle y el cartelito con el tipo de cambio */
+.tbMuelle { stroke: #9C7B4E; stroke-width: 2.5; }
+.tbPuertoCaja { fill: #F3E7CE; stroke: #9C7B4E; stroke-width: 2; }
+.tbPuertoTexto {
+    font-size: 11px;
+    fill: #6B4E24;
+    text-anchor: middle;
+    dominant-baseline: central;
+}
