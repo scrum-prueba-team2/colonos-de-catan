@@ -26,7 +26,7 @@ export class MyRoom extends Room<{ state: MyRoomState }> {
     },
     message: (client: Client, message: any) => {
       console.log("message received from", client.sessionId, ":", message);
-
+      // enviamos el mensaje a todos los clientes conectados a la sala, incluyendo el remitente.
       this.broadcast("message", {
         text: message,
         from: client.sessionId
@@ -35,28 +35,19 @@ export class MyRoom extends Room<{ state: MyRoomState }> {
     privatemessage: (client: Client, message: any) => {
       console.log("private message received from", client.sessionId, ":", message);
 
+      //enviamos el mensaje al cliente que se especifica en el campo 'to' del mensaje, este debe ser el sessionId del ciente
       const targetSessionId = message.to;
+      // buscamos el cliente con el sessionId especificado
       const targetClient = this.clients.find(c => c.sessionId === targetSessionId);
 
+      //enviamos el mensaje solo a ese cliente
       targetClient.send("privatemessage", {
         text: message.text,
         from: client.sessionId
       });
 
     },
-    rollDice: (client: Client, message: any) => {
-      if (this.state.currentTurn !== client.sessionId) { return; }
-
-      const diceRoll = Math.floor(Math.random() * 6) + 1; // Roll a dice (1-6)
-      console.log("dice rolled by", client.sessionId, ":", diceRoll);
-
-      this.broadcast("diceRolled", {
-        result: diceRoll,
-        from: client.sessionId
-      });
-
-      this.nextTurn();
-    }
+    
   };
 
   onCreate(options: any) {
