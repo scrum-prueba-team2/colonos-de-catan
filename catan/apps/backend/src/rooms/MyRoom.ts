@@ -47,6 +47,23 @@ export class MyRoom extends Room<{ state: MyRoomState }> {
       });
 
     },
+    rollDice: (client: Client, message: any) => {
+      // Si no es el turno del jugador, ignora
+      if (this.state.currentTurn !== client.sessionId) { return; }
+
+      // Se calcula un dado aleatorio entre 1 y 6 (esto es solo ejemplo, se adaptará a la lógica del juego mas adelante)
+      const diceRoll = Math.floor(Math.random() * 6) + 1; // Roll a dice (1-6)
+      //mensaje de depuracion
+      console.log("dice rolled by", client.sessionId, ":", diceRoll);
+
+      // Le mostramos el resultado a todos los jugadores.
+      this.broadcast("diceRolled", {
+        result: diceRoll,
+        from: client.sessionId
+      });
+
+      this.nextTurn();
+    }
     
   };
 
