@@ -1,13 +1,15 @@
 import { Room, Client, CloseCode, Delayed } from "colyseus";
-import { MyRoomState, Player } from "../states/MyRoomState.js";
-import { text } from "express";
+import { CatanState } from "../states/CatanState.js";
+import { Jugador } from "../schemas/Jugador.js";
 
 //* Cuanto tiempo tendra un jugador (en ms) para realizar su turno
 const TURN_DURATION = 15_000;
 
-export class MyRoom extends Room{
+export class CatanRoom extends Room{
   maxClients = 4;
-  state = new MyRoomState();
+  state = new CatanState();
+  Partida = this.state.partida;
+  Jugadores = this.state.jugadores;
 
   //? Delayed
   //* Tipo de dato temporizador que permite programar una funcion en el tiempo
@@ -15,9 +17,9 @@ export class MyRoom extends Room{
 
   messages = {
     play: (client: Client, message: any) => {
-      if (this.state.turnoActual !== client.sessionId) { return; }
+      if (this.Partida.turnoActual !== client.sessionId) { return; }
 
-      const player = this.state.jugadores.get(client.sessionId);
+      const player = this.Jugadores.get(client.sessionId);
       if (!player) { return; }
 
       player.puntuacion++;
@@ -61,7 +63,7 @@ export class MyRoom extends Room{
     },
 
     rollDice: (client: Client, message: any) => {
-      if (this.state.turnoActual !== client.sessionId) { return; }
+      if (this.Partida.turnoActual !== client.sessionId) { return; }
 
       //* Se calcula un dado aleatorio entre 1 y 6
       const diceRoll = Math.floor(Math.random() * 6) + 1; 
@@ -85,21 +87,22 @@ export class MyRoom extends Room{
   onJoin(client: Client, options: any) {
     console.log(client.sessionId, "joined!");
     //* Crear y setear un nuevo jugador en el estado de la sala cuando un cliente se une
-    this.state.jugadores.set(client.sessionId, new Player());
+    this.Jugadores.set(client.sessionId, new Jugador());
 
     //* Si la sala ya esta llena, se bloquea para no ser visible en el matchmaker
-    if (this.state.jugadores.size === this.maxClients) {
+    if (this.Jugadores
+      .size === this.maxClients) {
       this.lock(); 
       this.nextTurn();
-      this.state.fase = "playing"; //* fase a "playing"
+      this.Partida.fase = "playing"; //* fase a "playing"
     }
   }
 
   onLeave(client: Client, code: CloseCode) {
     console.log(client.sessionId, "left!", code);
-    const wasTheirTurn = this.state.turnoActual === client.sessionId;
+    const wasTheirTurn = this.Partida.turnoActual === client.sessionId;
 
-    this.state.jugadores.delete(client.sessionId);  //* Eliminar al jugador del state
+    this.Jugadores.delete(client.sessionId);  //* Eliminar al jugador del state
     if (wasTheirTurn) this.nextTurn();
   }
 
@@ -112,22 +115,17 @@ export class MyRoom extends Room{
     this.turnTimeout?.clear();  //! Limpia el temporizador anterior si existe
 
     //* Obtiene todos los sessionIds de los jugadores en la sala
-    const sessionIds = [...this.state.jugadores.keys()];
+    const sessionIds = [...this.Jugadores.keys()];
     if (sessionIds.length === 0) {
-      this.state.turnoActual = "";
+      this.Partida.turnoActual = "";
       return;
     }
 
     //* indexOf() si recibe vacio retorna -1, que al inicio asi sera por eso
-    const previous = sessionIds.indexOf(this.state.turnoActual);
+    const previous = sessionIds.indexOf(this.Partida.turnoActual);
 
     //* Al turno actual se considera el siguiente jugador en una lista circular de sessionIds
-    this.state.turnoActual = sessionIds[(previous + 1) % sessionIds.length];
-    this.state.contadorTurnos++;
-
-    //* Se establece el limite de tiempo como el tiempo actual del reloj de sala + duracion de turno
-    //* no tiene uso actual, solo sirve para verlo en el state de momento
-    this.state.tiempoLimiteTurno = this.clock.currentTime + TURN_DURATION;
+    this.Partida.turnoActual = sessionIds[(previous + 1) % sessionIds.length];
 
     //? Se programa un temporizador para la misma funcion nextTurn()
     this.turnTimeout = this.clock.setTimeout(() => this.nextTurn(), TURN_DURATION);
