@@ -1,5 +1,5 @@
 import { Room, Client, CloseCode, Delayed } from "colyseus";
-import { MyRoomState, Player } from "./schema/MyRoomState.js";
+import { MyRoomState, Player } from "../states/MyRoomState.js";
 import { text } from "express";
 
 //* Cuanto tiempo tendra un jugador (en ms) para realizar su turno

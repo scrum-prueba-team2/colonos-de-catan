@@ -1,5 +1,7 @@
 node_modules
 build
+dist
+.env
+.env.*
 .colyseus-cloud.json
 .devmode.json
-dist

@@ -1,1 +1,0 @@
-{ "name": "@catan/rules", "version": "0.0.0", "type": "module", "main": "./src/index.ts", "types": "./src/index.ts", "dependencies": { "@catan/shared": "*" } }
