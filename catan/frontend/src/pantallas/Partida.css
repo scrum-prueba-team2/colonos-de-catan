@@ -36,16 +36,15 @@
     min-height: 0;
     overflow: hidden;
 }
-
-/* Cada celda necesita min-height 0, o su contenido la estira y deforma la
-   pantalla entera. El overflow hidden es la red de seguridad. */
 .marcoPartida > div {
-    min-height: 0;
     overflow: hidden;
+    min-height: 0;
+}
+
+.marcoPartida > div {
     border: 2px solid red;
 }
 
-/* Bordes de guia mientras se construye la pantalla. Borrar cuando termine. */
 .marcoPartida > div > div {
     border: 2px solid red;
 }

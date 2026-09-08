@@ -1,8 +1,14 @@
+import TexturasTablero from './texturasTablero';
 import './tablero.css';
+
 export interface DatosTablero {
+  // q,r [terreno, numero, ladron]
   hexagonos: Record<string, [number, number, number]>;
+  // q,r,p(indice) [construccion, dueño]
   vertices: Record<string, [number, string]>;
+  // q,r,p(indice) dueño
   aristas: Record<string, string>;
+  // id [tipo, verticeA, verticeB]
   puertos: Record<string, [number, string, string]>;
 }
 
@@ -15,10 +21,14 @@ const NOMBRE_PUERTO: Record<number, string> = {
 
 // Centro de un hexagono en el lienzo.
 function centro(q: number, r: number): [number, number] {
-  return [S * Math.sqrt(3) * (q + r / 2), S * 1.5 * r];
+  return [
+    // x
+    S * Math.sqrt(3) * (q + r / 2), 
+    // y
+    S * 1.5 * r];
 }
 
-/** las 6 esquinas en orden: N, NE, SE, S, SO, NO */
+// las 6 esquinas en orden: N, NE, SE, S, SO, NO
 function esquinas(q: number, r: number): [number, number][] {
   const [cx, cy] = centro(q, r);
   const h = (S * Math.sqrt(3)) / 2;
@@ -28,26 +38,19 @@ function esquinas(q: number, r: number): [number, number][] {
   ];
 }
 
-/** p = 0 -> punta N ; p = 1 -> esquina NO */
+// p = 0 -> punta N ; p = 1 -> esquina NO
 function puntoVertice(clave: string): [number, number] {
   const [q, r, p] = clave.split(',').map(Number);
   return esquinas(q, r)[p === 0 ? 0 : 5];
 }
 
-/** p = 0 -> lado N-NE ; p = 1 -> lado NO-N ; p = 2 -> lado SO-NO */
+// p = 0 -> lado N-NE ; p = 1 -> lado NO-N ; p = 2 -> lado SO-NO
 const LADO = [0, 5, 4];
 function segmentoArista(clave: string): [[number, number], [number, number]] {
   const [q, r, p] = clave.split(',').map(Number);
   const e = esquinas(q, r);
   const i = LADO[p];
   return [e[i], e[(i + 1) % 6]];
-}
-
-/** cuántos puntitos lleva la ficha: 6 y 8 llevan 5, el 2 y el 12 llevan 1 */
-// Cuantos puntitos lleva la ficha del numero. El 6 y el 8 llevan 5 porque
-// son los mas probables; el 2 y el 12 llevan 1.
-function puntos(n: number): number {
-  return 6 - Math.abs(7 - n);
 }
 
 // El recuadro visible. Es fijo porque el tablero siempre mide lo mismo.
@@ -63,6 +66,7 @@ function Tablero({ datos }: Props) {
   // Ningun color se escribe aqui. En SVG, fill y stroke son propiedades
   // normales de CSS, asi que el componente solo pone clases.
     <svg className="tbSvg" viewBox={VB} role="img" aria-label="Tablero de Catan">
+      <TexturasTablero />
 
       {/* puertos primero, para que el muelle quede por detrás del hexágono */}
       {Object.entries(datos.puertos).map(([id, [tipo, va, vb]]) => {
@@ -110,18 +114,12 @@ function Tablero({ datos }: Props) {
         const [q, r] = clave.split(',').map(Number);
         const [cx, cy] = centro(q, r);
         const rojo = numero === 6 || numero === 8;
-        const n = puntos(numero);
         return (
           <g key={`f${clave}`}>
             {numero > 0 && (
               <g className={rojo ? 'tbFicha tbFichaRoja' : 'tbFicha'}>
                 <circle cx={cx} cy={cy} r={S * 0.31} className="tbFichaFondo" />
                 <text x={cx} y={cy} className="tbFichaNumero">{numero}</text>
-                {Array.from({ length: n }, (_, i) => (
-                  <circle key={i} r={S * 0.022} className="tbPip"
-                          cx={cx - ((n - 1) * S * 0.035) + i * S * 0.07}
-                          cy={cy + S * 0.185} />
-                ))}
               </g>
             )}
             {ladron === 1 && (

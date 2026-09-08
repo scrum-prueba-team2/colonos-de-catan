@@ -1,10 +1,5 @@
 import type { DatosTablero } from '../componentes/tablero';
 
-// Configuración de prueba que mandó el equipo de reglas.
-// Corregidos 4 signos menos que se perdieron al copiar del PDF:
-//   "1,2,0" -> "-1,2,0"   "2,3,0" -> "-2,3,0"
-//   "1,3,1" -> "-1,3,1"   "1,3,0" -> "-1,3,0"
-
 export const tableroPrueba: DatosTablero = {
   hexagonos: {
     '-2,0': [2, 10, 0],

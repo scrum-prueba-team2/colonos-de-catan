@@ -20,16 +20,12 @@
     stroke-width: 3;
 }
 
-/* Mapeo de terrenos. FALTA CONFIRMARLO con el equipo de reglas: por conteo
-   sabemos que los terrenos 1, 2 y 3 salen 4 veces cada uno (bosque, pasto y
-   campo) y que el 4 y el 5 salen 3 veces (colina y montana), pero no cual
-   numero es cual. */
-.tbTerreno-0 { fill: #E4D3A8; }   /* Desierto */
-.tbTerreno-1 { fill: #2F6B44; }   /* Bosque, da madera */
-.tbTerreno-2 { fill: #8FC65A; }   /* Pasto, da lana */
-.tbTerreno-3 { fill: #E9B93E; }   /* Campo, da trigo */
-.tbTerreno-4 { fill: #BF6437; }   /* Colina, da ladrillo */
-.tbTerreno-5 { fill: #8D96A3; }   /* Montana, da piedra */
+.tbTerreno-0 { fill: url(#tex-desierto); }
+.tbTerreno-1 { fill: url(#tex-bosque); }
+.tbTerreno-2 { fill: url(#tex-pasto); }
+.tbTerreno-3 { fill: url(#tex-campo); }
+.tbTerreno-4 { fill: url(#tex-colina); }
+.tbTerreno-5 { fill: url(#tex-montana); }
 
 /* Aristas: los lados donde van los caminos */
 .tbArista {
