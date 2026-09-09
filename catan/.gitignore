@@ -5,3 +5,4 @@ dist
 .env.*
 .colyseus-cloud.json
 .devmode.json
+.dist
