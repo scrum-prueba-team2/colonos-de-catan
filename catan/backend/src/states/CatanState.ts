@@ -5,6 +5,7 @@ import { Hexagono } from "../schemas/Hexagono.js";
 import { Tablero } from "../schemas/Tablero.js";
 import { Terreno } from "../common/enums.js";
 import { generarHexagonos } from "../generators/generarHexagonos.js";
+import { generarAristas } from "../generators/generarAristas.js";
 import { generarVertices } from "../generators/generarVertices.js";
 
 export class CatanState extends Schema{
@@ -20,6 +21,10 @@ export class CatanState extends Schema{
   constructor(){
     super();
     generarHexagonos(this.tablero.hexagonos);
+
     generarVertices(this.tablero.vertices);
+
+    generarAristas(this.tablero.aristas);
+    
   }
 };
