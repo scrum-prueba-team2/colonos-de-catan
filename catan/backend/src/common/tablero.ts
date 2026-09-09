@@ -6,3 +6,15 @@ export const coordenadasHexagono = [
     [-1, -1], [0, -1], [1, -1], [2, -1],
     [0, -2], [1, -2], [2, -2]
 ] 
+
+export const coordenadasPuertos = [
+    {id: 1, vertices: ["-3,3,0", "-2,3,1"]},
+    {id: 2, vertices: ["-1,3,1", "-1,3,0"]},
+    {id: 3, vertices: ["1,2,1", "1,2,0"]},
+    {id: 4, vertices: ["2,1,0", "3,0,1"]},
+    {id: 5, vertices: ["3,-1,1", "2,-1,0"]},
+    {id: 6, vertices: ["2,-2,1", "1,-2,0"]},
+    {id: 7, vertices: ["0,-2,0", "0,-2,1"]},
+    {id: 8, vertices: ["-1,-1,1", "-2,0,0"]},
+    {id: 9, vertices: ["-2,1,1", "-3,2,0"]},
+]

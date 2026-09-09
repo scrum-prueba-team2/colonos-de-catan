@@ -1,7 +1,7 @@
 import { MapSchema } from "@colyseus/schema";
 import { Terreno } from "../common/enums.js";
 import { coordenadasHexagono } from "../common/tablero.js";
-import { mezclar } from "../functions/mezclar.js";
+import { mezclar } from "../common/mezclar.js";
 import { Hexagono } from "../schemas/Hexagono.js";
 import { CatanState } from "../states/CatanState.js";
 
