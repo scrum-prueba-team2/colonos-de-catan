@@ -7,3 +7,10 @@ export enum Terreno {
     LADRILLO = 4,
     MINERAL = 5
 }
+
+export enum Construccion {
+    VACIO = 0,
+    ASENTAMIENTO = 1,
+    CIUDAD = 2,
+    CAMINO = 3
+}
