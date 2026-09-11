@@ -23,3 +23,11 @@ export enum TipoPuerto{
     LADRILLO = 4,
     MINERAL = 5
 }
+
+export enum CartasDesarrollo{
+    CABALLERO = 1,
+    PUNTOS_VICTORIA = 2,
+    CARRETERAS = 3,
+    ABUNDANCIA = 4,
+    MONOPOLIO = 5
+}
