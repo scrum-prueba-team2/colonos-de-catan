@@ -10,6 +10,7 @@ export class CatanRoom extends Room{
   state = new CatanState();
   Partida = this.state.partida;
   Jugadores = this.state.jugadores;
+  codigoAcceso = "";
 
   //? Delayed
   //* Tipo de dato temporizador que permite programar una funcion en el tiempo
@@ -82,9 +83,25 @@ export class CatanRoom extends Room{
 
   onCreate(options: any) {
     console.log("room created!", this.roomId);
+    //si se ingresa codigo de acceso, se setea al atributo de codigo de acceso a la sala
+    this.codigoAcceso = options.codigoAcceso || ""
+
+    //seteamos la data de la sala
+    this.setMetadata({
+      alias:options.alias || "Catan Room",
+      estado: "EN LOBBY",
+      privada:options.privada || false
+    })
   }
 
   onJoin(client: Client, options: any) {
+    //en dado caso que la sala tuviera clave, entra a este if
+    if(this.codigoAcceso != ""){
+      //si el codigo es incorrecto
+      if(options.codigoAcceso !== this.codigoAcceso){
+        throw new Error("Codigo de acceso incorrecto!!");
+      }
+    }
     console.log(client.sessionId, "joined!");
     //* Crear y setear un nuevo jugador en el estado de la sala cuando un cliente se une
     this.Jugadores.set(client.sessionId, new Jugador());
