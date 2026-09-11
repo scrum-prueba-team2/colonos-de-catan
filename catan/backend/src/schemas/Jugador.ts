@@ -2,6 +2,7 @@ import { MapSchema, Schema, type } from "@colyseus/schema"
 import { Terreno } from "../common/enums.js";
 import { generarRecursos } from "../generators/generarRecursos.js";
 import { generarCartas } from "../generators/generarCartas.js";
+import { generarConstruccionesDisponibles } from "../generators/generarConstruccionesDisponibles.js";
 
 export class Jugador extends Schema{
     @type("string") nombre: string;
@@ -16,7 +17,6 @@ export class Jugador extends Schema{
         this.puntuacion = 0;
         generarRecursos(this.recursos);
         generarCartas(this.cartas);
-
-
+        generarConstruccionesDisponibles(this.construccionesDisponibles);
     }
 }
