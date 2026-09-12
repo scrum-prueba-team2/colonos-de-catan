@@ -1,128 +1,235 @@
+import { useEffect, useRef, useState } from 'react';
+import type { PointerEvent } from 'react';
 import TexturasTablero from './texturasTablero';
 import './tablero.css';
 
-export interface DatosTablero {
-  // q,r [terreno, numero, ladron]
-  hexagonos: Record<string, [number, number, number]>;
-  // q,r,p(indice) [construccion, dueño]
-  vertices: Record<string, [number, string]>;
-  // q,r,p(indice) dueño
-  aristas: Record<string, string>;
-  // id [tipo, verticeA, verticeB]
-  puertos: Record<string, [number, string, string]>;
+export interface HexagonoDato { 
+  h: number; 
+  d: number; 
+  terreno: number; 
+  numero: number; 
+  esLadron: boolean 
+}
+export interface VerticeDato { 
+  h: number; 
+  d: number; 
+  p: number; 
+  constuccion: number; 
+  propietario: string 
+}
+export interface AristaDato { 
+  h: number; 
+  d: number; 
+  p: number; 
+  propietario: string 
+}
+export interface PuertoDato { 
+  id: number; 
+  tipo: number; 
+  vertice1: string; 
+  vertice2: string 
 }
 
-// viewBox hace que todo se escale junto al tamano que tenga el contenedor.
+export interface DatosTablero {
+  hexagonos: Record<string, HexagonoDato>;
+  vertices: Record<string, VerticeDato>;
+  aristas: Record<string, AristaDato>;
+  puertos: Record<string, PuertoDato>;
+}
+
+// Lado del hexagono.
 const S = 60;
 
+// Numeros del TipoPuerto
 const NOMBRE_PUERTO: Record<number, string> = {
-  0: '3:1', 1: 'Madera', 2: 'Lana', 3: 'Trigo', 4: 'Ladrillo', 5: 'Piedra',
+  0: '3:1', 1: '2 Madera:1', 2: '2 Trigo:1', 3: '2 Lana:1', 4: '2 Ladrillo:1', 5: '2 Piedra:1',
 };
 
-// Centro de un hexagono en el lienzo.
-function centro(q: number, r: number): [number, number] {
-  return [
-    // x
-    S * Math.sqrt(3) * (q + r / 2), 
-    // y
-    S * 1.5 * r];
+function centro(h: number, d: number): [number, number] {
+  return [S * Math.sqrt(3) * (h + d / 2), -S * 1.5 * d];
 }
 
-// las 6 esquinas en orden: N, NE, SE, S, SO, NO
-function esquinas(q: number, r: number): [number, number][] {
-  const [cx, cy] = centro(q, r);
-  const h = (S * Math.sqrt(3)) / 2;
+// Devuelve las 6 esquinas en orden: 0 N, 1 NE, 2 SE, 3 S, 4 SO, 5 NO 
+function esquinas(h: number, d: number): [number, number][] {
+  const [cx, cy] = centro(h, d);
+  const m = (S * Math.sqrt(3)) / 2;
   return [
-    [cx, cy - S], [cx + h, cy - S / 2], [cx + h, cy + S / 2],
-    [cx, cy + S], [cx - h, cy + S / 2], [cx - h, cy - S / 2],
+    [cx, cy - S], [cx + m, cy - S / 2], [cx + m, cy + S / 2],
+    [cx, cy + S], [cx - m, cy + S / 2], [cx - m, cy - S / 2],
   ];
 }
 
-// p = 0 -> punta N ; p = 1 -> esquina NO
-function puntoVertice(clave: string): [number, number] {
-  const [q, r, p] = clave.split(',').map(Number);
-  return esquinas(q, r)[p === 0 ? 0 : 5];
+// Cada hexagono es dueño de 2 esquinas: p = 0 la del sur, p = 1 la del suroeste.
+function puntoVertice(h: number, d: number, p: number): [number, number] {
+  return esquinas(h, d)[p === 0 ? 3 : 4];
 }
 
-// p = 0 -> lado N-NE ; p = 1 -> lado NO-N ; p = 2 -> lado SO-NO
-const LADO = [0, 5, 4];
-function segmentoArista(clave: string): [[number, number], [number, number]] {
-  const [q, r, p] = clave.split(',').map(Number);
-  const e = esquinas(q, r);
-  const i = LADO[p];
-  return [e[i], e[(i + 1) % 6]];
+/* Cada hexagono es dueño de 3 lados: p = 0 el SE-S, p = 1 el S-SO, p = 2 el SO-NO.
+   Que son las esquinas 2-3, 3-4 y 4-5, o sea p+2 y p+3. */
+function segmentoArista(h: number, d: number, p: number): [number, number][] {
+  const e = esquinas(h, d);
+  return [e[p + 2], e[p + 3]];
 }
 
-// El recuadro visible. Es fijo porque el tablero siempre mide lo mismo.
-const VB = `${-5.7 * S} ${-5.5 * S} ${11.4 * S} ${11 * S}`;
+// Los puertos referencian a sus vertices por la clave del mapa ("-3,3,0").
+function puntoDeClave(clave: string): [number, number] {
+  const [h, d, p] = clave.split(',').map(Number);
+  return puntoVertice(h, d, p);
+}
+
+const VISTA_INICIAL = { pX: -5.7, pY: -5.5, zX: 11.4, zY: 11 };
+const ZOOM_MIN = VISTA_INICIAL.zX * 0.33;  
+const ZOOM_MAX = VISTA_INICIAL.zX;        
+const UMBRAL = 4;
 
 interface Props {
   datos: DatosTablero;
+  // Opcionales: si no se pasan, el tablero solo se ve.
+  alTocarVertice?: (vertice: VerticeDato, clave: string) => void;
+  alTocarArista?: (arista: AristaDato, clave: string) => void;
+  alTocarHexagono?: (hexagono: HexagonoDato, clave: string) => void;
 }
 
-// Tablero de Catan dibujado en un solo SVG
-function Tablero({ datos }: Props) {
+function Tablero({ datos, alTocarVertice, alTocarArista, alTocarHexagono }: Props) {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [vista, setVista] = useState(VISTA_INICIAL);
+
+  const arrastre = useRef<{ x: number; y: number; capturado: boolean } | null>(null);
+
+  useEffect(() => {
+    const svg = svgRef.current;
+    
+    if (!svg) return;
+    function alGirarRueda(evento: WheelEvent) {
+      evento.preventDefault();
+      // En que parte del recuadro esta el cursor, de 0 a 1.
+      const caja = svg!.getBoundingClientRect();
+      const fx = (evento.clientX - caja.left) / caja.width;
+      const fy = (evento.clientY - caja.top) / caja.height;
+      const factor = evento.deltaY < 0 ? 0.88 : 1 / 0.88;  // rueda arriba = acercar
+
+      setVista((v) => {
+        const zX = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, v.zX * factor));
+        const k = zX / v.zX;
+        // Se corre la esquina para que el punto bajo el cursor no se mueva.
+        return {
+          pX: v.pX + fx * v.zX * (1 - k),
+          pY: v.pY + fy * v.zY * (1 - k),
+          zX,
+          zY: v.zY * k,
+        };
+      });
+    }
+
+    svg.addEventListener('wheel', alGirarRueda, { passive: false });
+    return () => svg.removeEventListener('wheel', alGirarRueda);
+  }, []);
+
+  function punteroAbajo(evento: PointerEvent<SVGSVGElement>) {
+    arrastre.current = { x: evento.clientX, y: evento.clientY, capturado: false };
+  }
+
+  function punteroMueve(evento: PointerEvent<SVGSVGElement>) {
+    const a = arrastre.current;
+    if (!a) return;
+
+    const dx = evento.clientX - a.x;
+    const dy = evento.clientY - a.y;
+
+    if (!a.capturado && Math.hypot(dx, dy) > UMBRAL) {
+      evento.currentTarget.setPointerCapture(evento.pointerId);
+      a.capturado = true;
+    }
+    if (!a.capturado) return;
+
+    a.x = evento.clientX;
+    a.y = evento.clientY;
+    const caja = evento.currentTarget.getBoundingClientRect();
+    setVista((v) => ({
+      ...v,
+      pX: v.pX - (dx / caja.width) * v.zX,
+      pY: v.pY - (dy / caja.height) * v.zY,
+    }));
+  }
+
+  function punteroArriba(evento: PointerEvent<SVGSVGElement>) {
+    if (arrastre.current?.capturado) evento.currentTarget.releasePointerCapture(evento.pointerId);
+    arrastre.current = null;
+  }
+
   return (
-  // Ningun color se escribe aqui. En SVG, fill y stroke son propiedades
-  // normales de CSS, asi que el componente solo pone clases.
-    <svg className="tbSvg" viewBox={VB} role="img" aria-label="Tablero de Catan">
+    <svg
+      ref={svgRef}
+      className="tbSvg"
+      viewBox={`${vista.pX * S} ${vista.pY * S} ${vista.zX * S} ${vista.zY * S}`}
+      onPointerDown={punteroAbajo}
+      onPointerMove={punteroMueve}
+      onPointerUp={punteroArriba}
+      onPointerCancel={punteroArriba}
+      // Doble clic para volver a ver el tablero completo.
+      onDoubleClick={() => setVista(VISTA_INICIAL)}
+      role="img"
+      aria-label="Tablero de Catan"
+    >
       <TexturasTablero />
 
-      {/* puertos primero, para que el muelle quede por detrás del hexágono */}
-      {Object.entries(datos.puertos).map(([id, [tipo, va, vb]]) => {
-        const a = puntoVertice(va);
-        const b = puntoVertice(vb);
+      {/* puertos primero, para que el muelle quede por detras del hexagono */}
+      {Object.entries(datos.puertos).map(([clave, puerto]) => {
+        const a = puntoDeClave(puerto.vertice1);
+        const b = puntoDeClave(puerto.vertice2);
+        // El cartel se separa del centro del tablero, hacia afuera.
         const mx = (a[0] + b[0]) / 2;
         const my = (a[1] + b[1]) / 2;
         const largo = Math.hypot(mx, my) || 1;
-        const px = mx + (mx / largo) * S * 0.62;
+        const px = mx + (mx / largo) * S * 0.8;
         const py = my + (my / largo) * S * 0.62;
         return (
-          <g key={id} className="tbPuerto">
+          <g key={clave} className="tbPuerto">
             <line x1={a[0]} y1={a[1]} x2={px} y2={py} className="tbMuelle" />
             <line x1={b[0]} y1={b[1]} x2={px} y2={py} className="tbMuelle" />
-            <rect x={px - S * 0.36} y={py - S * 0.19} width={S * 0.72} height={S * 0.38}
+            <rect x={px - S * 0.5} y={py - S * 0.19} width={S * 1} height={S * 0.38}
                   rx={S * 0.09} className="tbPuertoCaja" />
-            <text x={px} y={py} className="tbPuertoTexto">{NOMBRE_PUERTO[tipo]}</text>
+            <text x={px} y={py} className="tbPuertoTexto">{NOMBRE_PUERTO[puerto.tipo]}</text>
           </g>
         );
       })}
 
-      {/* hexágonos */}
-      {Object.entries(datos.hexagonos).map(([clave, [terreno]]) => {
-        const [q, r] = clave.split(',').map(Number);
+      {/* hexagonos */}
+      {Object.entries(datos.hexagonos).map(([clave, hex]) => (
+        <polygon
+          key={clave}
+          className={`tbHex tbTerreno-${hex.terreno}`}
+          points={esquinas(hex.h, hex.d).join(' ')}
+          onClick={alTocarHexagono && (() => alTocarHexagono(hex, clave))}
+        />
+      ))}
+
+      {/* aristas: los caminos */}
+      {Object.entries(datos.aristas).map(([clave, arista]) => {
+        const [a, b] = segmentoArista(arista.h, arista.d, arista.p);
         return (
-          <polygon
+          <line
             key={clave}
-            className={`tbHex tbTerreno-${terreno}`}
-            points={esquinas(q, r).map((p) => p.join(',')).join(' ')}
+            className={arista.propietario === '' ? 'tbArista' : 'tbArista tbAristaOcupada'}
+            x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]}
+            onClick={alTocarArista && (() => alTocarArista(arista, clave))}
           />
         );
       })}
 
-      {/* aristas — los caminos */}
-      {Object.entries(datos.aristas).map(([clave, dueno]) => {
-        const [a, b] = segmentoArista(clave);
-        return (
-          <line key={clave} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]}
-                className={dueno === '' ? 'tbArista' : 'tbArista tbAristaOcupada'} />
-        );
-      })}
-
-      {/* fichas de número y ladrón */}
-      {Object.entries(datos.hexagonos).map(([clave, [, numero, ladron]]) => {
-        const [q, r] = clave.split(',').map(Number);
-        const [cx, cy] = centro(q, r);
-        const rojo = numero === 6 || numero === 8;
+      {/* fichas de numero y ladron */}
+      {Object.entries(datos.hexagonos).map(([clave, hex]) => {
+        const [cx, cy] = centro(hex.h, hex.d);
+        const rojo = hex.numero === 6 || hex.numero === 8;
         return (
           <g key={`f${clave}`}>
-            {numero > 0 && (
+            {hex.numero > 0 && (
               <g className={rojo ? 'tbFicha tbFichaRoja' : 'tbFicha'}>
                 <circle cx={cx} cy={cy} r={S * 0.31} className="tbFichaFondo" />
-                <text x={cx} y={cy} className="tbFichaNumero">{numero}</text>
+                <text x={cx} y={cy} className="tbFichaNumero">{hex.numero}</text>
               </g>
             )}
-            {ladron === 1 && (
+            {hex.esLadron && (
               <g className="tbLadron">
                 <ellipse cx={cx} cy={cy + S * 0.18} rx={S * 0.2} ry={S * 0.16} />
                 <circle cx={cx} cy={cy - S * 0.1} r={S * 0.13} />
@@ -132,12 +239,15 @@ function Tablero({ datos }: Props) {
         );
       })}
 
-      {/* vértices — poblados y ciudades */}
-      {Object.entries(datos.vertices).map(([clave, [construccion]]) => {
-        const [x, y] = puntoVertice(clave);
+      {Object.entries(datos.vertices).map(([clave, vertice]) => {
+        const [x, y] = puntoVertice(vertice.h, vertice.d, vertice.p);
         return (
-          <circle key={clave} cx={x} cy={y} r={S * 0.085}
-                  className={construccion === 0 ? 'tbVertice' : 'tbVertice tbVerticeOcupado'} />
+          <circle
+            key={clave}
+            className={vertice.constuccion === 0 ? 'tbVertice' : 'tbVertice tbVerticeOcupado'}
+            cx={x} cy={y} r={S * 0.085}
+            onClick={alTocarVertice && (() => alTocarVertice(vertice, clave))}
+          />
         );
       })}
     </svg>

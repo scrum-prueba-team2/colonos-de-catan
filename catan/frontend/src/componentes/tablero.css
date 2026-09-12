@@ -22,8 +22,8 @@
 
 .tbTerreno-0 { fill: url(#tex-desierto); }
 .tbTerreno-1 { fill: url(#tex-bosque); }
-.tbTerreno-2 { fill: url(#tex-pasto); }
-.tbTerreno-3 { fill: url(#tex-campo); }
+.tbTerreno-2 { fill: url(#tex-campo); }
+.tbTerreno-3 { fill: url(#tex-pasto); }
 .tbTerreno-4 { fill: url(#tex-colina); }
 .tbTerreno-5 { fill: url(#tex-montana); }
 
@@ -70,3 +70,23 @@
     text-anchor: middle;
     dominant-baseline: central;
 }
+
+
+/* El tablero se puede arrastrar con el raton.
+   user-select evita que el doble clic deje seleccionados los numeros.
+   touch-action evita que el celular haga scroll al arrastrar el tablero. */
+.tbSvg {
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+/* Sin estado de React: :active ya sabe si el boton esta presionado. */
+.tbSvg:active { cursor: grabbing; }
+
+/* Cursor de mano sobre las piezas que se pueden tocar. */
+.tbVertice,
+.tbArista { cursor: pointer; }
+
+.tbFicha,
+.tbLadron,
+.tbPuerto { pointer-events: none; }

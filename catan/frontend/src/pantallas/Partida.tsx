@@ -133,7 +133,12 @@ function Partida() {
             </div>
         </div>
         <div className="tablero">
-            <Tablero datos={tableroPrueba} />
+            <Tablero
+            datos={tableroPrueba}
+            alTocarVertice={(vertice, clave) => console.log('VERTICE', clave, vertice)}
+            alTocarArista={(arista, clave) => console.log('ARISTA', clave, arista)}
+            alTocarHexagono={(hexagono, clave) => console.log('HEXAGONO', clave, hexagono)}
+          />
         </div>
         <div className="cartas"> 
             <div className="carRecursos">
