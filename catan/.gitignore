@@ -6,3 +6,4 @@ dist
 .colyseus-cloud.json
 .devmode.json
 .dist
+backend/test-lobby.mjs

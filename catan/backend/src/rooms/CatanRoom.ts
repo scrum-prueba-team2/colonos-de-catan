@@ -109,9 +109,10 @@ export class CatanRoom extends Room{
     //* Si la sala ya esta llena, se bloquea para no ser visible en el matchmaker
     if (this.Jugadores
       .size === this.maxClients) {
-      this.lock(); 
+      this.lock();
       this.nextTurn();
       this.Partida.fase = "playing"; //* fase a "playing"
+      this.setMetadata({ estado: "EN JUEGO" }); //* refleja el cambio de fase en el listado del lobby
     }
   }
 
