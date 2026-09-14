@@ -90,6 +90,11 @@ function AppContent() {
     const salaActual = room;
 
     function sincronizarEstado(state: EstadoDeSala) {
+      // Guard: en el primer instante el schema puede llegar incompleto
+      // (todavía sin "partida" o "jugadores" poblados). Si pasa, ignoramos
+      // esta actualización y esperamos a la siguiente.
+      if (!state?.partida || !state?.jugadores) return;
+
       setTurnoActual(state.partida.turnoActual);
 
       const listaJugadores: JugadorVista[] = [];
@@ -117,16 +122,13 @@ function AppContent() {
         navegarA("partida");
       }
     }
-    // Sincronizamos el estado inicial.
-    sincronizarEstado(
-      salaActual.state as unknown as EstadoDeSala
-    );
 
-    salaActual.onStateChange(
-      (state: EstadoDeSala) => {
-        sincronizarEstado(state);
-      }
-    );
+    // Nos suscribimos a los cambios de estado. onStateChange ya dispara
+    // la sincronización inicial en cuanto el primer estado completo llega
+    // del servidor, así que no hace falta (ni conviene) llamarlo a mano.
+    salaActual.onStateChange((state: EstadoDeSala) => {
+      sincronizarEstado(state);
+    });
 
     salaActual.onMessage(
       "message",
@@ -212,16 +214,16 @@ function AppContent() {
    * ============================================================
    */
 
- async function unirseASala(codigo: string) {
-  try {
-    const nuevaSala = await client.joinById(codigo, {});
+  async function unirseASala(codigo: string) {
+    try {
+      const nuevaSala = await client.joinById(codigo, {});
 
-    setRoom(nuevaSala);
-    navegarA("salaEspera");
-  } catch (error) {
-    console.error("Error connecting to room:", error);
+      setRoom(nuevaSala);
+      navegarA("salaEspera");
+    } catch (error) {
+      console.error("Error connecting to room:", error);
+    }
   }
-}
 
   /*
    * ============================================================
@@ -351,7 +353,7 @@ function AppContent() {
         <Partida
           room={room}
           jugadores={jugadores}
-          numeroDeTurno={numeroDeTurno}
+          numeroDeTurno={2}
           esMiTurno={esMiTurno}
           diceResult={diceResult}
           turnHistory={turnHistory}
