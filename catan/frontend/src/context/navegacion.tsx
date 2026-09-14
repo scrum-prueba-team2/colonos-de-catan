@@ -2,7 +2,12 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { NavigationContext } from './NavigationContext';
 
-type Pantalla = 'home' | 'login' | 'lobby' | 'partida';
+type Pantalla =
+  | 'home'
+  | 'elegirModo'
+  | 'lobby'
+  | 'salaEspera'
+  | 'partida';
 
 export function NavigationProvider({
   children,

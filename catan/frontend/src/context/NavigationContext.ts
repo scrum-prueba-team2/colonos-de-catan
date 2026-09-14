@@ -1,6 +1,11 @@
 import { createContext } from 'react';
 
-type Pantalla = 'home' | 'login' | 'lobby' | 'partida';
+type Pantalla =
+  | 'home'
+  | 'elegirModo'
+  | 'lobby'
+  | 'salaEspera'
+  | 'partida';
 
 interface NavigationContextType {
   pantallaActual: Pantalla;
