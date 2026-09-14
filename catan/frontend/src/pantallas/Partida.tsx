@@ -1,4 +1,4 @@
-import { useNavigation } from '../navegacion';
+import { useNavigation } from '../context/useNavigation';
 import InfoJugador, { type Jugador } from '../componentes/InfoJugador';
 import InfoPartida, { type DatosPartida } from '../componentes/infoPartida';
 import InfoCarRecursos, { type Recursos } from '../componentes/infoCarRecursos';
