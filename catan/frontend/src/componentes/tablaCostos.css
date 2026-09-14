@@ -1,0 +1,42 @@
+.tcMarco {
+  background: #f7ecd6;
+  border: 4px double #b89a5e;
+  border-radius: 10px;
+  padding: 12px;
+  color: #3a2a17;
+}
+
+.tcTitulo {
+  margin: 0 0 8px;
+  text-align: center;
+  border-bottom: 2px solid #b89a5e;
+  padding-bottom: 6px;
+}
+
+.tcLista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tcFila {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+  border-bottom: 1px solid #cbb083;
+}
+
+.tcFila:last-child {
+  border-bottom: none;
+}
+
+.tcInactiva {
+  opacity: 0.45;
+}
+
+.tcIconoPieza,
+.tcRecurso {
+  width: 1em;
+  height: 1em;
+}

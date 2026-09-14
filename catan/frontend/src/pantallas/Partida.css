@@ -1,0 +1,140 @@
+/* Maquetacion de la pantalla de Partida.
+   Este archivo SOLO reparte el espacio: que zona va donde y que tamano tiene.
+   El aspecto de cada zona vive en el .css de su componente, al lado del .tsx.
+
+   Ademas, cada celda se declara como contenedor de consulta con
+   container-type. Eso permite que los textos de adentro se midan en unidades
+   cqw, que son un porcentaje del ancho de SU contenedor, no de la pantalla.
+   Es lo que hace que todo escale junto cuando la ventana cambia de tamano.
+
+   MAPA DE LA PANTALLA
+
+       columna 1        columna 2         columna 3
+     +----------------+-----------------------------------+
+   1 | salir          | informacion                       |
+     +----------------+-----------------------------------+
+   2 | tabCostos      |                                   |
+     +----------------+  tablero                          |
+   3 | chat           |                                   |
+     +----------------+-----------------+-----------------+
+   4 | construir      | cartas          | acciones        |
+     +----------------+-----------------+-----------------+
+*/
+
+
+/* LA REJILLA PRINCIPAL
+   Las filas de en medio usan minmax(0, 1fr) para que se puedan encoger:
+   un 1fr pelado tiene un minimo escondido que impide achicarse. */
+.marcoPartida {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr repeat(2, 3fr);
+    grid-template-rows: 1fr repeat(3, 3fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    min-height: 0;
+    overflow: hidden;
+}
+.marcoPartida > div {
+    overflow: hidden;
+    min-height: 0;
+}
+
+.marcoPartida > div {
+    border: 2px solid red;
+}
+
+.marcoPartida > div > div {
+    border: 2px solid red;
+}
+
+
+/* DONDE VA CADA ZONA */
+.salir { grid-area: 1 / 1 / 2 / 2; }
+.tabCostos { grid-area: 2 / 1 / 3 / 2; }
+.chat { grid-area: 3 / 1 / 4 / 2; }
+.construir { grid-area: 4 / 1 / 5 / 2; }
+.tablero { grid-area: 2 / 2 / 4 / 4; }
+
+/* La barra de arriba se parte en dos: fichas de jugadores y datos de partida */
+.informacion {
+    grid-area: 1 / 2 / 2 / 4;
+    display: grid;
+    grid-template-columns: 8fr 2fr;
+    grid-template-rows: 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+}
+
+.infoJugadores {
+    grid-area: 1 / 1 / 2 / 2;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+}
+
+.infoPartida {
+    grid-area: 1 / 2 / 2 / 3;
+    padding: 4px;
+    overflow: hidden;
+}
+
+/* Las tres cajas de cartas de la barra de abajo */
+.cartas {
+    grid-area: 4 / 2 / 5 / 3;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+}
+
+.carRecursos { grid-area: 1 / 1 / 2 / 2; overflow: hidden; }
+.carDesarrollo { grid-area: 1 / 2 / 2 / 3; }
+.carEspeciales { grid-area: 1 / 3 / 2 / 4; }
+
+/* Las tres acciones de la barra de abajo */
+.acciones {
+    grid-area: 4 / 3 / 5 / 4;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+}
+
+.negociar { grid-area: 1 / 1 / 2 / 2; }
+.tirDado { grid-area: 1 / 2 / 2 / 3; }
+.finTurno { grid-area: 1 / 3 / 2 / 4; }
+
+
+/* CADA CAJA ES UN CONTENEDOR DE CONSULTA
+   inline-size significa que solo se mide el ancho. No uso size (ancho y alto)
+   a proposito: eso haria que la caja dejara de crecer con su contenido, y la
+   fila de abajo del grid es auto, o sea que SI depende del contenido. */
+.salir,
+.tabCostos,
+.chat,
+.construir,
+.tablero,
+.infoJugador,
+.infoPartida,
+.carRecursos,
+.carDesarrollo,
+.carEspeciales,
+.negociar,
+.tirDado,
+.finTurno {
+    container-type: inline-size;
+}
+
+
+/* El unico elemento que se dibuja directo en la pantalla, sin componente */
+.btnSalida {
+    width: 100%;
+    height: 100%;
+    background-color: red;
+}
