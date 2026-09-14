@@ -1,0 +1,69 @@
+/* Tablero de Catan */
+.tablero { background: #BFD8E8; }
+.tbSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Hexágonos */
+.tbHex {
+    stroke: #F3EDE0;
+    stroke-width: 3;
+}
+
+/* Colores por terreno (ajusta los números según tu tipo de terreno) */
+.tbTerreno-0 { fill: #e8c97a; } /* desierto */
+.tbTerreno-1 { fill: #6ab04c; } /* bosque / madera */
+.tbTerreno-2 { fill: #f6e58d; } /* campo / trigo */
+.tbTerreno-3 { fill: #a5d6a7; } /* pradera / lana */
+.tbTerreno-4 { fill: #c96b4a; } /* colina / ladrillo */
+.tbTerreno-5 { fill: #9aa0a6; } /* montaña / piedra */
+
+/*  Aristas (caminos) */
+.tbArista {
+    stroke: #00000018;
+    stroke-width: 6;
+    stroke-linecap: round;
+}
+.tbAristaOcupada { stroke: #2C4049; stroke-width: 9; }
+
+/*  Vértices (poblados / ciudades)  */
+.tbVertice {
+    fill: #ffffff;
+    stroke: #00000030;
+    stroke-width: 1.5;
+}
+.tbVerticeOcupado { fill: #2C4049; }
+
+/* Ficha con el numero del hexagono */
+.tbFichaFondo { fill: #F6EFDD; stroke: #00000022; }
+
+.tbFichaNumero {
+    font-size: 21px;
+    fill: #2A2A2A;
+    text-anchor: middle;
+    dominant-baseline: central;
+}
+
+.tbFichaRoja .tbFichaNumero,
+.tbFichaRoja .tbPip { fill: #B3261E; }
+
+/*  Puertos  */
+.tbMuelle { stroke: #9C7B4E; stroke-width: 2.5; }
+.tbPuertoCaja { fill: #F3E7CE; stroke: #9C7B4E; stroke-width: 2; }
+.tbPuertoTexto {
+    font-size: 11px;
+    fill: #6B4E24;
+    text-anchor: middle;
+    dominant-baseline: central;
+}
+
+
+/*  Ladrón  */
+.tbLadron ellipse,
+.tbLadron circle {
+  fill: #333;
+  stroke: #000;
+  stroke-width: 1;
+}
