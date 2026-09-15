@@ -1,42 +1,86 @@
 .tcMarco {
-  background: #f7ecd6;
-  border: 4px double #b89a5e;
-  border-radius: 10px;
-  padding: 12px;
-  color: #3a2a17;
+    background: #f7ecd6;
+    border: 4px double #b89a5e;
+    border-radius: 10px;
+    padding: 2%;
+    padding-top: 4%;
+    color: #3a2a17;
+
+    /* Ocupa todo el contenedor padre. */
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+
+    /* Columna: título arriba, lista repartida en el resto. */
+    display: flex;
+    flex-direction: column;
+    gap: 2%;
+
+    /* Referencia para las unidades cqi/cqh de los hijos. */
+    container-type: size;
 }
 
 .tcTitulo {
-  margin: 0 0 8px;
-  text-align: center;
-  border-bottom: 2px solid #b89a5e;
-  padding-bottom: 6px;
+    margin: 0;
+    text-align: center;
+    border-bottom: 2px solid #b89a5e;
+    padding-bottom: 6px;
+    /* El título escala con el ancho del contenedor. */
+    font-size: clamp(1.2rem, 2cqi, 1.4rem);
 }
 
 .tcLista {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    /* Ocupa el alto restante y reparte las filas por igual. */
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .tcFila {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 0;
-  border-bottom: 1px solid #cbb083;
+    display: flex;
+    align-items: center;
+    gap: 0px;
+    padding: 1% 0;
+    border-bottom: 1px solid #cbb083;
+
+    /* Cada fila ocupa el mismo alto disponible. */
+    flex: 1 1 0;
+    min-height: 0;
+
+    /* El texto escala con el alto de la fila (cqh). */
+    font-size: clamp(1rem, 5cqh, 1.1rem);
+}
+
+.tcFila > img{
+  font-size: clamp(0.8rem, 5cqh, 1.1rem);
+}
+
+.tcFila > span{
+  font-size: clamp(1rem, 5cqh, 1.1rem);
 }
 
 .tcFila:last-child {
-  border-bottom: none;
-}
-
-.tcInactiva {
-  opacity: 0.45;
+    border-bottom: none;
 }
 
 .tcIconoPieza,
 .tcRecurso {
-  width: 1em;
-  height: 1em;
+    /* En em: escalan con el font-size de la fila. */
+    width: 2em;
+    height: 2em;
+    object-fit: contain;
+    flex: none;
+}
+
+.tcNombre {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
