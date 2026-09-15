@@ -3,8 +3,8 @@ import { FaseJuego, FasePartida } from "../common/enums.js";
 
 export class Partida extends Schema{
   @type("string") creador: string; 
-  @type("string") fase: FasePartida;
-  @type("string") faseJuego: FaseJuego;
+  @type("uint8") fase: FasePartida;
+  @type("uint8") faseJuego: FaseJuego;
   @type("string") turnoActual: string;
   
   constructor(){
