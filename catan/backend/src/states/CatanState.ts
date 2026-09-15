@@ -8,6 +8,9 @@ import { generarHexagonos } from "../generators/generarHexagonos.js";
 import { generarAristas } from "../generators/generarAristas.js";
 import { generarVertices } from "../generators/generarVertices.js";
 import { generarPuertos } from "../generators/generarPuertos.js";
+import { Banca } from "../schemas/Banca.js";
+import { generarCartasBanca } from "../generators/generarCartasBanca.js";
+import { generarRecursosBanca } from "../generators/generarRecursosBanca.js";
 
 export class CatanState extends Schema{
   @type({ map: Jugador}) 
@@ -19,11 +22,16 @@ export class CatanState extends Schema{
   @type(Tablero)
   tablero = new Tablero();
 
+  @type(Banca)
+  banca = new Banca();
+
   constructor(){
     super();
     generarHexagonos(this.tablero.hexagonos);
     generarVertices(this.tablero.vertices);
     generarAristas(this.tablero.aristas);
     generarPuertos(this.tablero.puertos);
+    generarCartasBanca(this.banca.cartas);
+    generarRecursosBanca(this.banca.recursos);
   }
 };

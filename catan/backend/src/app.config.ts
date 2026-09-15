@@ -5,6 +5,7 @@ import {
   playground,
   createRouter,
   createEndpoint,
+  LobbyRoom,
 } from "colyseus";
 
 /**
@@ -18,7 +19,13 @@ const server = defineServer({
    * Define your room handlers:
    */
   rooms: {
-    catan: defineRoom(CatanRoom),
+    //* enableRealtimeListing() notifica al LobbyRoom cada vez que esta sala
+    //* se crea, se llena, se bloquea/desbloquea o cambia su metadata
+    catan: defineRoom(CatanRoom).enableRealtimeListing(),
+
+    //* Sala especial de Colyseus que expone el listado de salas activas
+    //* (publicas y privadas) a los clientes que se unan a ella
+    lobby: defineRoom(LobbyRoom),
   },
 
   /**
