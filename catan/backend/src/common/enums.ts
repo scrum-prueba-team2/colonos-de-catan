@@ -39,3 +39,24 @@ export enum CartasDesarrollo{
     ABUNDANCIA = 4,
     MONOPOLIO = 5
 }
+
+export  enum FasePartida {
+    LOBBY = 0,
+    PRECONSTRUCCION = 2,
+    JUEGO = 3,
+    FINALIZADA = 4
+}
+
+export enum FasePreconstruccion {
+    ASENTAMIENTO = 1,
+    CAMINO = 2
+}
+
+export enum FaseJuego {
+    DADOS = 1,
+    ACCIONES = 2,
+    LADRON = 3,
+    ROBO = 4,
+    DESCARTE = 5,
+    CARRETERAS = 6
+}
