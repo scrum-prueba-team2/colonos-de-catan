@@ -1,7 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
-import type { PointerEvent } from 'react';
-import TexturasTablero from './texturasTablero';
-import './tablero.css';
+import "./tablero.css"
 
 export interface HexagonoDato { 
   h: number; 
@@ -42,11 +39,19 @@ const S = 60;
 
 // Numeros del TipoPuerto
 const NOMBRE_PUERTO: Record<number, string> = {
-  0: '3:1', 1: '2 Madera:1', 2: '2 Trigo:1', 3: '2 Lana:1', 4: '2 Ladrillo:1', 5: '2 Piedra:1',
+  0: '3:1', 
+  1: '2 Madera:1', 
+  2: '2 Trigo:1', 
+  3: '2 Lana:1', 
+  4: '2 Ladrillo:1', 
+  5: '2 Piedra:1',
 };
 
+//* Funcion para transoformar una coordenada axial a un punto cartesiano
 function centro(h: number, d: number): [number, number] {
-  return [S * Math.sqrt(3) * (h + d / 2), -S * 1.5 * d];
+  return [
+    S * Math.sqrt(3) * (h + d / 2),   //* => Coordenada X 
+    -S * 1.5 * d];                    //* => Coordenada Y
 }
 
 // Devuelve las 6 esquinas en orden: 0 N, 1 NE, 2 SE, 3 S, 4 SO, 5 NO 
@@ -54,8 +59,12 @@ function esquinas(h: number, d: number): [number, number][] {
   const [cx, cy] = centro(h, d);
   const m = (S * Math.sqrt(3)) / 2;
   return [
-    [cx, cy - S], [cx + m, cy - S / 2], [cx + m, cy + S / 2],
-    [cx, cy + S], [cx - m, cy + S / 2], [cx - m, cy - S / 2],
+    [cx, cy - S], 
+    [cx + m, cy - S / 2], 
+    [cx + m, cy + S / 2],
+    [cx, cy + S], 
+    [cx - m, cy + S / 2], 
+    [cx - m, cy - S / 2],
   ];
 }
 
@@ -77,101 +86,13 @@ function puntoDeClave(clave: string): [number, number] {
   return puntoVertice(h, d, p);
 }
 
-const VISTA_INICIAL = { pX: -5.7, pY: -5.5, zX: 11.4, zY: 11 };
-const ZOOM_MIN = VISTA_INICIAL.zX * 0.33;  
-const ZOOM_MAX = VISTA_INICIAL.zX;        
-const UMBRAL = 4;
-
-interface Props {
-  datos: DatosTablero;
-  // Opcionales: si no se pasan, el tablero solo se ve.
-  alTocarVertice?: (vertice: VerticeDato, clave: string) => void;
-  alTocarArista?: (arista: AristaDato, clave: string) => void;
-  alTocarHexagono?: (hexagono: HexagonoDato, clave: string) => void;
-}
-
-function Tablero({ datos, alTocarVertice, alTocarArista, alTocarHexagono }: Props) {
-  const svgRef = useRef<SVGSVGElement>(null);
-  const [vista, setVista] = useState(VISTA_INICIAL);
-
-  const arrastre = useRef<{ x: number; y: number; capturado: boolean } | null>(null);
-
-  useEffect(() => {
-    const svg = svgRef.current;
-    
-    if (!svg) return;
-    function alGirarRueda(evento: WheelEvent) {
-      evento.preventDefault();
-      // En que parte del recuadro esta el cursor, de 0 a 1.
-      const caja = svg!.getBoundingClientRect();
-      const fx = (evento.clientX - caja.left) / caja.width;
-      const fy = (evento.clientY - caja.top) / caja.height;
-      const factor = evento.deltaY < 0 ? 0.88 : 1 / 0.88;  // rueda arriba = acercar
-
-      setVista((v) => {
-        const zX = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, v.zX * factor));
-        const k = zX / v.zX;
-        // Se corre la esquina para que el punto bajo el cursor no se mueva.
-        return {
-          pX: v.pX + fx * v.zX * (1 - k),
-          pY: v.pY + fy * v.zY * (1 - k),
-          zX,
-          zY: v.zY * k,
-        };
-      });
-    }
-
-    svg.addEventListener('wheel', alGirarRueda, { passive: false });
-    return () => svg.removeEventListener('wheel', alGirarRueda);
-  }, []);
-
-  function punteroAbajo(evento: PointerEvent<SVGSVGElement>) {
-    arrastre.current = { x: evento.clientX, y: evento.clientY, capturado: false };
-  }
-
-  function punteroMueve(evento: PointerEvent<SVGSVGElement>) {
-    const a = arrastre.current;
-    if (!a) return;
-
-    const dx = evento.clientX - a.x;
-    const dy = evento.clientY - a.y;
-
-    if (!a.capturado && Math.hypot(dx, dy) > UMBRAL) {
-      evento.currentTarget.setPointerCapture(evento.pointerId);
-      a.capturado = true;
-    }
-    if (!a.capturado) return;
-
-    a.x = evento.clientX;
-    a.y = evento.clientY;
-    const caja = evento.currentTarget.getBoundingClientRect();
-    setVista((v) => ({
-      ...v,
-      pX: v.pX - (dx / caja.width) * v.zX,
-      pY: v.pY - (dy / caja.height) * v.zY,
-    }));
-  }
-
-  function punteroArriba(evento: PointerEvent<SVGSVGElement>) {
-    if (arrastre.current?.capturado) evento.currentTarget.releasePointerCapture(evento.pointerId);
-    arrastre.current = null;
-  }
-
+function Tablero({ datos }: { datos: DatosTablero }) {
+  
   return (
     <svg
-      ref={svgRef}
       className="tbSvg"
-      viewBox={`${vista.pX * S} ${vista.pY * S} ${vista.zX * S} ${vista.zY * S}`}
-      onPointerDown={punteroAbajo}
-      onPointerMove={punteroMueve}
-      onPointerUp={punteroArriba}
-      onPointerCancel={punteroArriba}
-      // Doble clic para volver a ver el tablero completo.
-      onDoubleClick={() => setVista(VISTA_INICIAL)}
-      role="img"
-      aria-label="Tablero de Catan"
+      viewBox={`${-5.7 * S} ${-5.5 * S} ${11.4 * S} ${11 * S}`}
     >
-      <TexturasTablero />
 
       {/* puertos primero, para que el muelle quede por detras del hexagono */}
       {Object.entries(datos.puertos).map(([clave, puerto]) => {
@@ -200,7 +121,6 @@ function Tablero({ datos, alTocarVertice, alTocarArista, alTocarHexagono }: Prop
           key={clave}
           className={`tbHex tbTerreno-${hex.terreno}`}
           points={esquinas(hex.h, hex.d).join(' ')}
-          onClick={alTocarHexagono && (() => alTocarHexagono(hex, clave))}
         />
       ))}
 
@@ -212,7 +132,6 @@ function Tablero({ datos, alTocarVertice, alTocarArista, alTocarHexagono }: Prop
             key={clave}
             className={arista.propietario === '' ? 'tbArista' : 'tbArista tbAristaOcupada'}
             x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]}
-            onClick={alTocarArista && (() => alTocarArista(arista, clave))}
           />
         );
       })}
@@ -246,12 +165,10 @@ function Tablero({ datos, alTocarVertice, alTocarArista, alTocarHexagono }: Prop
             key={clave}
             className={vertice.constuccion === 0 ? 'tbVertice' : 'tbVertice tbVerticeOcupado'}
             cx={x} cy={y} r={S * 0.085}
-            onClick={alTocarVertice && (() => alTocarVertice(vertice, clave))}
           />
         );
       })}
     </svg>
   );
 }
-
 export default Tablero;

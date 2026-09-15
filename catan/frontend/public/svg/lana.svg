@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Patas -->
+  <rect x="18" y="44" width="4" height="10" rx="1.5" fill="#5A544A"/>
+  <rect x="26" y="44" width="4" height="10" rx="1.5" fill="#5A544A"/>
+  <rect x="36" y="44" width="4" height="10" rx="1.5" fill="#5A544A"/>
+  <rect x="44" y="44" width="4" height="10" rx="1.5" fill="#5A544A"/>
+
+  <!-- Cuerpo de nube: varios círculos solapados -->
+  <g fill="#F4F1E5" stroke="#8C8578" stroke-width="2" stroke-linejoin="round">
+    <circle cx="24" cy="34" r="9"/>
+    <circle cx="34" cy="28" r="10"/>
+    <circle cx="44" cy="34" r="9"/>
+    <circle cx="32" cy="40" r="9"/>
+    <circle cx="42" cy="42" r="7"/>
+    <circle cx="22" cy="42" r="7"/>
+  </g>
+
+  <!-- Cabeza y oreja -->
+  <ellipse cx="50" cy="24" rx="8" ry="7" fill="#3B3B3B" stroke="#1F1F1F" stroke-width="2"/>
+  <ellipse cx="44" cy="20" rx="4" ry="3" fill="#3B3B3B" stroke="#1F1F1F" stroke-width="2" transform="rotate(-25 44 20)"/>
+
+  <!-- Ojo -->
+  <circle cx="52" cy="22" r="1.4" fill="#F4F1E5"/>
+</svg>

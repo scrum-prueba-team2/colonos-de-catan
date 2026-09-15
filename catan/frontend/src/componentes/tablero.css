@@ -1,33 +1,26 @@
-/* Tablero de Catan.
-   Todo se dibuja en un solo SVG. En SVG, fill y stroke son propiedades
-   normales de CSS, por eso todos los colores viven aqui y el componente solo
-   pone clases.
-
-   Los textos de este archivo NO llevan unidades: los numeros de un SVG estan
-   en las coordenadas del viewBox, no en pixeles de pantalla, asi que ya
-   escalan solos junto con el dibujo. Son relativos al contenedor por
-   naturaleza y no hace falta cqw. */
+/* Tablero de Catan */
 .tablero { background: #BFD8E8; }
-
 .tbSvg {
-    width: 100%;
-    height: 100%;
-    display: block;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
+/* Hexágonos */
 .tbHex {
     stroke: #F3EDE0;
     stroke-width: 3;
 }
 
-.tbTerreno-0 { fill: url(#tex-desierto); }
-.tbTerreno-1 { fill: url(#tex-bosque); }
-.tbTerreno-2 { fill: url(#tex-campo); }
-.tbTerreno-3 { fill: url(#tex-pasto); }
-.tbTerreno-4 { fill: url(#tex-colina); }
-.tbTerreno-5 { fill: url(#tex-montana); }
+/* Colores por terreno (ajusta los números según tu tipo de terreno) */
+.tbTerreno-0 { fill: #e8c97a; } /* desierto */
+.tbTerreno-1 { fill: #6ab04c; } /* bosque / madera */
+.tbTerreno-2 { fill: #f6e58d; } /* campo / trigo */
+.tbTerreno-3 { fill: #a5d6a7; } /* pradera / lana */
+.tbTerreno-4 { fill: #c96b4a; } /* colina / ladrillo */
+.tbTerreno-5 { fill: #9aa0a6; } /* montaña / piedra */
 
-/* Aristas: los lados donde van los caminos */
+/*  Aristas (caminos) */
 .tbArista {
     stroke: #00000018;
     stroke-width: 6;
@@ -35,7 +28,7 @@
 }
 .tbAristaOcupada { stroke: #2C4049; stroke-width: 9; }
 
-/* Vertices: las esquinas donde van poblados y ciudades */
+/*  Vértices (poblados / ciudades)  */
 .tbVertice {
     fill: #ffffff;
     stroke: #00000030;
@@ -53,15 +46,10 @@
     dominant-baseline: central;
 }
 
-.tbPip { fill: #6A6A6A; }
-
-/* El 6 y el 8 son los numeros mas probables, por eso van en rojo */
 .tbFichaRoja .tbFichaNumero,
 .tbFichaRoja .tbPip { fill: #B3261E; }
 
-.tbLadron { fill: #2B2B2B; }
-
-/* Puertos: el muelle y el cartelito con el tipo de cambio */
+/*  Puertos  */
 .tbMuelle { stroke: #9C7B4E; stroke-width: 2.5; }
 .tbPuertoCaja { fill: #F3E7CE; stroke: #9C7B4E; stroke-width: 2; }
 .tbPuertoTexto {
@@ -71,22 +59,10 @@
     dominant-baseline: central;
 }
 
-
-/* El tablero se puede arrastrar con el raton.
-   user-select evita que el doble clic deje seleccionados los numeros.
-   touch-action evita que el celular haga scroll al arrastrar el tablero. */
-.tbSvg {
-    cursor: grab;
-    touch-action: none;
-    user-select: none;
+/*  Ladrón  */
+.tbLadron ellipse,
+.tbLadron circle {
+  fill: #333;
+  stroke: #000;
+  stroke-width: 1;
 }
-/* Sin estado de React: :active ya sabe si el boton esta presionado. */
-.tbSvg:active { cursor: grabbing; }
-
-/* Cursor de mano sobre las piezas que se pueden tocar. */
-.tbVertice,
-.tbArista { cursor: pointer; }
-
-.tbFicha,
-.tbLadron,
-.tbPuerto { pointer-events: none; }

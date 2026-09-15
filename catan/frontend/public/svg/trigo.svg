@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" color="#D69A2D">
+  <title>Trigo</title>
+  <rect fill="currentColor" x="11.1" y="10" width="1.8" height="11.8" rx="0.9"/>
+  <ellipse fill="currentColor" cx="12" cy="4" rx="2" ry="3.2"/>
+  <ellipse fill="currentColor" cx="8.1" cy="9.4" rx="1.9" ry="3.1" transform="rotate(-36 8.1 9.4)"/>
+  <ellipse fill="currentColor" cx="15.9" cy="9.4" rx="1.9" ry="3.1" transform="rotate(36 15.9 9.4)"/>
+  <ellipse fill="currentColor" cx="8.1" cy="15.4" rx="1.9" ry="3.1" transform="rotate(-36 8.1 15.4)"/>
+  <ellipse fill="currentColor" cx="15.9" cy="15.4" rx="1.9" ry="3.1" transform="rotate(36 15.9 15.4)"/>
+</svg>

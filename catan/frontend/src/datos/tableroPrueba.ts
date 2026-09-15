@@ -1,8 +1,5 @@
 import type { DatosTablero } from '../componentes/tablero';
 
-// Tablero de ejemplo con el MISMO formato que envia el backend:
-// cada objeto lleva sus coordenadas adentro (h, d, p), no solo en la clave.
-// Se borra cuando exista la conexion real con Colyseus.
 export const tableroPrueba: DatosTablero = {
   // clave 'h,d' -> hexagono. h = horizontal (+ a la derecha), d = diagonal (+ arriba a la derecha)
   hexagonos: {
