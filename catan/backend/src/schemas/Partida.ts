@@ -1,12 +1,17 @@
 import { Schema, type } from "@colyseus/schema";
+import { FaseJuego, FasePartida } from "../common/enums.js";
 
 export class Partida extends Schema{
+  @type("string") creador: string; 
+  @type("string") fase: FasePartida;
+  @type("string") faseJuego: FaseJuego;
   @type("string") turnoActual: string;
-  @type("string") fase: string; 
-
+  
   constructor(){
     super();
+    this.creador = "";
+    this.fase = FasePartida.LOBBY;
     this.turnoActual = "";
-    this.fase = "lobby";
+    this.faseJuego = FaseJuego.DADOS;
   }
 }
