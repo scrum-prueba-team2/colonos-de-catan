@@ -3,6 +3,7 @@ import { Hexagono } from "./Hexagono.js";
 import { Arista } from "./Arista.js";
 import { Vertice } from "./Vertices.js";
 import { Puerto } from "./Puertos.js";
+import { Coordenada } from "./Coordenada.js";
 
 
 export class Tablero extends Schema{
@@ -17,5 +18,8 @@ export class Tablero extends Schema{
 
     @type({ map: Puerto })
     puertos = new MapSchema<Puerto>();
+
+    @type(Coordenada)
+    ladron = new Coordenada(0, 0);
 
 }
