@@ -41,7 +41,7 @@ export enum CartasDesarrollo{
 }
 
 export  enum FasePartida {
-    LOBBY = 0,
+    LOBBY = 1,
     PRECONSTRUCCION = 2,
     JUEGO = 3,
     FINALIZADA = 4
