@@ -8,6 +8,14 @@ export enum Terreno {
     MINERAL = 5
 }
 
+export enum Desarrollo {
+    CABALLERO = 1,
+    PUNTOS_VICTORIA = 2,
+    CARRETERA = 3,
+    ABUNDANCIA = 4,
+    MONOPOLIO = 5
+}
+
 export enum Construccion {
     VACIO = 0,
     ASENTAMIENTO = 1,
