@@ -1,16 +1,13 @@
 import './App.css'
-import Tablero from './componentes/tablero'
-import { tableroPrueba } from './datos/tableroPrueba'
+import Partida from './pantallas/Partida'
 
 function App() {
 
-/* descomentar para ver el componente de la vista de tablero
+// Cambiar a lobby cuando exista
  return(
-  <Tablero
-    datos={tableroPrueba}
-  />
+  <Partida/>
  )
-  */
+
 }
 
 export default App

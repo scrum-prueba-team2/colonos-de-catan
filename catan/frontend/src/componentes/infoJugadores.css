@@ -1,0 +1,90 @@
+.ijLista {
+    display: flex;
+    gap: 0.2%;
+    width: 100%;
+    height: 100%;
+    container-type: inline-size;
+}
+
+.ijFicha {
+    flex: 1 1 0;
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.15em;
+    padding: 0.2em 1em;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: clamp(0.7rem, 0.4vw + 1.2vh, 1rem);
+    font-variant-numeric: tabular-nums;
+
+    color: var(--color-text, #172A2D);
+    background: var(--color-surface-warm, #F3E8D6);
+    border: 0.07em solid var(--color-line, #D9D9D9);
+    border-radius: 0.75em;
+    border: 0.25em solid var(--color-jugador, #617276);
+    /* Franja más gruesa: el color del jugador se ve de un vistazo. */
+    border-left: 2em solid var(--color-jugador, #617276);
+}
+
+/* Jugador en turno: fondo con su color + borde de selección.
+   El texto pasa a blanco para contrastar sobre el color. */
+.ijTurno {
+    background: var(--color-jugador, #617276);
+    color: #FFFFFF;
+    border-color: var(--color-primary, #176977);
+    border-left-color: var(--color-jugador, #617276);
+    outline: 0.15em solid var(--color-primary, #176977);
+    outline-offset: -0.15em;
+}
+
+/* En turno, los números secundarios también en blanco para que se lean. */
+.ijTurno .ijMano {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.ijYo .ijNombre { font-weight: 700; }
+
+.ijCabecera {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    min-width: 0;
+    font-size: 1.125em;
+    line-height: 1.15;
+    font-weight: 600;
+}
+
+.ijNombre {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ijPuntos {
+    flex: none;
+    font-weight: 700;
+}
+
+.ijMano {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.1em 0.75em;
+    min-width: 0;
+    font-size: 0.875em;
+    line-height: 1.15;
+    font-weight: 500;
+    color: var(--color-text-muted, #617276);
+}
+
+.ijRiesgo {
+    color: var(--color-warning, #B36B00);
+    font-weight: 700;
+}
