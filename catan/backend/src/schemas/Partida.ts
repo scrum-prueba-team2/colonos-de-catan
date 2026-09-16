@@ -1,12 +1,23 @@
-import { Schema, type } from "@colyseus/schema";
+import { ArraySchema, Schema, type } from "@colyseus/schema";
+import { FaseJuego, FasePartida, FasePreconstruccion } from "../common/enums.js";
 
-export class Partida extends Schema{
+export class Partida extends Schema {
+  @type("string") creador: string;
+  @type("uint8") fase: FasePartida;
+  @type("uint8") fasePreconstruccion: FasePreconstruccion;
+  @type("int8") direccionPreconstruccion: number;
+  @type("uint8") faseJuego: FaseJuego;
   @type("string") turnoActual: string;
-  @type("string") fase: string; 
+  @type(["string"]) ordenJugadores = new ArraySchema<string>();
+  @type("string") ganador: string;
 
-  constructor(){
+  constructor() {
     super();
+    this.creador = "";
+    this.fase = FasePartida.LOBBY;
     this.turnoActual = "";
-    this.fase = "lobby";
+    this.fasePreconstruccion = FasePreconstruccion.ASENTAMIENTO;
+    this.direccionPreconstruccion = 1;
+    this.faseJuego = FaseJuego.DADOS;
   }
 }

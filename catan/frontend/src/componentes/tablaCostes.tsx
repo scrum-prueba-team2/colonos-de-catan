@@ -7,36 +7,36 @@ function TablaCostes() {
 
       <ul className="tcLista">
         <li className="tcFila">
-          <img className="tcIconoPieza" src="/img/carretera.png" alt="Carretera" />
+          <img className="tcIconoPieza" src="/svg/carretera.svg" alt="Carretera" />
           <span className="tcNombre">Carretera</span>
-          <img className="tcRecurso" src="/img/madera.png" alt="Madera" />
-          <img className="tcRecurso" src="/img/ladrillo.png" alt="Ladrillo" />
+          <img className="tcRecurso" src="/svg/madera.svg" alt="Madera" />
+          <img className="tcRecurso" src="/svg/ladrillo.svg" alt="Ladrillo" />
         </li>
 
         <li className="tcFila">
-          <img className="tcIconoPieza" src="/img/poblado.png" alt="Poblado" />
+          <img className="tcIconoPieza" src="/svg/poblado.svg" alt="Poblado" />
           <span className="tcNombre">Poblado</span>
-          <img className="tcRecurso" src="/img/madera.png" alt="Madera" />
-          <img className="tcRecurso" src="/img/ladrillo.png" alt="Ladrillo" />
-          <img className="tcRecurso" src="/img/trigo.png" alt="Trigo" />
-          <img className="tcRecurso" src="/img/lana.png" alt="Lana" />
+          <img className="tcRecurso" src="/svg/madera.svg" alt="Madera" />
+          <img className="tcRecurso" src="/svg/ladrillo.svg" alt="Ladrillo" />
+          <img className="tcRecurso" src="/svg/trigo.svg" alt="Trigo" />
+          <img className="tcRecurso" src="/svg/lana.svg" alt="Lana" />
         </li>
 
-        <li className="tcFila tcInactiva">
-          <img className="tcIconoPieza" src="/img/ciudad.png" alt="Ciudad" />
+        <li className="tcFila">
+          <img className="tcIconoPieza" src="/svg/ciudad.svg" alt="Ciudad" />
           <span className="tcNombre">Ciudad</span>
-          <img className="tcRecurso" src="/img/trigo.png" alt="Trigo" />
           <span>2</span>
-          <img className="tcRecurso" src="/img/piedra.png" alt="Piedra" />
+          <img className="tcRecurso" src="/svg/trigo.svg" alt="Trigo" />
           <span>3</span>
+          <img className="tcRecurso" src="/svg/piedra.svg" alt="Piedra" />
         </li>
 
-        <li className="tcFila tcInactiva">
-          <img className="tcIconoPieza" src="/img/desarrollo.png" alt="Carta de desarrollo" />
+        <li className="tcFila">
+          <img className="tcIconoPieza" src="/svg/desarrollo.svg" alt="Carta de desarrollo" />
           <span className="tcNombre">Carta de desarrollo</span>
-          <img className="tcRecurso" src="/img/trigo.png" alt="Trigo" />
-          <img className="tcRecurso" src="/img/lana.png" alt="Lana" />
-          <img className="tcRecurso" src="/img/piedra.png" alt="Piedra" />
+          <img className="tcRecurso" src="/svg/trigo.svg" alt="Trigo" />
+          <img className="tcRecurso" src="/svg/lana.svg" alt="Lana" />
+          <img className="tcRecurso" src="/svg/piedra.svg" alt="Piedra" />
         </li>
       </ul>
     </div>

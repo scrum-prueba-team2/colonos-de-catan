@@ -3,11 +3,10 @@ import Partida from './pantallas/Partida'
 
 function App() {
 
-//descomentar para ver el componente de la vista de tablero
+// Cambiar a lobby cuando exista
  return(
   <Partida/>
  )
-
 }
 
 export default App

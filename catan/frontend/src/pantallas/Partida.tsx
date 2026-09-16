@@ -1,16 +1,20 @@
 import { useState } from 'react';
+import {
+  jugadoresPrueba, ordenJugadoresPrueba, turnoActualPrueba, miSessionIdPrueba,
+} from '../datos/jugadoresPrueba';
+import InfoJugadores from '../componentes/infoJugadores';
+
+import { bancaPrueba } from '../datos/bancaPruebas';
+import Existencias from '../componentes/existencias';
 import { tableroPrueba } from '../datos/tableroPrueba'
-import { jugadoresPrueba } from '../datos/jugadoresPrueba';
 import TablaCostes from '../componentes/tablaCostes';
 import Tablero from '../componentes/tablero';
-import InfoJugador from '../componentes/infoJugador';
 import Construir, {
   type ObjetivoConstruccion,
   type RecursosConstruccion,
   type SolicitudConstruccion,
   type TipoConstruccion,
 } from '../componentes/construir';
-
 import './Partida.css'
 
 // Mientras la conexión de la issue #25 no esté integrada, estos recursos solo
@@ -72,21 +76,23 @@ function Partida({ onSolicitarConstruccion }: Props) {
         <div className="construir">
           <Construir
             recursos={recursosPrueba}
+            {/*esMiTurno={turnoActualPrueba === miSessionIdPrueba}*/}
             esMiTurno={true}
             seleccion={tipoConstruccion}
             onSeleccionar={seleccionarConstruccion}
           />
           {estadoConstruccion && <p className="estadoConstruccion" role="status">{estadoConstruccion}</p>}
         </div>
-        <div className="informacion"> 
-            <div className="infoJugadores">
-                {jugadoresPrueba.map((j) => (
-                  <InfoJugador key={j.nombre} jugador={j} />
-                ))}
-            </div>
-            <div className="infoPartida">
-                area de informacion de partida
-            </div>
+        <div className="infoJugadores">
+          <InfoJugadores
+            jugadores={jugadoresPrueba}
+            ordenJugadores={ordenJugadoresPrueba}
+            turnoActual={turnoActualPrueba}
+            miSessionId={miSessionIdPrueba}
+          />
+        </div>
+        <div className="infoPartida">
+            area de informacion de partida
         </div>
         <div className="tablero">
           <Tablero
@@ -96,27 +102,29 @@ function Partida({ onSolicitarConstruccion }: Props) {
             onSeleccionarObjetivo={seleccionarObjetivo}
           />
         </div>
-        <div className="cartas"> 
-            <div className="carRecursos">
-              area de cartas de recursos
-            </div>
-            <div className="carDesarrollo">
-              area de cartas de desarollo
-            </div>
-            <div className="carEspeciales">
-              area de cartas especiales 
-            </div>
+        <div className="carRecursos">
+          area de cartas de recursos
         </div>
-        <div className="acciones"> 
-          <div className="negociar">
+        <div className="carDesarrollo">
+          area de cartas de desarollo
+        </div>
+        <div className="carEspeciales">
+          area de cartas especiales 
+        </div>
+        <div className="negociar">
             area de negociar   
-          </div>
-          <div className="tirDado">
-            area de tirar dado
-          </div>
-          <div className="finTurno">
-            area de finaliszar turno
-          </div>
+        </div>
+        <div className="tirDado">
+          area de tirar dado
+        </div>
+        <div className="finTurno">
+          area de finaliszar turno
+        </div>
+        <div className="existencias">
+          <Existencias
+            banca={bancaPrueba}
+            miJugador={jugadoresPrueba[miSessionIdPrueba]}
+          />
         </div>
     </div>
   );

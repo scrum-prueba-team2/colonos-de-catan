@@ -1,159 +1,224 @@
 import { Room, Client, CloseCode, Delayed } from "colyseus";
 import { CatanState } from "../states/CatanState.js";
 import { Jugador } from "../schemas/Jugador.js";
+import { FaseJuego, FasePartida } from "../common/enums.js";
+import { buscarHexagonos } from "../functions/buscarHexagonos.js";
+import { darRecursosJugador } from "../functions/darRecursosJugador.js";
+import { verticesDelHexagono } from "../functions/verticesDelHexagono.js";
+import { lanzarDados } from "../functions/lanzarDados.js";
+import { mezclar } from "../common/mezclar.js";
+import { siguienteTurno } from "../functions/siguienteTruno.js";
 
-//* Cuanto tiempo tendra un jugador (en ms) para realizar su turno
-const TURN_DURATION = 15_000;
 
-export class CatanRoom extends Room{
+export class CatanRoom extends Room {
   maxClients = 4;
   state = new CatanState();
-  Partida = this.state.partida;
-  Jugadores = this.state.jugadores;
+  partida = this.state.partida;
+  tablero = this.state.tablero;
+  banca = this.state.banca;
+  jugadores = this.state.jugadores;
   codigoAcceso = "";
 
-  //? Delayed
-  //* Tipo de dato temporizador que permite programar una funcion en el tiempo
-  private turnTimeout?: Delayed;
 
   messages = {
-    play: (client: Client, message: any) => {
-      if (this.Partida.turnoActual !== client.sessionId) { return; }
-
-      const player = this.Jugadores.get(client.sessionId);
-      if (!player) { return; }
-
-      player.puntuacion++;
-      this.nextTurn();
-    },
-    
-    message: (client: Client, message: any) => {
-      console.log("message received from", client.sessionId, ":", message);
-      //* enviamos el mensaje a todos los clientes conectados a la sala, incluyendo el remitente.
-      this.broadcast("message", {
-        text: message,
-        from: client.sessionId
-      });
-    },
-
-    privatemessage: (client: Client, message: any) => {
-      console.log("private message received from", client.sessionId, ":", message);
-
-      //* extraemos el sessionId del destinatario del mensaje
-      const targetSessionId = message.to;
-      //* si no existe el sessionId o no hay texto ignora
-      if (!targetSessionId || !message.text) return; 
-
-      //* buscamos el cliente con el sessionId especificado
-      const targetClient = this.clients.find(c => c.sessionId === targetSessionId);
-
-      //* si no se encuentra el cliente enviarle un mensaje al cliente
-      if (!targetClient) {
-        client.send("error", { 
-          message: "Ese jugador ya no está en la sala"
-        });
-        return; 
+    msgLanzarDados: (client: Client) => {
+      //* Verificar que la partida siga en curso
+      if (this.partida.fase === FasePartida.FINALIZADA) {
+        client.send("error", {
+          mensajeError: "La partida ha finalizado"
+        })
+        return;
       }
 
-      //* enviamos el mensaje solo a ese cliente
-      targetClient.send("privatemessage", {
-        text: message.text,
-        from: client.sessionId
-      });
+      //* Verificar que sea el turno del jugador
+      if (this.partida.turnoActual !== client.sessionId) {
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        })
+        return;
+      }
 
+      //* Verificar que estemos en la fase de juego
+      if (this.partida.fase !== FasePartida.JUEGO) {
+        client.send("error", {
+          mensajeError: "No es la fase de juego"
+        })
+        return;
+      }
+
+      //* Verificar que estemos en la fase de lanzar dados
+      if (this.partida.faseJuego !== FaseJuego.DADOS) {
+        client.send("error", {
+          mensajeError: "Ya lanzaste los dados"
+        })
+        return;
+      }
+
+      //* Lanzamiento de dados
+      const { dado1, dado2, suma } = lanzarDados();
+
+      //? Notificar a todos los jugadores el resultado de los dados
+      this.broadcast("dados", {
+        dado1,
+        dado2,
+        suma
+      })
+
+      //! Si sale 7 toda la logica cambia, entramos a fase de robo y/o ladron
+      if (suma === 7) {
+
+        // todo: logica para descarte de jugadores
+        this.partida.faseJuego = FaseJuego.LADRON;
+        return;
+      }
+
+      //* Buscar los hexagonos con dicho numero resultado de la suma de los dados
+      const hexagonosEncontrados = buscarHexagonos(this.tablero.hexagonos, suma);
+
+      //* Traer los vertices adyacentes para cada hexagono encontrado
+      hexagonosEncontrados.forEach((hexagono) => {
+        const vertices = verticesDelHexagono(this.tablero.vertices, hexagono);
+
+        //* Dar los recursos correspondientes en cada vertice encontrado
+        vertices.forEach((vertice) => {
+          darRecursosJugador(
+            hexagono,
+            vertice,
+            this.jugadores,
+            this.banca,
+            this.tablero.ladron);
+        })
+      })
+      this.partida.faseJuego = FaseJuego.ACCIONES;
     },
 
-    rollDice: (client: Client, message: any) => {
-      if (this.Partida.turnoActual !== client.sessionId) { return; }
+    msgIniciarPartida: (client: Client) => {
 
-      //* Se calcula un dado aleatorio entre 1 y 6
-      const diceRoll = Math.floor(Math.random() * 6) + 1; 
-      console.log("dice rolled by", client.sessionId, ":", diceRoll);
+      //* Verificar que sea el creador de la sala
+      if (this.partida.creador !== client.sessionId) {
+        client.send("error", {
+          mensajeError: "Solo el creador puede iniciar la partida"
+        });
+        return;
+      }
 
-      //* Le mostramos el resultado a todos los jugadores.
-      this.broadcast("diceRolled", {
-        result: diceRoll,
-        from: client.sessionId
+      //* Solo se puede iniciar si estamos en la fase de lobby
+      if (this.partida.fase !== FasePartida.LOBBY) {
+        client.send("error", {
+          mensajeError: "La partida ya ha comenzado"
+        });
+        return;
+      }
+
+      //* Verificar que al menos hayan 2 jugadores
+      if (this.jugadores.size < 2) {
+        client.send("error", {
+          mensajeError: "Se necesitan al menos 2 jugadores para iniciar la partida"
+        });
+        return;
+      }
+
+      //* Mezclamos el orden de los jugadores en la partida
+      mezclar(this.partida.ordenJugadores);
+
+      //* Le damos el turno al primer jugador en la lista
+      this.partida.turnoActual = this.partida.ordenJugadores[0];
+
+      //* Enviar un mensaje a todos que la partida comenzó
+      this.broadcast("inicio", {
+        mensaje: "La partida ha comenzado",
       });
 
-      this.nextTurn();
-    }
-    
+      //* Cambiamos el estado de la partida a preconstruccion
+      this.partida.fase = FasePartida.PRECONSTRUCCION;
+
+      //* Actualización de metadata para mostrar en la Lobby
+      this.setMetadata({
+        estado: "EN JUEGO"
+      });
+    },
+
+    msgPasarTurno: (client: Client) => {
+
+      //* Verificar que la partida siga en curso
+      if (this.partida.fase === FasePartida.FINALIZADA) {
+        client.send("error", {
+          mensajeError: "La partida ha finalizado"
+        });
+
+        return;
+      }
+
+      //* Verificar que sea tu turno
+      if (this.partida.turnoActual !== client.sessionId) {
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        });
+
+        return;
+      }
+
+      //* Solo se puede pasar turno en fase de acciones
+      if (this.partida.faseJuego !== FaseJuego.ACCIONES) {
+        client.send("error", {
+          mensajeError: "Termina de lanzar los dados primero"
+        });
+
+        return;
+      }
+
+      siguienteTurno(this.partida);
+    },
   };
 
   onCreate(options: any) {
     console.log("room created!", this.roomId);
-    //si se ingresa codigo de acceso, se setea al atributo de codigo de acceso a la sala
+    //* si se ingresa codigo de acceso, se setea al atributo de codigo de acceso a la sala
     this.codigoAcceso = options.codigoAcceso || ""
 
-    //seteamos la data de la sala
+    //* seteamos la data de la sala
     this.setMetadata({
-      alias:options.alias || "Catan Room",
+      alias: options.alias || "Catan Room",
       estado: "EN LOBBY",
-      privada:options.privada || false
+      privada: options.privada || false
     })
   }
 
   onJoin(client: Client, options: any) {
-    //en dado caso que la sala tuviera clave, entra a este if
-    if(this.codigoAcceso != ""){
-      //si el codigo es incorrecto
-      if(options.codigoAcceso !== this.codigoAcceso){
-        throw new Error("Codigo de acceso incorrecto!!");
+    //* todo: issue fase del juego
+    if (this.codigoAcceso !== "") {
+      if (options.codigoAcceso !== this.codigoAcceso) {
+        throw new Error("Codigo de acceso incorrecto");
       }
     }
-    console.log(client.sessionId, "joined!");
-    //* Crear y setear un nuevo jugador en el estado de la sala cuando un cliente se une
-    this.Jugadores.set(client.sessionId, new Jugador());
+    console.log(`${client.sessionId} joined the room`);
 
-    //* Si la sala ya esta llena, se bloquea para no ser visible en el matchmaker
-    if (this.Jugadores
-      .size === this.maxClients) {
-      this.lock(); 
-      this.nextTurn();
-      this.Partida.fase = "playing"; //* fase a "playing"
+    this.partida.ordenJugadores.push(client.sessionId);
+
+    this.jugadores.set(client.sessionId, new Jugador(options.nombre));
+
+    if (this.partida.creador == "") {
+      this.partida.creador = client.sessionId;
     }
   }
 
   onLeave(client: Client, code: CloseCode) {
-    console.log(client.sessionId, "left!", code);
-    const wasTheirTurn = this.Partida.turnoActual === client.sessionId;
-
-    this.Jugadores.delete(client.sessionId);  //* Eliminar al jugador del state
-    if (wasTheirTurn) this.nextTurn();
+    //* todo: issue fase del juego
+    console.log(`${client.sessionId} left the room`);
   }
 
   onDispose() {
     console.log("room", this.roomId, "disposing...");
   }
 
-  //* Controla a que jugador le toca el turno
-  nextTurn() {
-    this.turnTimeout?.clear();  //! Limpia el temporizador anterior si existe
-
-    //* Obtiene todos los sessionIds de los jugadores en la sala
-    const sessionIds = [...this.Jugadores.keys()];
-    if (sessionIds.length === 0) {
-      this.Partida.turnoActual = "";
-      return;
-    }
-
-    //* indexOf() si recibe vacio retorna -1, que al inicio asi sera por eso
-    const previous = sessionIds.indexOf(this.Partida.turnoActual);
-
-    //* Al turno actual se considera el siguiente jugador en una lista circular de sessionIds
-    this.Partida.turnoActual = sessionIds[(previous + 1) % sessionIds.length];
-
-    //? Se programa un temporizador para la misma funcion nextTurn()
-    this.turnTimeout = this.clock.setTimeout(() => this.nextTurn(), TURN_DURATION);
-  }
-
   //* Si un cliente se desconecta tiene 30 segundos para reconectarse
   onDrop(client: Client, code: CloseCode) {
-    this.allowReconnection(client, 30).catch(() => {});
+    //* todo: issue fase del juego
+    console.log(`${client.sessionId} droppef with code ${code}`);
+    this.allowReconnection(client, 30);
   }
 
   onReconnect(client: Client) {
-    console.log(client.sessionId, "reconnected!");
+    console.log(`${client.sessionId} reconnected`);
   }
 }
