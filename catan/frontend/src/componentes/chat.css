@@ -1,0 +1,106 @@
+/* Chat de la partida.
+   El titulo y la caja de escribir se quedan quietos; solo la lista de en medio
+   hace scroll. Eso lo logran el flex 1 y el min-height 0 de .chLista. */
+.chMarco {
+    font-size: clamp(8px, 4.4cqw, 16px);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.42em;
+    padding: 0.5em 0.66em;
+    box-sizing: border-box;
+    min-height: 0;
+}
+
+.chTitulo {
+    font-size: 0.83em;
+    color: #888;
+    flex: none;
+}
+
+.chLista {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    padding-right: 0.17em;
+}
+
+.chVacio {
+    margin: auto;
+    font-size: 0.92em;
+    color: #B4C0C4;
+    text-align: center;
+}
+
+/* Mensaje de otro jugador: pegado a la izquierda */
+.chMensaje {
+    background: #F1F5F6;
+    border-radius: 0.66em 0.66em 0.66em 0.17em;
+    padding: 0.42em 0.66em;
+    max-width: 88%;
+    align-self: flex-start;
+    min-width: 0;
+}
+
+/* Mensaje mio: pegado a la derecha y con la esquina invertida */
+.chMio {
+    background: #DDEBEE;
+    border-radius: 0.66em 0.66em 0.17em 0.66em;
+    align-self: flex-end;
+}
+
+.chCabecera {
+    display: flex;
+    align-items: baseline;
+    gap: 0.66em;
+    margin-bottom: 0.08em;
+}
+
+.chAutor {
+    font-size: 0.83em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* overflow-wrap parte las palabras kilometricas, como una URL pegada */
+.chTexto {
+    margin: 0;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.chForma {
+    flex: none;
+    display: flex;
+    gap: 0.42em;
+}
+
+.chEntrada {
+    flex: 1;
+    min-width: 0;
+    font-size: 1em;
+    padding: 0.42em 0.66em;
+    border: 1px solid #C3CDD1;
+    border-radius: 0.42em;
+    font-family: inherit;
+}
+.chEntrada:focus {
+    outline: none;
+    border-color: #2C4049;
+}
+
+.chEnviar {
+    flex: none;
+    font-size: 0.92em;
+    padding: 0.42em 0.92em;
+    border: 1px solid #2C4049;
+    border-radius: 0.42em;
+    background: #fff;
+    cursor: pointer;
+}
+.chEnviar:hover:not(:disabled) { background: #2C4049; color: #fff; }
+.chEnviar:disabled { opacity: .35; cursor: not-allowed; }

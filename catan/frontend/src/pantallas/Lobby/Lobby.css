@@ -1,0 +1,225 @@
+/* ==========================================
+   LOBBY DE PARTIDAS
+   ========================================== */
+.lobby {
+  background-color: var(--bg-main, #fcfcfd);
+  color: var(--text-primary, #121826);
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  padding: 2rem 1.5rem 4rem;
+  max-width: 680px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Botón Volver */
+.lobby__volver {
+  background: transparent;
+  border: 1px solid var(--border-color, #eaecf0);
+  border-radius: var(--radius-sm, 8px);
+  color: var(--text-muted, #4d5761);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.5rem 0.85rem;
+  cursor: pointer;
+  margin-bottom: 2rem;
+  align-self: flex-start;
+  transition: all var(--transition-fast, 0.2s ease);
+}
+
+.lobby__volver:hover {
+  background-color: #ffffff;
+  border-color: var(--border-hover, #d0d5dd);
+  color: var(--text-primary, #121826);
+  transform: translateX(-2px);
+}
+
+/* Encabezado */
+.lobby__header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary, #121826);
+}
+
+.lobby__header p {
+  color: var(--text-muted, #4d5761);
+  font-size: 1.05rem;
+  margin: 0 0 2rem 0;
+}
+
+/* Ingreso manual por código */
+.lobby__manual {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+}
+
+.lobby__manual input {
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid var(--border-color, #eaecf0);
+  border-radius: var(--radius-md, 12px);
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  color: var(--text-primary, #121826);
+  outline: none;
+  transition: border-color var(--transition-fast, 0.2s ease), box-shadow var(--transition-fast, 0.2s ease);
+  box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+.lobby__manual input:focus {
+  border-color: var(--brand-primary, #101828);
+  box-shadow: 0 0 0 3px rgba(16, 24, 40, 0.08);
+}
+
+.lobby__manual input::placeholder {
+  color: var(--text-subtle, #858d9d);
+}
+
+/* Lista de salas */
+.lobby__lista h2 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  color: var(--text-primary, #121826);
+}
+
+.lobby__lista ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lobby__vacio {
+  color: var(--text-subtle, #858d9d);
+  font-size: 0.95rem;
+  padding: 2rem;
+  text-align: center;
+  background: #ffffff;
+  border: 1px dashed var(--border-color, #eaecf0);
+  border-radius: var(--radius-md, 12px);
+}
+
+/* Ficha de Sala */
+.lobby__sala {
+  background: #ffffff;
+  border: 1.5px solid var(--border-color, #eaecf0);
+  border-radius: var(--radius-md, 12px);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+  box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.04);
+  transition: all var(--transition-fast, 0.2s ease);
+}
+
+.lobby__sala:hover {
+  border-color: var(--border-hover, #d0d5dd);
+  box-shadow: 0px 4px 12px -2px rgba(16, 24, 40, 0.06);
+}
+
+.lobby__sala--seleccionada {
+  border-color: var(--brand-primary, #101828) !important;
+  background-color: #fcfcfd;
+}
+
+.lobby__sala-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.lobby__sala-nombre-fila {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.lobby__sala-nombre {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-primary, #121826);
+}
+
+.lobby__sala-detalle {
+  font-size: 0.85rem;
+  color: var(--text-muted, #4d5761);
+}
+
+/* Badges (Etiquetas de tipo de sala) */
+.lobby__badge {
+  font-size: 0.725rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+}
+
+.lobby__badge--publica {
+  background-color: #ecfdf3;
+  color: #027a48;
+}
+
+.lobby__badge--privada {
+  background-color: #f4f3ff;
+  color: #5925dc;
+}
+
+.lobby__badge--tuya {
+  background-color: #fffaeb;
+  color: #b54708;
+}
+
+/* Botones genéricos de la vista */
+.lobby__btn-secondary {
+  background-color: #ffffff;
+  border: 1px solid var(--border-color, #eaecf0);
+  border-radius: var(--radius-sm, 8px);
+  color: var(--text-primary, #121826);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.6rem 1.1rem;
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.2s ease);
+  box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+.lobby__btn-secondary:hover:not(:disabled) {
+  background-color: var(--bg-main, #fcfcfd);
+  border-color: var(--border-hover, #d0d5dd);
+}
+
+.lobby__btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.lobby__btn-crear {
+  margin-top: 2rem;
+  background-color: var(--brand-primary, #101828);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md, 12px);
+  padding: 0.85rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.2s ease);
+  box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.05);
+  text-align: center;
+}
+
+.lobby__btn-crear:hover {
+  background-color: var(--brand-hover, #1d2939);
+  transform: translateY(-1px);
+}

@@ -171,5 +171,4 @@ function Tablero({ datos }: { datos: DatosTablero }) {
     </svg>
   );
 }
-
 export default Tablero;

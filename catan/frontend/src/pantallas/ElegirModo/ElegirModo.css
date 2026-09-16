@@ -1,0 +1,102 @@
+/* ==========================================
+   ELEGIR MODO (MODO DE JUEGO)
+   ========================================== */
+.elegir {
+  background-color: var(--bg-main, #fcfcfd);
+  color: var(--text-primary, #121826);
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  padding: 2rem 1.5rem 4rem;
+  max-width: 680px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Botón Volver */
+.elegir__volver {
+  background: transparent;
+  border: 1px solid var(--border-color, #eaecf0);
+  border-radius: var(--radius-sm, 8px);
+  color: var(--text-muted, #4d5761);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.5rem 0.85rem;
+  cursor: pointer;
+  margin-bottom: 2.5rem;
+  transition: all var(--transition-fast, 0.2s ease);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.elegir__volver:hover {
+  background-color: #ffffff;
+  border-color: var(--border-hover, #d0d5dd);
+  color: var(--text-primary, #121826);
+  transform: translateX(-2px);
+}
+
+/* Encabezados */
+.elegir h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary, #121826);
+}
+
+.elegir p {
+  color: var(--text-muted, #4d5761);
+  font-size: 1.05rem;
+  margin: 0 0 2rem 0;
+}
+
+/* Opciones (Tarjetas Seleccionables) */
+.elegir__opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.elegir__opcion {
+  background: #ffffff;
+  border: 1.5px solid var(--border-color, #eaecf0);
+  border-radius: var(--radius-md, 12px);
+  padding: 1.5rem;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.04);
+  transition: all var(--transition-fast, 0.2s ease);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.elegir__opcion:hover {
+  border-color: var(--brand-primary, #101828);
+  box-shadow: 0px 4px 12px -2px rgba(16, 24, 40, 0.08);
+  transform: translateY(-2px);
+}
+
+.elegir__opcion:active {
+  transform: translateY(0);
+}
+
+/* Texto interno de los botones */
+.elegir__opcion-titulo {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary, #121826);
+  letter-spacing: -0.01em;
+}
+
+.elegir__opcion-detalle {
+  font-size: 0.9rem;
+  color: var(--text-muted, #4d5761);
+  line-height: 1.45;
+}
