@@ -6,9 +6,11 @@ import { buscarHexagonos } from "../functions/buscarHexagonos.js";
 import { darRecursosJugador } from "../functions/darRecursosJugador.js";
 import { verticesDelHexagono } from "../functions/verticesDelHexagono.js";
 import { lanzarDados } from "../functions/lanzarDados.js";
+import { mezclar } from "../common/mezclar.js";
+import { siguienteTurno } from "../functions/siguienteTruno.js";
 
 
-export class CatanRoom extends Room{
+export class CatanRoom extends Room {
   maxClients = 4;
   state = new CatanState();
   partida = this.state.partida;
@@ -66,7 +68,7 @@ export class CatanRoom extends Room{
       if (suma === 7) {
 
         // todo: logica para descarte de jugadores
-          this.partida.faseJuego = FaseJuego.LADRON;
+        this.partida.faseJuego = FaseJuego.LADRON;
         return;
       }
 
@@ -88,30 +90,121 @@ export class CatanRoom extends Room{
         })
       })
       this.partida.faseJuego = FaseJuego.ACCIONES;
-    }
+    },
+
+    msgIniciarPartida: (client: Client) => {
+
+      //* Verificar que sea el creador de la sala
+      if (this.partida.creador !== client.sessionId) {
+        client.send("error", {
+          mensajeError: "Solo el creador puede iniciar la partida"
+        });
+        return;
+      }
+
+      //* Solo se puede iniciar si estamos en la fase de lobby
+      if (this.partida.fase !== FasePartida.LOBBY) {
+        client.send("error", {
+          mensajeError: "La partida ya ha comenzado"
+        });
+        return;
+      }
+
+      //* Verificar que al menos hayan 2 jugadores
+      if (this.jugadores.size < 2) {
+        client.send("error", {
+          mensajeError: "Se necesitan al menos 2 jugadores para iniciar la partida"
+        });
+        return;
+      }
+
+      //* Mezclamos el orden de los jugadores en la partida
+      mezclar(this.partida.ordenJugadores);
+
+      //* Le damos el turno al primer jugador en la lista
+      this.partida.turnoActual = this.partida.ordenJugadores[0];
+
+      //* Enviar un mensaje a todos que la partida comenzó
+      this.broadcast("inicio", {
+        mensaje: "La partida ha comenzado",
+      });
+
+      //* Cambiamos el estado de la partida a preconstruccion
+      this.partida.fase = FasePartida.PRECONSTRUCCION;
+
+      //* Actualización de metadata para mostrar en la Lobby
+      this.setMetadata({
+        estado: "EN JUEGO"
+      });
+    },
+
+    msgPasarTurno: (client: Client) => {
+
+      //* Verificar que la partida siga en curso
+      if (this.partida.fase === FasePartida.FINALIZADA) {
+        client.send("error", {
+          mensajeError: "La partida ha finalizado"
+        });
+
+        return;
+      }
+
+      //* Verificar que sea tu turno
+      if (this.partida.turnoActual !== client.sessionId) {
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        });
+
+        return;
+      }
+
+      //* Solo se puede pasar turno en fase de acciones
+      if (this.partida.faseJuego !== FaseJuego.ACCIONES) {
+        client.send("error", {
+          mensajeError: "Termina de lanzar los dados primero"
+        });
+
+        return;
+      }
+
+      siguienteTurno(this.partida);
+    },
   };
 
   onCreate(options: any) {
     console.log("room created!", this.roomId);
-    //si se ingresa codigo de acceso, se setea al atributo de codigo de acceso a la sala
+    //* si se ingresa codigo de acceso, se setea al atributo de codigo de acceso a la sala
     this.codigoAcceso = options.codigoAcceso || ""
 
-    //seteamos la data de la sala
+    //* seteamos la data de la sala
     this.setMetadata({
-      alias:options.alias || "Catan Room",
+      alias: options.alias || "Catan Room",
       estado: "EN LOBBY",
-      privada:options.privada || false
+      privada: options.privada || false
     })
   }
 
   onJoin(client: Client, options: any) {
-    // todo: issue fase del juego
+    //* todo: issue fase del juego
+    if (this.codigoAcceso !== "") {
+      if (options.codigoAcceso !== this.codigoAcceso) {
+        throw new Error("Codigo de acceso incorrecto");
+      }
+    }
     console.log(`${client.sessionId} joined the room`);
+
+    this.partida.ordenJugadores.push(client.sessionId);
+
+    this.jugadores.set(client.sessionId, new Jugador(options.nombre));
+
+    if (this.partida.creador == "") {
+      this.partida.creador = client.sessionId;
+    }
   }
 
   onLeave(client: Client, code: CloseCode) {
-    //todo: issue fase del juego
-    console.log(`${client.sessionId} left the room` );
+    //* todo: issue fase del juego
+    console.log(`${client.sessionId} left the room`);
   }
 
   onDispose() {
@@ -120,6 +213,7 @@ export class CatanRoom extends Room{
 
   //* Si un cliente se desconecta tiene 30 segundos para reconectarse
   onDrop(client: Client, code: CloseCode) {
+    //* todo: issue fase del juego
     console.log(`${client.sessionId} droppef with code ${code}`);
     this.allowReconnection(client, 30);
   }
