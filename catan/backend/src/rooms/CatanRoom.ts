@@ -8,7 +8,7 @@ import { verticesDelHexagono } from "../functions/verticesDelHexagono.js";
 import { lanzarDados } from "../functions/lanzarDados.js";
 
 
-export class CatanRoom extends Room{
+export class CatanRoom extends Room {
   maxClients = 4;
   state = new CatanState();
   partida = this.state.partida;
@@ -66,7 +66,7 @@ export class CatanRoom extends Room{
       if (suma === 7) {
 
         // todo: logica para descarte de jugadores
-          this.partida.faseJuego = FaseJuego.LADRON;
+        this.partida.faseJuego = FaseJuego.LADRON;
         return;
       }
 
@@ -98,20 +98,33 @@ export class CatanRoom extends Room{
 
     //seteamos la data de la sala
     this.setMetadata({
-      alias:options.alias || "Catan Room",
+      alias: options.alias || "Catan Room",
       estado: "EN LOBBY",
-      privada:options.privada || false
+      privada: options.privada || false
     })
   }
 
   onJoin(client: Client, options: any) {
     // todo: issue fase del juego
+    if (this.codigoAcceso !== "") {
+      if (options.codigoAcceso !== this.codigoAcceso) {
+        throw new Error("Codigo de acceso incorrecto");
+      }
+    }
     console.log(`${client.sessionId} joined the room`);
+
+    this.partida.ordenJugadores.push(client.sessionId);
+
+    this.jugadores.set(client.sessionId, new Jugador(options.nombre));
+
+    if (this.partida.creador == "") {
+      this.partida.creador = client.sessionId;
+    }
   }
 
   onLeave(client: Client, code: CloseCode) {
     //todo: issue fase del juego
-    console.log(`${client.sessionId} left the room` );
+    console.log(`${client.sessionId} left the room`);
   }
 
   onDispose() {
