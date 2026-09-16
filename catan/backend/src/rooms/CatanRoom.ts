@@ -7,6 +7,7 @@ import { darRecursosJugador } from "../functions/darRecursosJugador.js";
 import { verticesDelHexagono } from "../functions/verticesDelHexagono.js";
 import { lanzarDados } from "../functions/lanzarDados.js";
 import { mezclar } from "../common/mezclar.js";
+import { siguienteTurno } from "../functions/siguienteTruno.js";
 
 
 export class CatanRoom extends Room {
@@ -135,6 +136,38 @@ export class CatanRoom extends Room {
       this.setMetadata({
         estado: "EN JUEGO"
       });
+    },
+
+    msgPasarTurno: (client: Client) => {
+
+      //* Verificar que la partida siga en curso
+      if (this.partida.fase === FasePartida.FINALIZADA) {
+        client.send("error", {
+          mensajeError: "La partida ha finalizado"
+        });
+
+        return;
+      }
+
+      //* Verificar que sea tu turno
+      if (this.partida.turnoActual !== client.sessionId) {
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        });
+
+        return;
+      }
+
+      //* Solo se puede pasar turno en fase de acciones
+      if (this.partida.faseJuego !== FaseJuego.ACCIONES) {
+        client.send("error", {
+          mensajeError: "Termina de lanzar los dados primero"
+        });
+
+        return;
+      }
+
+      siguienteTurno(this.partida);
     },
   };
 
