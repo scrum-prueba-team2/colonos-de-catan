@@ -98,7 +98,7 @@ export class CatanRoom extends Room {
 
     msgColocarCiudad: (
       client: Client,
-      mensaje: {h: mensaje, d: number, p:number}
+      mensaje: {h: number, d: number, p:number}
     ) => {
         //* Verificar que la partida siga un curso
         if(this.partida.fase === FasePartida.FINALIZADA){
