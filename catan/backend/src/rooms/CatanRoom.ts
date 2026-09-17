@@ -1,13 +1,16 @@
 import { Room, Client, CloseCode, Delayed } from "colyseus";
 import { CatanState } from "../states/CatanState.js";
 import { Jugador } from "../schemas/Jugador.js";
-import { FaseJuego, FasePartida } from "../common/enums.js";
+import { FaseJuego, FasePartida, FasePreconstruccion } from "../common/enums.js";
 import { buscarHexagonos } from "../functions/buscarHexagonos.js";
 import { darRecursosJugador } from "../functions/darRecursosJugador.js";
 import { verticesDelHexagono } from "../functions/verticesDelHexagono.js";
 import { lanzarDados } from "../functions/lanzarDados.js";
 import { mezclar } from "../common/mezclar.js";
 import { siguienteTurno } from "../functions/siguienteTruno.js";
+import { construirAsentamiento } from "../functions/construirAsentamiento.js";
+import { darMaterialInicial } from "../functions/darMaterialInicial.js";
+import { verificarVictoria } from "../functions/verificarVictoria.js";
 
 
 export class CatanRoom extends Room {
@@ -169,6 +172,102 @@ export class CatanRoom extends Room {
 
       siguienteTurno(this.partida);
     },
+    msgColocarAsentamiento:(
+      client: Client,
+      mensaje: {h: number, d: number, p: number}
+    ) =>{
+      //* Verificar que la partida siga en curso
+      if(this.partida.fase === FasePartida.FINALIZADA){
+        client.send("error", {
+          mensajeError: "La partida ha finalizado"
+        })
+        return ;
+      }
+
+      //*Verificar que el turno sea del jugador 
+      if(this.partida.turnoActual !== client.sessionId){
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        })
+        return ;
+      }
+
+      const jugador = this.jugadores.get(client.sessionId);
+      if(!jugador) return;
+
+      const {h, d, p} = mensaje;
+
+      //! FLUJO DE LA FASE PRECONSTRUCCION
+      if(this.partida.fase === FasePartida.PRECONSTRUCCION){
+        //* Comprobar que estamos en la fase de colocar asentamiento
+        if(this.partida.fasePreconstruccion !== FasePreconstruccion.ASENTAMIENTO){
+          client.send("error",{
+            mensajeError: "Debes colocar un camino"
+          })
+          return ;
+        }
+
+        //* Intentar construir el asentamiento
+        const resultado = construirAsentamiento(
+          this.tablero.vertices,
+          this.tablero.aristas, 
+          this.partida, 
+          h, d, p, 
+          jugador, 
+          this.banca, 
+          client.sessionId)
+
+          if(resultado.error){
+            client.send("error", {
+              mensaje: resultado.mensaje
+            })
+            return ;
+          }
+
+          //* Si estamos en vuelta de regreso de la preconstruccion
+          if(this.partida.direccionPreconstruccion === -1){
+            darMaterialInicial(this.tablero.hexagonos, jugador, h, d, p, this.banca);
+          }
+
+          this.partida.fasePreconstruccion = FasePreconstruccion.CAMINO;
+          return;
+
+      }
+
+      //!FLUJO EN JUEGO
+      if(this.partida.fase == FasePartida.JUEGO){
+        //* Comprobar que estamos en la fase de acciones
+        if(this.partida.faseJuego !== FaseJuego.ACCIONES){
+          client.send("error", {
+            mensajeError: "Debes lanzar los dados primero"
+          })
+          return;
+        }
+
+        //* Intentar construir asentamiento
+        const resultado = construirAsentamiento(
+          this.tablero.vertices,
+          this.tablero.aristas,
+          this.partida,
+          h, d, p,
+          jugador, 
+          this.banca,
+          client.sessionId
+        )
+
+        //* Si algo fallo en la construccion, indicar el error
+        if(resultado.error){
+          client.send("error", {
+            mensajeError: resultado.mensaje
+          })
+          return;
+        }
+
+        //* Verificar si el jugador ha ganado
+        verificarVictoria(this.partida, jugador, client.sessionId);
+      }
+
+    }
   };
 
   onCreate(options: any) {

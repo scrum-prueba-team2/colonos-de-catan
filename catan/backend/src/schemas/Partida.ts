@@ -1,5 +1,6 @@
 import { ArraySchema, Schema, type } from "@colyseus/schema";
 import { FaseJuego, FasePartida, FasePreconstruccion } from "../common/enums.js";
+import { Jugador } from "./Jugador.js";
 
 export class Partida extends Schema {
   @type("string") creador: string;
@@ -14,6 +15,7 @@ export class Partida extends Schema {
   constructor() {
     super();
     this.creador = "";
+    this.ganador = "";
     this.fase = FasePartida.LOBBY;
     this.turnoActual = "";
     this.fasePreconstruccion = FasePreconstruccion.ASENTAMIENTO;
