@@ -21,5 +21,6 @@ export class Partida extends Schema {
     this.fasePreconstruccion = FasePreconstruccion.ASENTAMIENTO;
     this.direccionPreconstruccion = 1;
     this.faseJuego = FaseJuego.DADOS;
+    this.ganador = "";
   }
 }
