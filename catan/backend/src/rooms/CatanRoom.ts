@@ -11,6 +11,7 @@ import { siguienteTurno } from "../functions/siguienteTruno.js";
 import { construirAsentamiento } from "../functions/construirAsentamiento.js";
 import { darMaterialInicial } from "../functions/darMaterialInicial.js";
 import { verificarVictoria } from "../functions/verificarVictoria.js";
+import { construirCiudad } from "../functions/construirCiudad.js";
 
 
 export class CatanRoom extends Room {
@@ -93,6 +94,66 @@ export class CatanRoom extends Room {
         })
       })
       this.partida.faseJuego = FaseJuego.ACCIONES;
+    },
+
+    msgColocarCiudad: (
+      client: Client,
+      mensaje: {h: mensaje, d: number, p:number}
+    ) => {
+        //* Verificar que la partida siga un curso
+        if(this.partida.fase === FasePartida.FINALIZADA){
+          client.send("error",{
+            mensajeError: "La partida ha finalizado"
+          })
+          return;
+        }
+
+        //*Verificar que sea el turno del jugador
+        if(this.partida.turnoActual !== client.sessionId){
+          client.send("error", {
+            mensajeError: "No es tu turno"
+          })
+          return;
+        }
+
+        //* Verificar que estemos en la fase de juego
+        if(this.partida.fase !== FasePartida.JUEGO){
+          client.send("error", {
+            mensajeError: "No es la fase de juego"
+          });
+          return;
+        }
+
+        //* Verificar que estemos en la fase de acciones
+        if(this.partida.faseJuego !== FaseJuego.ACCIONES){
+          client.send("error", {
+            mensajeError: "Debes lanzar los dados primero"
+          })
+          return;
+        }
+
+        //* Obtener el jugador del state y que exista
+        const jugador = this.jugadores.get(client.sessionId);
+        if(!jugador) return;
+        const {h, d, p} = mensaje;
+
+        //* Intentar construir la ciudad
+        const resultado = construirCiudad(
+          this.tablero.vertices,
+          h, d, p,
+          jugador, this.banca, client.sessionId
+        )
+
+        //* Si no se pudo construir, se notifica el error
+        if(resultado.error){
+          client.send("error", {
+            mensajeError: resultado.mensaje
+          })
+          return;
+        }
+
+        //* Verificar si el jugador ha ganado
+        verificarVictoria(this.partida, jugador, client.sessionId);
     },
 
     msgIniciarPartida: (client: Client) => {
