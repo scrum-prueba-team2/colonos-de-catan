@@ -36,6 +36,25 @@
 }
 .tbVerticeOcupado { fill: #2C4049; }
 
+/* Los objetivos aparecen solamente mientras el jugador eligió una pieza.
+   El área visible se hace más ancha para que sea fácil seleccionarla. */
+.tbObjetivoConstruccion {
+    cursor: pointer;
+    stroke: #276C86;
+    stroke-width: 11;
+}
+
+.tbObjetivoConstruccion:hover,
+.tbObjetivoConstruccion:focus {
+    stroke: #4F46E5;
+    outline: none;
+}
+
+.tbObjetivoSeleccionado {
+    stroke: #2E7D5B;
+    stroke-width: 14;
+}
+
 /* Ficha con el numero del hexagono */
 .tbFichaFondo { fill: #F6EFDD; stroke: #00000022; }
 
