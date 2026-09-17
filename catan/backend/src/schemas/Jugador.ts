@@ -10,11 +10,13 @@ export class Jugador extends Schema{
     @type( {map:"uint8"}) recursos = new MapSchema<number>();
     @type({map:"uint8"}) cartas = new MapSchema<number>();
     @type({map:"uint8"}) construccionesDisponibles =new MapSchema<number>();
+    @type("string") ultimoAsentamiento: string;
 
     constructor(nombre: string = "") {
         super();
         this.nombre = nombre;
         this.puntuacion = 0;
+        this.ultimoAsentamiento = "";
         generarRecursos(this.recursos);
         generarCartas(this.cartas);
         generarConstruccionesDisponibles(this.construccionesDisponibles);
