@@ -12,6 +12,7 @@ import { construirAsentamiento } from "../functions/construirAsentamiento.js";
 import { darMaterialInicial } from "../functions/darMaterialInicial.js";
 import { verificarVictoria } from "../functions/verificarVictoria.js";
 import { construirCiudad } from "../functions/construirCiudad.js";
+import { comerciarBanca } from "../functions/comerciarBanca.js";
 
 
 export class CatanRoom extends Room {
@@ -25,6 +26,42 @@ export class CatanRoom extends Room {
 
 
   messages = {
+    msgIntercambiarBanca:(
+      client: Client,
+      mensaje: { recursoEntregado: string, recursoRecibido: string}
+    ) => {
+      //* Verificar que sea el turno del jugador
+      if(this.partida.turnoActual !== client.sessionId){
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        })
+        return;
+      }
+
+      //* Verificar que estemos en la fase de acciones
+      if(this.partida.faseJuego !== FaseJuego.ACCIONES){
+        client.send("error", {
+          mensajeError: "Termian de lanzar los dados primero"
+        })
+        return;
+      }
+
+      //* Intentar realizar el intercambio con la banca
+      const resultado = comerciarBanca(
+        this.jugadores.get(client.sessionId), this.banca, client.sessionId,
+        this.tablero.vertices, this.tablero.puertos,
+        mensaje.recursoEntregado, mensaje.recursoRecibido
+      );
+
+      //* Si el intercambio fallo, notificar error
+      if(resultado.error){
+        client.send("error", {
+          mensajeError: resultado.mensaje
+        })
+        return;
+      }
+
+    },
     msgLanzarDados: (client: Client) => {
       //* Verificar que la partida siga en curso
       if (this.partida.fase === FasePartida.FINALIZADA) {
