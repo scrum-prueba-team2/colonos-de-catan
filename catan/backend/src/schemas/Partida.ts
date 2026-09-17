@@ -10,14 +10,15 @@ export class Partida extends Schema {
   @type("uint8") faseJuego: FaseJuego;
   @type("string") turnoActual: string;
   @type(["string"]) ordenJugadores = new ArraySchema<string>();
+  @type("boolean") cartaJugable: boolean;
   @type("string") ganador: string;
 
   constructor() {
     super();
     this.creador = "";
-    this.ganador = "";
     this.fase = FasePartida.LOBBY;
     this.turnoActual = "";
+    this.cartaJugable = false;
     this.fasePreconstruccion = FasePreconstruccion.ASENTAMIENTO;
     this.direccionPreconstruccion = 1;
     this.faseJuego = FaseJuego.DADOS;
