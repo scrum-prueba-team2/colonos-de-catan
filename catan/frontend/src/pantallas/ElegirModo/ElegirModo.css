@@ -1,0 +1,74 @@
+.elegir {
+  min-height: 100vh;
+  background: #10131a;
+  color: #eef1f7;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.elegir__volver {
+  background: none;
+  border: none;
+  color: #8b93a7;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 28px;
+  transition: color 0.2s ease;
+}
+
+.elegir__volver:hover {
+  color: #eef1f7;
+}
+
+.elegir h1 {
+  color: #eef1f7; /* Forzado explícito */
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.elegir > p {
+  color: #8b93a7;
+  font-size: 15px;
+  margin: 0 0 28px;
+}
+
+.elegir__opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.elegir__opcion {
+  text-align: left;
+  background: #1a1f2e;
+  border: 1px solid #2a3142;
+  border-radius: 14px;
+  padding: 20px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #eef1f7; /* Asegura el color base claro para botones/links */
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.elegir__opcion:hover {
+  border-color: #6c5ce0;
+  background: #202738; /* Efecto sutil para feedback visual */
+}
+
+.elegir__opcion-titulo {
+  color: #ffffff; /* Blanco de alto contraste */
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.elegir__opcion-detalle {
+  color: #8b93a7; /* Gris claro legible sobre el fondo oscuro */
+  font-size: 14px;
+  line-height: 1.5;
+}
