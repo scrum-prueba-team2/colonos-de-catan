@@ -1,4 +1,4 @@
-import { Terreno } from "./enums.js";
+import { Terreno, TipoPuerto } from "./enums.js";
 
 
 export function recursoTexto(terreno: Terreno){
@@ -17,5 +17,16 @@ export function recursoTexto(terreno: Terreno){
             return "mineral";
         default:
             return "desconocido";
+    }
+}
+
+export function recursoTipoPuerto(recurso: string): TipoPuerto{
+    switch(recurso){
+        case "madera": return TipoPuerto.MADERA;
+        case "trigo": return TipoPuerto.TRIGO;
+        case "lana": return TipoPuerto.LANA;
+        case "ladrillo": return TipoPuerto.LADRILLO;
+        case "mineral": return TipoPuerto.MINERAL;
+        default: return TipoPuerto.GENERICO;
     }
 }
