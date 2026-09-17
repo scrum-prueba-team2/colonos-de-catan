@@ -21,7 +21,7 @@ export function construirCiudad(
     if(!vertice){
         return{
             error: true,
-            mensaje: "El mensaje seleccionado no es valido"
+            mensaje: "El lugar seleccionado no es valido"
         };
     }
 
