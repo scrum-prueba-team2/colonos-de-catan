@@ -13,6 +13,9 @@ import { darMaterialInicial } from "../functions/darMaterialInicial.js";
 import { verificarVictoria } from "../functions/verificarVictoria.js";
 import { construirCiudad } from "../functions/construirCiudad.js";
 import { comerciarBanca } from "../functions/comerciarBanca.js";
+import { descartarRecurso } from "../functions/descartarRecurso.js";
+import { moverLadron } from "../functions/moverLadron.js";
+import { robarJugador } from "../functions/robarJugador.js";
 
 
 export class CatanRoom extends Room {
@@ -108,9 +111,34 @@ export class CatanRoom extends Room {
       //! Si sale 7 toda la logica cambia, entramos a fase de robo y/o ladron
       if (suma === 7) {
 
-        // todo: logica para descarte de jugadores
-        this.partida.faseJuego = FaseJuego.LADRON;
-        return;
+        //* Limpiar a los jugadors que deben descartar
+        this.partida.jugadoresParaDescartar.clear();
+
+        //* Ver el total de cartas de cada jugador
+        this.jugadores.forEach((jugador, sessionId)=>{
+          let totalRecursos = 0;
+
+          //* contando la cantidad de recursos
+          jugador.recursos.forEach(cantidad => {
+            totalRecursos += cantidad;
+          });
+
+          //* Si tiene mas de 7, debe descartar la mitad
+          if(totalRecursos > 7){
+            this.partida.jugadoresParaDescartar.set(sessionId, Math.floor(totalRecursos / 2));
+          }
+
+        });
+
+        //*Verificar si alguien tiene descarte, para enviarlo a fase de descarte
+        if(this.partida.jugadoresParaDescartar.size > 0){
+          this.partida.faseJuego = FaseJuego.DESCARTE
+        }else{
+          this.partida.faseJuego = FaseJuego.LADRON
+        }
+
+        return ;
+
       }
 
       //* Buscar los hexagonos con dicho numero resultado de la suma de los dados
@@ -365,6 +393,149 @@ export class CatanRoom extends Room {
         verificarVictoria(this.partida, jugador, client.sessionId);
       }
 
+    },
+    msgDescartarRecursos:(
+      client: Client,
+      mensaje:{recurso: string}
+    ) => {
+      //* Verificar si estamos en fase de descarte
+      if(this.partida.faseJuego !== FaseJuego.DESCARTE){
+        client.send("error", {
+          mensajeError: "No es la fase de descarte"
+        })
+        return;
+      }
+
+      //* Verificar si el jugador esta en la lista de descarte
+      if(!this.partida.jugadoresParaDescartar.has(client.sessionId)){
+        client.send("error", {
+          mensajeError: "No tienes que descartar"
+        })
+        return ;
+      }
+
+      //* Encontrar al jugador que debe descartar
+      let jugadorPorDescartar = "";
+      for(const sessionId of this.partida.ordenJugadores){
+        if(this.partida.jugadoresParaDescartar.has(sessionId)){
+          jugadorPorDescartar = sessionId;
+          break;
+        }
+      
+      }
+
+      //* Si no es el turno del jugador que debe descartar, enviar error
+      if(client.sessionId !== jugadorPorDescartar){
+        client.send("error",{
+          mensajeError: "No es tu turno para descartar"
+        })
+        return;
+      }
+
+      //* Intentar descartar
+      const resultado = descartarRecurso(
+        this.jugadores.get(jugadorPorDescartar),
+        this.banca,
+        mensaje.recurso
+      );
+
+
+      //*Error en descarte
+      if(resultado.error){
+        client.send("error", {
+          mensajeError: resultado.mensaje
+        })
+        return;
+      }
+
+
+      //*Actualizar la cantidad de recursos que le faltan por descartar
+      this.partida.jugadoresParaDescartar.set(
+        jugadorPorDescartar,
+        this.partida.jugadoresParaDescartar.get(jugadorPorDescartar) - 1
+      );
+
+      //* Eliminarlo de la lista si ya no tiene que descartar
+      if(this.partida.jugadoresParaDescartar.get(jugadorPorDescartar) === 0){
+        this.partida.jugadoresParaDescartar.delete(jugadorPorDescartar);
+      }
+
+      //* Verificar si ya no hay jugadores que deben descartar, para pasar a fase de ladron
+      if(this.partida.jugadoresParaDescartar.size == 0){
+        this.partida.faseJuego = FaseJuego.LADRON;
+      }
+    },
+    msgMoverLadron: (
+      client: Client,
+      mensaje: {h:number, d:number}
+    ) => {
+      //* Verificar que sea el turno del jugador
+      if(this.partida.turnoActual !== client.sessionId){
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        })
+        return;
+      }
+
+      //*Verificar que estemos en la fase de juego
+      if(this.partida.fase !== FasePartida.JUEGO){
+        client.send("error", {
+          mensajeError: "No es la fase de juego"
+        })
+        return;
+      }
+
+      //* Verificar que estemos en la fase de mover al ladron
+      if(this.partida.faseJuego !== FaseJuego.LADRON){
+        client.send("error", {
+          mensajeError: "No es la fase de mover al ladron"
+        })
+        return;
+      }
+
+
+      //* Mover al ladron y obtener los jugadores involucrados
+      const {h, d} = mensaje;
+      const resultado = moverLadron(
+        this.tablero,
+        this.jugadores,
+        client.sessionId,
+        h, d
+      );
+
+      if(resultado.error){
+        client.send("error", {
+          mensajeError: resultado.mensaje
+        })
+        return;
+      }
+
+
+      //*Extraemos los jugadores involucrados en el robo
+      const jugadoresinvolucrados = resultado.jugadoresInvolucrados;
+
+      //* Si no hay jugadores pasamos a las acciones
+      if(jugadoresinvolucrados.length === 0){
+        this.partida.faseJuego = FaseJuego.ACCIONES;
+        return;
+      }
+
+      //*Si solo hubo un jugador, se le roba automaticamente
+      if(jugadoresinvolucrados.length === 1){
+        robarJugador(
+          this.jugadores.get(client.sessionId),
+          this.jugadores.get(jugadoresinvolucrados[0])
+        )
+        this.partida.faseJuego = FaseJuego.ACCIONES;
+        return;
+      }
+
+      //* Si hay 2 o mas jugadores involucrados, se pasa la lista de jugadores
+      this.partida.jugadoresParaRobar.clear();
+      this.partida.jugadoresParaRobar.push(...jugadoresinvolucrados);
+
+
+      this.partida.faseJuego = FaseJuego.ROBO
     }
   };
 
