@@ -8,6 +8,8 @@ import SalaEspera from "./pantallas/SalaEspera/SalaEspera";
 import Partida, { type JugadorVista } from "./pantallas/PartidaCol/Partidacol";
 import { guardarSalaReciente } from "./pantallas/salasRecientes";
 
+import PartidaTablero from "./pantallas/Partida";
+
 const MAX_JUGADORES = 4;
 
 interface JugadorEstado {
@@ -137,6 +139,11 @@ function Navegacion() {
   if (!salaCompleta) {
     return <SalaEspera room={room} jugadores={jugadores} maxJugadores={MAX_JUGADORES} />;
   }
+
+  // No entiendo que tanto hay aqui asi que prefiero no tocar nada
+  // pero el tablero ya se genera desde el backend
+  if (room) return <PartidaTablero sala={room} />;
+
 
   return (
     <Partida
