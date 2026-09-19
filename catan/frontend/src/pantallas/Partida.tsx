@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { Room } from '@colyseus/sdk';
 import {
   jugadoresPrueba, ordenJugadoresPrueba, turnoActualPrueba, miSessionIdPrueba,
 } from '../datos/jugadoresPrueba';
@@ -9,6 +10,7 @@ import Existencias from '../componentes/existencias';
 import { tableroPrueba } from '../datos/tableroPrueba'
 import TablaCostes from '../componentes/tablaCostes';
 import Tablero from '../componentes/tablero';
+import type { DatosTablero } from '../componentes/tablero';
 import Construir, {
   type ObjetivoConstruccion,
   type RecursosConstruccion,
@@ -28,7 +30,18 @@ const recursosPrueba: RecursosConstruccion = {
   mineral: 3,
 };
 
+/* Lo que llega en room.state usa las mismas claves (h, d, p, terreno, constuccion...) 
+   no hay nada que traducir.
+   Devuelve null si el estado todavia no llego. */
+function leerTablero(sala: Room): DatosTablero | null {
+  const estado = sala.state as { tablero?: { toJSON(): DatosTablero } } | undefined;
+  if (!estado || !estado.tablero) return null;
+  return estado.tablero.toJSON();
+}
+
 interface Props {
+  // Si no hay sala de Colyseus, usara el tableroPrueba
+  sala?: Room | null;
   // La capa de conexión inyectará aquí una función equivalente a:
   // room.send('construir', solicitud).
   // Así esta pantalla no crea una segunda conexión al backend.
@@ -36,10 +49,32 @@ interface Props {
 }
 
 // Pantalla principal de la partida. Contiene todos los componentes de la partida.
-function Partida({ onSolicitarConstruccion }: Props) {
+function Partida({ sala, onSolicitarConstruccion }: Props) {
   const [tipoConstruccion, setTipoConstruccion] = useState<TipoConstruccion | null>(null);
   const [objetivoConstruccion, setObjetivoConstruccion] = useState<ObjetivoConstruccion | null>(null);
   const [estadoConstruccion, setEstadoConstruccion] = useState('');
+
+  // El tablero que manda el servidor. null = todavia no llega, o no hay sala.
+  const [tableroReal, setTableroReal] = useState<DatosTablero | null>(null);
+
+  useEffect(() => {
+    if (!sala) return;
+    const salaActual = sala;
+
+    function actualizarTablero() {
+      setTableroReal(leerTablero(salaActual));
+    }
+
+    actualizarTablero();
+
+    // Actualisa el tablero con cada cambio que mande el servidor.
+    salaActual.onStateChange(actualizarTablero);
+    return () => { salaActual.onStateChange.remove(actualizarTablero); };
+  }, [sala]);
+
+  /* Sin sala se usa el tablero de prueba: es la misma forma de datos, asi que
+     <Tablero> no nota la diferencia y no hay que tocarlo. */
+  const datosTablero = tableroReal ?? tableroPrueba;
 
   function seleccionarConstruccion(tipo: TipoConstruccion | null) {
     setTipoConstruccion(tipo);
@@ -76,7 +111,6 @@ function Partida({ onSolicitarConstruccion }: Props) {
         <div className="construir">
           <Construir
             recursos={recursosPrueba}
-            {/*esMiTurno={turnoActualPrueba === miSessionIdPrueba}*/}
             esMiTurno={true}
             seleccion={tipoConstruccion}
             onSeleccionar={seleccionarConstruccion}
@@ -96,7 +130,7 @@ function Partida({ onSolicitarConstruccion }: Props) {
         </div>
         <div className="tablero">
           <Tablero
-            datos={tableroPrueba}
+            datos={datosTablero}
             tipoConstruccion={tipoConstruccion}
             objetivoSeleccionado={objetivoConstruccion}
             onSeleccionarObjetivo={seleccionarObjetivo}
