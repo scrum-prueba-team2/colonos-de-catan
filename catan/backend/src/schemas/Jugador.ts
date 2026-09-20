@@ -9,9 +9,12 @@ export class Jugador extends Schema{
     @type("uint16") puntuacion: number;
     @type("uint16") puntosParaGanar: number;
     @type( {map:"uint8"}) recursos = new MapSchema<number>();
-    @type({map:"uint8"}) cartas = new MapSchema<number>();
+    //@type({map:"uint8"}) cartas = new MapSchema<number>();
+    @type({map:"uint8"}) cartas_usables = new MapSchema<number>();
+    @type({map: "uint8"}) cartas_inusables = new MapSchema<number>();
     @type({map:"uint8"}) construccionesDisponibles =new MapSchema<number>();
     @type("string") ultimoAsentamiento: string;
+    @type("uint8") caballerosJugados: number;
 
     constructor(nombre: string = "") {
         super();
@@ -19,8 +22,10 @@ export class Jugador extends Schema{
         this.puntuacion = 0;
         this.puntosParaGanar = 10;
         this.ultimoAsentamiento = "";
+        this.caballerosJugados = 0;
         generarRecursos(this.recursos);
-        generarCartas(this.cartas);
+        generarCartas(this.cartas_usables);
+        generarCartas(this.cartas_inusables);
         generarConstruccionesDisponibles(this.construccionesDisponibles);
     }
 }
