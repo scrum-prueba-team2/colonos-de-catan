@@ -12,10 +12,9 @@ export class Partida extends Schema {
   @type(["string"]) ordenJugadores = new ArraySchema<string>();
   @type(["string"]) jugadoresParaRobar = new ArraySchema<string>();
   @type({map: "uint8"}) jugadoresParaDescartar = new MapSchema<number>();
-  
   @type("boolean") cartaJugable: boolean;
   @type("string") ganador: string;
-  
+  @type("string") ejercitoMasGrande: string;
 
   constructor() {
     super();
@@ -27,5 +26,6 @@ export class Partida extends Schema {
     this.direccionPreconstruccion = 1;
     this.faseJuego = FaseJuego.DADOS;
     this.ganador = "";
+    this.ejercitoMasGrande = "";
   }
 }
