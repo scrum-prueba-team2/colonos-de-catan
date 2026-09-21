@@ -1,7 +1,7 @@
 import { Room, Client, CloseCode, Delayed } from "colyseus";
 import { CatanState } from "../states/CatanState.js";
 import { Jugador } from "../schemas/Jugador.js";
-import { FaseJuego, FasePartida, FasePreconstruccion } from "../common/enums.js";
+import { Desarrollo, FaseJuego, FasePartida, FasePreconstruccion } from "../common/enums.js";
 import { buscarHexagonos } from "../functions/buscarHexagonos.js";
 import { darRecursosJugador } from "../functions/darRecursosJugador.js";
 import { verticesDelHexagono } from "../functions/verticesDelHexagono.js";
@@ -16,6 +16,7 @@ import { comerciarBanca } from "../functions/comerciarBanca.js";
 import { descartarRecurso } from "../functions/descartarRecurso.js";
 import { moverLadron } from "../functions/moverLadron.js";
 import { robarJugador } from "../functions/robarJugador.js";
+import { jugarCaballero } from "../functions/jugarCaballero.js";
 
 
 export class CatanRoom extends Room {
@@ -536,6 +537,105 @@ export class CatanRoom extends Room {
 
 
       this.partida.faseJuego = FaseJuego.ROBO
+    },
+    msgCartaCaballero: (
+      client: Client,
+      mensaje: {h: number, d:number}
+    ) => {
+      //* Verificar que la partida siga en curso
+      if(this.partida.fase === FasePartida.FINALIZADA){
+        client.send("error", {
+          mensajeError: "La partida ha finalizado"
+        })
+        return;
+      }
+
+      //* Verificar que sea el turno del jugador
+      if(this.partida.turnoActual !== client.sessionId){
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        })
+        return;
+      }
+
+      //* Verificar si estamos en la fase de acciones
+      if(this.partida.faseJuego !== FaseJuego.ACCIONES){
+        client.send("error", {
+          mensajeError: "Termina de lanzar los dados primero"
+        })
+        return;
+      }
+
+
+      //* Verificar que se permita usar carta
+      if(!this.partida.cartaJugable){
+        client.send("error", {
+          mensajeError: "Solo una carta por turno"
+        })
+        return;
+      }
+
+
+      //* Verificar que el jugador tenga la carta de caballero
+      const jugador = this.jugadores.get(client.sessionId);
+      if(jugador.cartas_usables.get(`${Desarrollo.CABALLERO}`) < 1){
+        client.send("error", {
+          mensajeError: "No tienes la carta de caballero"
+        })
+        return;
+      }
+
+      //* Mover al ladron y obtener los jugadores involucrados
+      const {h, d} = mensaje;
+      const resultado = moverLadron(
+        this.tablero,
+        this.jugadores,
+        client.sessionId,
+        h, d);
+
+
+        //* Si no se puede mover el ladron, notificar error
+        if(resultado.error){
+          client.send("error", {
+            mensajeError: resultado.mensaje
+          })
+          return;
+        }
+
+        //* Eliminar la carta de caballero del jugador
+        jugarCaballero(this.jugadores, client.sessionId, this.partida);
+
+        //* Extraemos los jugadores involucrados en el robo
+        const jugadoresInvolucrados = resultado.jugadoresInvolucrados;
+
+        //* Si no hay jugadores, pasamos a las ACCIONES
+        if(jugadoresInvolucrados.length == 0){
+          this.partida.faseJuego = FaseJuego.ACCIONES;
+          return;
+        }
+
+        //* Si solo hubo un jugador, se le roba automaticamente
+        if(jugadoresInvolucrados.length === 1){
+          robarJugador(
+            this.jugadores.get(client.sessionId),
+            this.jugadores.get(jugadoresInvolucrados[0])
+          )
+          this.partida.faseJuego = FaseJuego.ACCIONES;
+          return;
+        }
+
+        //* Si hay 2 o mas jugadores involucrados, se pasa la lista de jugadores
+        this.partida.jugadoresParaRobar.clear();
+        this.partida.jugadoresParaRobar.push(...jugadoresInvolucrados);
+
+
+        //* Deshabilitar el uso de otra carta este turno
+        this.partida.cartaJugable = false;
+
+        //? Entramos a fase especial para decidir a quien robar
+
+        this.partida.faseJuego = FaseJuego.ROBO;
+
     }
   };
 
