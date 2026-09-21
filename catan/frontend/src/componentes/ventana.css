@@ -1,0 +1,102 @@
+/* Ventana emergente compartida.
+   Estas clases las usan la ventana de recursos, la de cartas de desarrollo y
+   la de cartas especiales. Los tres componentes importan este archivo; el
+   empaquetador lo incluye una sola vez aunque se importe tres veces.
+
+   El position fixed saca la ventana del flujo: aunque en el JSX este anidada
+   dentro de una celda de la rejilla, se posiciona contra la ventana del
+   navegador y por eso no la corta el overflow de la celda. */
+.vdFondo {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 30, 36, .55);
+    display: grid;
+    place-items: center;
+    z-index: 100;
+}
+
+/* La ventana es su propio contenedor de consulta: los textos de adentro se
+   miden contra el ancho de la ventana, no contra la celda de donde salio. */
+.vdVentana {
+    container-type: inline-size;
+    font-size: clamp(11px, 1.7cqw, 17px);
+    background: #fff;
+    border-radius: 0.6em;
+    padding: 1.2em 1.4em;
+    min-width: 340px;
+    max-width: 90vw;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 1em 3em rgba(0, 0, 0, .3);
+}
+
+/* Variante angosta, para la ventana de cartas especiales. Las dos clases van
+   pegadas para ganar en especificidad sin depender del orden en el archivo. */
+.vdVentana.vdAngosta { width: 480px; }
+
+.vdCabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1em;
+    margin-bottom: 1em;
+}
+
+.vdTitulo {
+    margin: 0;
+    font-size: 1.4em;
+}
+
+.vdCerrar {
+    border: 0;
+    background: transparent;
+    font-size: 2em;
+    line-height: 1;
+    cursor: pointer;
+    color: #667;
+    padding: 0 0.25em;
+}
+
+.vdCerrar:hover {
+    color: #000;
+}
+
+.vdRejilla {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.75em;
+}
+
+.vdCarta {
+    border: 0.15em solid #2C4049;
+    border-radius: 0.6em;
+    padding: 1em 0.5em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3em;
+}
+
+.vdCantidad {
+    font-size: 2em;
+    line-height: 1;
+}
+
+.vdNombre {
+    font-size: 0.85em;
+    color: #667;
+}
+
+/* No tienes ninguna carta de ese tipo */
+.vdCartaVacia {
+    border-color: #D7DEE0;
+    color: #AAB4B8;
+}
+
+.vdPie {
+    margin-top: 1.2em;
+    padding-top: 0.9em;
+    border-top: 1px solid #DDE4E6;
+    font-size: 1em;
+    color: #667;
+}

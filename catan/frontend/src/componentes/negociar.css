@@ -1,0 +1,191 @@
+/* Panel y ventana de negociar.
+   Solo se puede negociar si es tu turno y ya tiraste los dados. */
+.ngMarco {
+    font-size: clamp(7px, 3.7cqw, 14px);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0.6em;
+    box-sizing: border-box;
+    min-height: 0;
+}
+
+.ngTitulo {
+    color: #888;
+    flex: none;
+}
+
+.ngBoton {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: grid;
+    place-items: center;
+    padding: 0.4em;
+    border: 0.2em dashed #DDE4E6;
+    border-radius: 0.8em;
+    background: #fff;
+    cursor: not-allowed;
+    transition: border-color .12s, background .12s;
+}
+
+.ngIcono {
+    width: 100%;
+    height: 100%;
+    max-height: 7.6em;
+    object-fit: contain;
+}
+
+.ngPuede {
+    border-style: solid;
+    border-color: #2C4049;
+    cursor: pointer;
+}
+.ngPuede:hover { background: #EEF6F7; }
+
+
+/* La ventana es mas grande que las otras: a la izquierda el trato y a la
+   derecha el chat, que es el mismo componente de la columna lateral.
+   Tambien es su propio contenedor de consulta. */
+.ngVentana {
+    container-type: inline-size;
+    font-size: clamp(11px, 1.5cqw, 16px);
+    background: #fff;
+    border-radius: 0.65em;
+    padding: 1.15em 1.4em;
+    width: min(940px, 94vw);
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1.1em 3em rgba(0, 0, 0, .3);
+}
+
+/* La altura fija es lo que necesita el chat de adentro para poder calcular
+   su scroll. Sin ella crece sin parar. */
+.ngCuerpo {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 1.3em;
+    min-height: 0;
+    height: min(60vh, 460px);
+}
+
+.ngTrato {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45em;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.ngPaso {
+    font-size: 0.8em;
+    color: #0F6B78;
+    margin-top: 0.25em;
+}
+
+/* Paso 1: con quien negociar */
+.ngJugadores { display: flex; flex-wrap: wrap; gap: 0.45em; }
+
+.ngJugador {
+    font-size: 1em;
+    padding: 0.4em 0.9em;
+    border: 0.13em solid #D7DEE0;
+    border-radius: 1.3em;
+    background: #fff;
+    cursor: pointer;
+}
+.ngJugador:hover { border-color: #A8B8BD; }
+
+.ngElegido {
+    border-color: #2C4049;
+    background: #2C4049;
+    color: #fff;
+}
+
+/* Paso 2: que ofreces y que pides */
+.ngTabla { display: flex; flex-direction: column; gap: 0.2em; }
+
+.ngEncabezado {
+    display: none;
+}
+
+.ngFila {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 0.65em;
+    padding: 0.25em 0;
+    border-bottom: 1px solid #EDF1F2;
+}
+.ngFila:last-child { border-bottom: 0; }
+
+.ngRecurso {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.ngTengo { font-size: 0.78em; color: #9AAAB0; }
+
+.ngContador {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+}
+
+.ngContador button {
+    width: 1.6em;
+    height: 1.6em;
+    font-size: 1em;
+    line-height: 1;
+    border: 1px solid #C3CDD1;
+    border-radius: 0.35em;
+    background: #fff;
+    cursor: pointer;
+}
+.ngContador button:hover:not(:disabled) { background: #EEF1F2; }
+.ngContador button:disabled { opacity: .3; cursor: not-allowed; }
+
+.ngContador b {
+    min-width: 1.2em;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.ngPie {
+    margin-top: auto;
+    padding-top: 0.8em;
+    border-top: 1px solid #DDE4E6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.9em;
+    flex-wrap: wrap;
+}
+
+.ngResumen { font-size: 0.95em; color: #667; }
+
+.ngProponer {
+    font-size: 1em;
+    padding: 0.6em 1.5em;
+    border: 0.15em solid #0F6B78;
+    border-radius: 0.45em;
+    background: #0F6B78;
+    color: #fff;
+    cursor: pointer;
+}
+.ngProponer:hover:not(:disabled) { background: #0A505A; }
+.ngProponer:disabled { opacity: .35; cursor: not-allowed; }
+
+/* El chat reutilizado dentro de la ventana. Es contenedor de consulta propio
+   para que su texto se mida contra esta columna y no contra la de la pantalla. */
+.ngChat {
+    container-type: inline-size;
+    min-height: 0;
+    border: 1px solid #DDE4E6;
+    border-radius: 0.5em;
+    overflow: hidden;
+}

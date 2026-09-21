@@ -1,3 +1,4 @@
+function Construir() {
 import './construir.css';
 
 // Estos nombres se envían al backend. No usamos las etiquetas visibles para

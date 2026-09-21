@@ -1,4 +1,4 @@
-import { ArraySchema, MapSchema, Schema, type } from "@colyseus/schema";
+import { ArraySchema, Schema, type } from "@colyseus/schema";
 import { FaseJuego, FasePartida, FasePreconstruccion } from "../common/enums.js";
 import { Jugador } from "./Jugador.js";
 
@@ -6,7 +6,7 @@ export class Partida extends Schema {
   @type("string") creador: string;
   @type("uint8") fase: FasePartida;
   @type("uint8") fasePreconstruccion: FasePreconstruccion;
-  @type("int8") direccionPreconstruccion: number;
+  @type("uint8") direccionPreconstruccion: number;
   @type("uint8") faseJuego: FaseJuego;
   @type("string") turnoActual: string;
   @type(["string"]) ordenJugadores = new ArraySchema<string>();
