@@ -1,13 +1,8 @@
-import './App.css'
-import Partida from './pantallas/Partida'
+import "./App.css";
+import Navegacion from "./Navegacion";
 
 function App() {
-
-// Cambiar a lobby cuando exista
- return(
-  <Partida/>
- )
-
+  return <Navegacion />;
 }
 
-export default App
+export default App;

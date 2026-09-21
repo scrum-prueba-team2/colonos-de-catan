@@ -1,0 +1,220 @@
+.home {
+  min-height: 100vh;
+  background: radial-gradient(circle at 15% -10%, rgba(108, 92, 224, 0.18), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(61, 220, 151, 0.1), transparent 40%), #10131a;
+  color: #eef1f7;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.home__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid #1f2534;
+  position: sticky;
+  top: 0;
+  background: rgba(16, 19, 26, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+}
+
+.home__marca {
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+}
+
+.home__nav-btn {
+  background: #6c5ce0;
+  border: none;
+  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(108, 92, 224, 0.35);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.home__nav-btn:hover {
+  background: #5b4bd0;
+  transform: translateY(-1px);
+}
+
+.home__nav-btn:active {
+  transform: translateY(0);
+}
+
+.home__hero {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: clamp(40px, 8vw, 72px) 20px 48px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.home__badge {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #b5aef7;
+  background: rgba(108, 92, 224, 0.14);
+  border: 1px solid rgba(108, 92, 224, 0.35);
+  border-radius: 999px;
+  padding: 6px 14px;
+  margin-bottom: 24px;
+}
+
+.home__hex-arte {
+  width: 100%;
+  max-width: 340px;
+  height: auto;
+  margin: 0 auto 28px;
+  display: block;
+}
+
+.home__hero h1 {
+  font-size: clamp(26px, 5vw, 34px);
+  font-weight: 700;
+  margin: 0 0 14px;
+  letter-spacing: -0.01em;
+}
+
+.home__hero p {
+  color: #8b93a7;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 28px;
+  max-width: 460px;
+}
+
+.home__cta {
+  background: #6c5ce0;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 32px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(108, 92, 224, 0.3);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.home__cta:hover {
+  background: #5b4bd0;
+  transform: translateY(-1px);
+}
+
+.home__equipo {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 0 20px 64px;
+}
+
+.home__equipo h2 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #8b93a7;
+  margin: 0 0 16px;
+  padding-top: 32px;
+  border-top: 1px solid #1f2534;
+}
+
+.home__roles {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.home__rol {
+  flex: 1;
+  min-width: 220px;
+  background: #1a1f2e;
+  border: 1px solid #2a3142;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.home__rol-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.home__rol-nombre {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.home__rol-cargo {
+  color: #8b93a7;
+  font-size: 13px;
+}
+
+.home__equipo h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8b93a7;
+  margin: 0 0 10px;
+}
+
+.home__desarrolladores {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.home__desarrolladores li {
+  background: #1a1f2e;
+  border: 1px solid #2a3142;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.home__avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #10131a;
+  flex-shrink: 0;
+}
+
+.home__avatar--chico {
+  width: 26px;
+  height: 26px;
+  font-size: 11px;
+}
+
+@media (max-width: 480px) {
+  .home__nav {
+    padding: 14px 16px;
+  }
+
+  .home__hero {
+    padding-top: 32px;
+  }
+}

@@ -1,4 +1,4 @@
-import { ArraySchema, Schema, type } from "@colyseus/schema";
+import { ArraySchema, MapSchema, Schema, type } from "@colyseus/schema";
 import { FaseJuego, FasePartida, FasePreconstruccion } from "../common/enums.js";
 import { Jugador } from "./Jugador.js";
 
@@ -10,8 +10,8 @@ export class Partida extends Schema {
   @type("uint8") faseJuego: FaseJuego;
   @type("string") turnoActual: string;
   @type(["string"]) ordenJugadores = new ArraySchema<string>();
-  @type("boolean") cartaJugable: boolean;
   @type("string") ganador: string;
+  @type("string") ejercitoMasGrande: string;
 
   constructor() {
     super();
@@ -22,5 +22,7 @@ export class Partida extends Schema {
     this.fasePreconstruccion = FasePreconstruccion.ASENTAMIENTO;
     this.direccionPreconstruccion = 1;
     this.faseJuego = FaseJuego.DADOS;
+    this.ganador = "";
+    this.ejercitoMasGrande = "";
   }
 }

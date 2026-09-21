@@ -1,0 +1,159 @@
+.sala-espera {
+  min-height: 100vh;
+  background: #10131a;
+  color: #eef1f7;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.sala-espera__card {
+  width: 100%;
+  max-width: 420px;
+  background: #1a1f2e;
+  border: 1px solid #2a3142;
+  border-radius: 20px;
+  padding: 36px 28px;
+  text-align: center;
+}
+
+.sala-espera__estado {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #b5aef7;
+  background: rgba(108, 92, 224, 0.14);
+  border: 1px solid rgba(108, 92, 224, 0.35);
+  border-radius: 999px;
+  padding: 5px 12px;
+  margin-bottom: 16px;
+}
+
+.sala-espera__card h1 {
+  font-size: 22px;
+  margin: 0 0 8px;
+}
+
+.sala-espera__contador {
+  color: #8b93a7;
+  font-size: 14px;
+  margin: 0 0 20px;
+}
+
+.sala-espera__barra {
+  height: 6px;
+  background: #10131a;
+  border: 1px solid #2a3142;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+
+.sala-espera__barra-relleno {
+  height: 100%;
+  background: #6c5ce0;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.sala-espera__asientos {
+  list-style: none;
+  margin: 0 0 28px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.sala-espera__asiento {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: #10131a;
+  border: 1px solid #2a3142;
+  border-radius: 14px;
+  padding: 16px 8px;
+}
+
+.sala-espera__asiento--vacio {
+  border-style: dashed;
+}
+
+.sala-espera__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #6c5ce0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.sala-espera__avatar--vacio {
+  background: transparent;
+  border: 2px dashed #3a4258;
+  animation: sala-espera-pulso 1.8s ease-in-out infinite;
+}
+
+.sala-espera__asiento-nombre {
+  font-size: 12px;
+  color: #8b93a7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.sala-espera__codigo {
+  width: 100%;
+  background: #10131a;
+  border: 1px solid #2a3142;
+  border-radius: 10px;
+  padding: 12px;
+  color: #8b93a7;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.sala-espera__codigo strong {
+  color: #eef1f7;
+  font-family: ui-monospace, monospace;
+  font-size: 15px;
+}
+
+.sala-espera__codigo-hint {
+  color: #6c5ce0;
+  font-weight: 600;
+}
+
+.sala-espera__nota {
+  color: #8b93a7;
+  font-size: 13px;
+  margin: 0;
+}
+
+@keyframes sala-espera-pulso {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 380px) {
+  .sala-espera__card {
+    padding: 28px 20px;
+  }
+}
