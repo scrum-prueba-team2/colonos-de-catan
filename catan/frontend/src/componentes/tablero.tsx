@@ -1,3 +1,4 @@
+import type { ObjetivoConstruccion, TipoConstruccion } from './construir';
 import "./tablero.css"
 
 export interface HexagonoDato { 
@@ -86,7 +87,23 @@ function puntoDeClave(clave: string): [number, number] {
   return puntoVertice(h, d, p);
 }
 
-function Tablero({ datos }: { datos: DatosTablero }) {
+interface Props {
+  datos: DatosTablero;
+  tipoConstruccion?: TipoConstruccion | null;
+  objetivoSeleccionado?: ObjetivoConstruccion | null;
+  onSeleccionarObjetivo?: (objetivo: ObjetivoConstruccion) => void;
+}
+
+function esElObjetivo(
+  objetivo: ObjetivoConstruccion | null | undefined,
+  h: number,
+  d: number,
+  p: number,
+) {
+  return objetivo?.h === h && objetivo.d === d && objetivo.p === p;
+}
+
+function Tablero({ datos, tipoConstruccion = null, objetivoSeleccionado, onSeleccionarObjetivo }: Props) {
   
   return (
     <svg
@@ -127,11 +144,28 @@ function Tablero({ datos }: { datos: DatosTablero }) {
       {/* aristas: los caminos */}
       {Object.entries(datos.aristas).map(([clave, arista]) => {
         const [a, b] = segmentoArista(arista.h, arista.d, arista.p);
+        const puedeSeleccionar = tipoConstruccion === 'camino' && arista.propietario === '';
+        const seleccionado = puedeSeleccionar && esElObjetivo(objetivoSeleccionado, arista.h, arista.d, arista.p);
+        const objetivo = { h: arista.h, d: arista.d, p: arista.p };
         return (
           <line
             key={clave}
-            className={arista.propietario === '' ? 'tbArista' : 'tbArista tbAristaOcupada'}
+            className={[
+              arista.propietario === '' ? 'tbArista' : 'tbArista tbAristaOcupada',
+              puedeSeleccionar ? 'tbObjetivoConstruccion' : '',
+              seleccionado ? 'tbObjetivoSeleccionado' : '',
+            ].filter(Boolean).join(' ')}
             x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]}
+            role={puedeSeleccionar ? 'button' : undefined}
+            tabIndex={puedeSeleccionar ? 0 : undefined}
+            aria-label={puedeSeleccionar ? `Construir camino en ${arista.h}, ${arista.d}, ${arista.p}` : undefined}
+            onClick={puedeSeleccionar ? () => onSeleccionarObjetivo?.(objetivo) : undefined}
+            onKeyDown={puedeSeleccionar ? (evento) => {
+              if (evento.key === 'Enter' || evento.key === ' ') {
+                evento.preventDefault();
+                onSeleccionarObjetivo?.(objetivo);
+              }
+            } : undefined}
           />
         );
       })}
@@ -160,15 +194,35 @@ function Tablero({ datos }: { datos: DatosTablero }) {
 
       {Object.entries(datos.vertices).map(([clave, vertice]) => {
         const [x, y] = puntoVertice(vertice.h, vertice.d, vertice.p);
+        const puedeSeleccionar =
+          (tipoConstruccion === 'poblado' && vertice.constuccion === 0) ||
+          (tipoConstruccion === 'ciudad' && vertice.constuccion !== 0);
+        const seleccionado = puedeSeleccionar && esElObjetivo(objetivoSeleccionado, vertice.h, vertice.d, vertice.p);
+        const objetivo = { h: vertice.h, d: vertice.d, p: vertice.p };
         return (
           <circle
             key={clave}
-            className={vertice.constuccion === 0 ? 'tbVertice' : 'tbVertice tbVerticeOcupado'}
+            className={[
+              vertice.constuccion === 0 ? 'tbVertice' : 'tbVertice tbVerticeOcupado',
+              puedeSeleccionar ? 'tbObjetivoConstruccion' : '',
+              seleccionado ? 'tbObjetivoSeleccionado' : '',
+            ].filter(Boolean).join(' ')}
             cx={x} cy={y} r={S * 0.085}
+            role={puedeSeleccionar ? 'button' : undefined}
+            tabIndex={puedeSeleccionar ? 0 : undefined}
+            aria-label={puedeSeleccionar ? `Construir ${tipoConstruccion} en ${vertice.h}, ${vertice.d}, ${vertice.p}` : undefined}
+            onClick={puedeSeleccionar ? () => onSeleccionarObjetivo?.(objetivo) : undefined}
+            onKeyDown={puedeSeleccionar ? (evento) => {
+              if (evento.key === 'Enter' || evento.key === ' ') {
+                evento.preventDefault();
+                onSeleccionarObjetivo?.(objetivo);
+              }
+            } : undefined}
           />
         );
       })}
     </svg>
   );
 }
+
 export default Tablero;
