@@ -10,10 +10,10 @@ import Existencias from '../componentes/existencias';
 import { tableroPrueba } from '../datos/tableroPrueba'
 import TablaCostes from '../componentes/tablaCostes';
 import Tablero from '../componentes/tablero';
-import type { DatosTablero } from '../componentes/tablero';
+import type { DatosTablero } from '../datos/tablero';
+import type { Recursos } from '../datos/jugador';
 import Construir, {
   type ObjetivoConstruccion,
-  type RecursosConstruccion,
   type SolicitudConstruccion,
   type TipoConstruccion,
 } from '../componentes/construir';
@@ -22,7 +22,7 @@ import './Partida.css'
 // Mientras la conexión de la issue #25 no esté integrada, estos recursos solo
 // sirven para probar la interfaz. El estado real debe llegar desde el jugador
 // que publica Colyseus, nunca calcularse de forma definitiva en el cliente.
-const recursosPrueba: RecursosConstruccion = {
+const recursosPrueba: Recursos = {
   madera: 2,
   ladrillo: 2,
   lana: 1,

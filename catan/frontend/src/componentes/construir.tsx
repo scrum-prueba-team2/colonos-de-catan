@@ -1,16 +1,9 @@
+import type { Recursos } from '../datos/jugador';
 import './construir.css';
 
 // Estos nombres se envían al backend. No usamos las etiquetas visibles para
 // evitar que un cambio de texto rompa el protocolo entre cliente y servidor.
 export type TipoConstruccion = 'camino' | 'poblado' | 'ciudad';
-
-export interface RecursosConstruccion {
-  madera: number;
-  ladrillo: number;
-  lana: number;
-  trigo: number;
-  mineral: number;
-}
 
 export interface ObjetivoConstruccion {
   h: number;
@@ -27,7 +20,7 @@ interface OpcionConstruccion {
   tipo: TipoConstruccion;
   etiqueta: string;
   ayuda: string;
-  costo: Partial<RecursosConstruccion>;
+  costo: Partial<Recursos>;
 }
 
 const OPCIONES: OpcionConstruccion[] = [
@@ -37,7 +30,7 @@ const OPCIONES: OpcionConstruccion[] = [
 ];
 
 interface Props {
-  recursos: RecursosConstruccion;
+  recursos: Recursos;
   esMiTurno: boolean;
   seleccion: TipoConstruccion | null;
   onSeleccionar: (tipo: TipoConstruccion | null) => void;
@@ -45,9 +38,9 @@ interface Props {
 
 // El botón se desactiva antes de seleccionar, pero el servidor vuelve a
 // comprobar los recursos para evitar que el cliente pueda falsificarlos.
-function puedePagar(recursos: RecursosConstruccion, costo: Partial<RecursosConstruccion>) {
+function puedePagar(recursos: Recursos, costo: Partial<Recursos>) {
   return Object.entries(costo).every(([recurso, cantidad]) => {
-    const clave = recurso as keyof RecursosConstruccion;
+    const clave = recurso as keyof Recursos;
     return recursos[clave] >= cantidad;
   });
 }

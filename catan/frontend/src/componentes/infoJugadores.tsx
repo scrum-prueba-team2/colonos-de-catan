@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
-import type { Jugadores } from '../datos/jugadoresPrueba';
-import { totalEnMano, totalRecursos, enRiesgoDeDescarte } from '../datos/jugadoresPrueba';
+import type { Jugadores } from '../datos/jugador';
+import { totalEnMano, totalRecursos, enRiesgoDeDescarte, colorDeJugador } from '../datos/jugador';
 import './infoJugadores.css';
 
 interface Props {
@@ -20,8 +20,9 @@ function InfoJugadores({ jugadores, ordenJugadores, turnoActual, miSessionId }: 
         const jugador = jugadores[sessionId];
         if (!jugador) return null;
 
-        // El color del jugador viaja como variable CSS.
-        const estilo = { '--color-jugador': jugador.color } as CSSProperties;
+                /* El backend no manda color: se asigna por la posicion en el orden de
+           turnos, asi todos ven el mismo color para la misma persona. */
+        const estilo = { '--color-jugador': colorDeJugador(lista, sessionId) } as CSSProperties;
 
         const clases = ['ijFicha'];
         if (sessionId === turnoActual) clases.push('ijTurno');

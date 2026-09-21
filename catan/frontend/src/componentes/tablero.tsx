@@ -1,52 +1,10 @@
 import type { ObjetivoConstruccion, TipoConstruccion } from './construir';
+import type { DatosTablero } from '../datos/tablero';
+import { NOMBRE_PUERTO } from '../datos/tablero';
 import "./tablero.css"
-
-export interface HexagonoDato { 
-  h: number; 
-  d: number; 
-  terreno: number; 
-  numero: number; 
-  esLadron: boolean 
-}
-export interface VerticeDato { 
-  h: number; 
-  d: number; 
-  p: number; 
-  constuccion: number; 
-  propietario: string 
-}
-export interface AristaDato { 
-  h: number; 
-  d: number; 
-  p: number; 
-  propietario: string 
-}
-export interface PuertoDato { 
-  id: number; 
-  tipo: number; 
-  vertice1: string; 
-  vertice2: string 
-}
-
-export interface DatosTablero {
-  hexagonos: Record<string, HexagonoDato>;
-  vertices: Record<string, VerticeDato>;
-  aristas: Record<string, AristaDato>;
-  puertos: Record<string, PuertoDato>;
-}
 
 // Lado del hexagono.
 const S = 60;
-
-// Numeros del TipoPuerto
-const NOMBRE_PUERTO: Record<number, string> = {
-  0: '3:1', 
-  1: '2 Madera:1', 
-  2: '2 Trigo:1', 
-  3: '2 Lana:1', 
-  4: '2 Ladrillo:1', 
-  5: '2 Piedra:1',
-};
 
 //* Funcion para transoformar una coordenada axial a un punto cartesiano
 function centro(h: number, d: number): [number, number] {
