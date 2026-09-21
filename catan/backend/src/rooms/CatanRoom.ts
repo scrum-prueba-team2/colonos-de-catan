@@ -7,16 +7,10 @@ import { darRecursosJugador } from "../functions/darRecursosJugador.js";
 import { verticesDelHexagono } from "../functions/verticesDelHexagono.js";
 import { lanzarDados } from "../functions/lanzarDados.js";
 import { mezclar } from "../common/mezclar.js";
-import { siguienteTurno } from "../functions/siguienteTruno.js";
+import { siguienteTurno } from "../functions/siguienteTurno.js";
 import { construirAsentamiento } from "../functions/construirAsentamiento.js";
 import { darMaterialInicial } from "../functions/darMaterialInicial.js";
 import { verificarVictoria } from "../functions/verificarVictoria.js";
-import { construirCiudad } from "../functions/construirCiudad.js";
-import { comerciarBanca } from "../functions/comerciarBanca.js";
-import { descartarRecurso } from "../functions/descartarRecurso.js";
-import { moverLadron } from "../functions/moverLadron.js";
-import { robarJugador } from "../functions/robarJugador.js";
-import { jugarCaballero } from "../functions/jugarCaballero.js";
 
 
 export class CatanRoom extends Room {
@@ -26,6 +20,7 @@ export class CatanRoom extends Room {
   tablero = this.state.tablero;
   banca = this.state.banca;
   jugadores = this.state.jugadores;
+  ofertas = new Map<string, unknown>();
   codigoAcceso = "";
 
 
@@ -297,74 +292,83 @@ export class CatanRoom extends Room {
         return;
       }
 
+      this.ofertas.clear();
+
+      /** Activar las cartas compradas del jugador */
+      activarCartasCompradas(this.jugadores.get(client.sessionId));
+
+      /** Permitir usar una carta en el siguiente turno */
+      this.partida.cartaJugable = true;
+
       siguienteTurno(this.partida);
+
     },
-    msgColocarAsentamiento:(
+    msgColocarAsentamiento: (
       client: Client,
-      mensaje: {h: number, d: number, p: number}
-    ) =>{
+      mensaje: { h: number, d: number, p: number }
+    ) => {
       //* Verificar que la partida siga en curso
-      if(this.partida.fase === FasePartida.FINALIZADA){
+      if (this.partida.fase === FasePartida.FINALIZADA) {
         client.send("error", {
           mensajeError: "La partida ha finalizado"
         })
-        return ;
+        return;
       }
 
       //*Verificar que el turno sea del jugador 
-      if(this.partida.turnoActual !== client.sessionId){
+      if (this.partida.turnoActual !== client.sessionId) {
         client.send("error", {
           mensajeError: "No es tu turno"
         })
-        return ;
+        return;
       }
 
       const jugador = this.jugadores.get(client.sessionId);
-      if(!jugador) return;
+      if (!jugador) return;
 
-      const {h, d, p} = mensaje;
+      const { h, d, p } = mensaje;
 
       //! FLUJO DE LA FASE PRECONSTRUCCION
-      if(this.partida.fase === FasePartida.PRECONSTRUCCION){
+      if (this.partida.fase === FasePartida.PRECONSTRUCCION) {
         //* Comprobar que estamos en la fase de colocar asentamiento
-        if(this.partida.fasePreconstruccion !== FasePreconstruccion.ASENTAMIENTO){
-          client.send("error",{
+        if (this.partida.fasePreconstruccion !== FasePreconstruccion.ASENTAMIENTO) {
+          client.send("error", {
             mensajeError: "Debes colocar un camino"
           })
-          return ;
+          return;
         }
 
         //* Intentar construir el asentamiento
         const resultado = construirAsentamiento(
           this.tablero.vertices,
-          this.tablero.aristas, 
-          this.partida, 
-          h, d, p, 
-          jugador, 
-          this.banca, 
+          this.tablero.aristas,
+          this.partida,
+          h, d, p,
+          jugador,
+          this.banca,
           client.sessionId)
 
-          if(resultado.error){
-            client.send("error", {
-              mensaje: resultado.mensaje
-            })
-            return ;
-          }
-
-          //* Si estamos en vuelta de regreso de la preconstruccion
-          if(this.partida.direccionPreconstruccion === -1){
-            darMaterialInicial(this.tablero.hexagonos, jugador, h, d, p, this.banca);
-          }
-
-          this.partida.fasePreconstruccion = FasePreconstruccion.CAMINO;
+        if (resultado.error) {
+          client.send("error", {
+            mensaje: resultado.mensaje
+          })
           return;
+        }
+
+        //* Si estamos en vuelta de regreso de la preconstruccion
+        if (this.partida.direccionPreconstruccion === -1) {
+          darMaterialInicial(this.tablero.hexagonos, jugador, h, d, p, this.banca);
+        }
+
+        this.partida.fasePreconstruccion = FasePreconstruccion.CAMINO;
+        return;
 
       }
 
       //!FLUJO EN JUEGO
-      if(this.partida.fase == FasePartida.JUEGO){
+      if (this.partida.fase == FasePartida.JUEGO) {
         //* Comprobar que estamos en la fase de acciones
-        if(this.partida.faseJuego !== FaseJuego.ACCIONES){
+        if (this.partida.faseJuego !== FaseJuego.ACCIONES) {
           client.send("error", {
             mensajeError: "Debes lanzar los dados primero"
           })
@@ -377,13 +381,13 @@ export class CatanRoom extends Room {
           this.tablero.aristas,
           this.partida,
           h, d, p,
-          jugador, 
+          jugador,
           this.banca,
           client.sessionId
         )
 
         //* Si algo fallo en la construccion, indicar el error
-        if(resultado.error){
+        if (resultado.error) {
           client.send("error", {
             mensajeError: resultado.mensaje
           })
