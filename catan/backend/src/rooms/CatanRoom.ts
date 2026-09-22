@@ -11,6 +11,12 @@ import { siguienteTurno } from "../functions/siguienteTurno.js";
 import { construirAsentamiento } from "../functions/construirAsentamiento.js";
 import { darMaterialInicial } from "../functions/darMaterialInicial.js";
 import { verificarVictoria } from "../functions/verificarVictoria.js";
+import { construirCiudad } from "../functions/construirCiudad.js";
+import { comerciarBanca } from "../functions/comerciarBanca.js";
+import { descartarRecurso } from "../functions/descartarRecurso.js";
+import { moverLadron } from "../functions/moverLadron.js";
+import { robarJugador } from "../functions/robarJugador.js";
+import { jugarCaballero } from "../functions/jugarCaballero.js";
 
 
 export class CatanRoom extends Room {
