@@ -17,6 +17,9 @@ import { descartarRecurso } from "../functions/descartarRecurso.js";
 import { moverLadron } from "../functions/moverLadron.js";
 import { robarJugador } from "../functions/robarJugador.js";
 import { jugarCaballero } from "../functions/jugarCaballero.js";
+import { activarCartasCompradas } from "../functions/activarCartasCompradas.js";
+import { OfertaIntercambio } from "../schemas/OfertaIntercambio.js";
+import { intercambiarRecursos } from "../functions/intercambiarRecursos.js";
 
 
 export class CatanRoom extends Room {
@@ -646,7 +649,164 @@ export class CatanRoom extends Room {
 
         this.partida.faseJuego = FaseJuego.ROBO;
 
-    }
+    },
+
+    msgIntercambiarJugador: (
+      client: Client,
+      mensaje: {
+        recursoEntregado: string,
+        cantidadEntregada: number,
+        recusoRecibido: string,
+        cantidadRecibida: number,
+      }
+    ) => {
+      //* Verificar que sea el turno del jugador
+      if(this.partida.turnoActual !== client.sessionId) {
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        })
+        return;
+      }
+
+      // * Verificar que estemos en la fase de acciones
+      if(this.partida.faseJuego !== FaseJuego.ACCIONES) {
+        client.send("error", {
+          mensajeError: "Termina de lanzar los dados primero"
+        })
+        return;
+      }
+
+      // * Verificar que no exista una oferta activa
+      if(this.partida.ofertaIntercambio.jugador !== "")(
+        client.send("error", {
+          mensajeError: "Ya existe una oferta activa"
+        })
+      )
+
+      const jugador = this.jugadores.get(client.sessionId);
+
+      // * Verificar que los recursos sean validos
+      if(
+        !jugador.recursos.has(mensaje.recursoEntregado) ||
+        !jugador.recursos.has(mensaje.recusoRecibido)
+      ) {
+        client.send("error", {
+          mensajeError: "Los Recursos seleccionados no son validos"
+        })
+        return;
+      }
+
+      // * Verificar que las cantidades tengan sentido
+      if(mensaje.cantidadEntregada <= 0 || mensaje.cantidadRecibida <= 0){
+        client.send("error", {
+          mensajeError: "No tienes suficientes recuros, mi loco"
+        })
+        return;
+      }
+
+      // * No se permite pedir y dar lo mismo
+      if(mensaje.recursoEntregado === mensaje.recusoRecibido){
+        client.send("error", {
+          mensajeError: "No puedes pedir y dar el mismo recurso"
+        })
+        return;
+      }
+
+      // * Llenado de la oferta
+      this.partida.ofertaIntercambio.setOferta(
+        client.sessionId, this.jugadores,
+        mensaje.recursoEntregado, mensaje.cantidadEntregada,
+        mensaje.recusoRecibido, mensaje.cantidadRecibida
+      );
+    },
+
+    msgResponderIntercambio: (
+      client: Client,
+      mensaje: {respuesta: number}
+    ) => {
+      // * Verificar que exista una oferta activa
+      if(this.partida.ofertaIntercambio.jugador === ""){
+        client.send("error", {
+          mensajeError: "No hay una oferta activa"
+        })
+      }
+
+      // * Verificar que no sea el jugador que la propuso
+      if(!this.partida.ofertaIntercambio.respuestas.has(client.sessionId)){
+        client.send("error", {
+          mensajeError: "No puedes responde a esta oferta"
+        })
+        return;
+      }
+
+      // * Verificar que el jugador aún deba reponder
+      if(this.partida.ofertaIntercambio.respuestas.get(client.sessionId) !== 0){
+        client.send("Error", {
+          mensajeError: "Ya respondiste a esta oferta"
+        })
+        return;
+      }
+
+      // * Verificar que sea una respueta valida
+      if(mensaje.respuesta !== 1 && mensaje.respuesta !== -1){
+        client.send("Error", {
+          mensajeError: "Respuesta invalida"
+        })
+        return;
+      }
+
+      // ! Rechazo
+      if(mensaje.respuesta === -1) {
+        this.partida.ofertaIntercambio.registrarRespuesta(client.sessionId, -1);
+        // * Verificar si todos rechazaron
+        if(this.partida.ofertaIntercambio.todosRechazaron()){
+          this.partida.ofertaIntercambio.limpiarOferta();
+        }
+        return;
+      }
+
+      const jugador = this.jugadores.get(client.sessionId);
+      const jugadorOferta = this.jugadores.get(this.partida.ofertaIntercambio.jugador);
+
+      // ? Acepto
+      if(mensaje.respuesta === 1) {
+        // * Destruir la ofera si el jugador que propuso ya gastó
+        if(jugadorOferta.recursos.get(
+          this.partida.ofertaIntercambio.recursoOfrecido
+        ) < this.partida.ofertaIntercambio.cantidadOfrecida) {
+          this.partida.ofertaIntercambio.limpiarOferta();
+
+          client.send("Error", {
+            mensajeError: "Oferta cancelada por falta de recursos"
+          })
+          return;
+        }
+
+        // * Verificar que el jugadr que acepta tenga suficientes recursos
+        if(jugador.recursos.get(
+          this.partida.ofertaIntercambio.recursoSolicitado
+        ) < this.partida.ofertaIntercambio.cantidadSolicitada) { 
+          // * Automaticamente pasarlo a rechazo
+          this.partida.ofertaIntercambio.registrarRespuesta(client.sessionId, -1);
+          // * Verificar si todos rechazaron
+          if(this.partida.ofertaIntercambio.todosRechazaron()) {
+            this.partida.ofertaIntercambio.limpiarOferta();
+          }
+          return;
+        }
+
+        // * Intercambiar los recursos
+        intercambiarRecursos(
+          this.partida.ofertaIntercambio.jugador,
+          client.sessionId,
+          this.jugadores,
+          this.partida.ofertaIntercambio
+        );
+
+        // * Destruir la oferta
+        this.partida.ofertaIntercambio.limpiarOferta();
+      }
+    },
   };
 
   onCreate(options: any) {
