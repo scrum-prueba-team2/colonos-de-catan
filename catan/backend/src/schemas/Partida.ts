@@ -1,6 +1,7 @@
 import { ArraySchema, MapSchema, Schema, type } from "@colyseus/schema";
 import { FaseJuego, FasePartida, FasePreconstruccion } from "../common/enums.js";
 import { Jugador } from "./Jugador.js";
+import { OfertaIntercambio } from "./OfertaIntercambio.js";
 
 export class Partida extends Schema {
   @type("string") creador: string;
@@ -15,6 +16,8 @@ export class Partida extends Schema {
   @type("boolean") cartaJugable: boolean;
   @type("string") ganador: string;
   @type("string") ejercitoMasGrande: string;
+  @type("uint8") carreterasGratis: number;
+  @type(OfertaIntercambio) ofertaIntercambio = new OfertaIntercambio();
 
   constructor() {
     super();
@@ -28,5 +31,6 @@ export class Partida extends Schema {
     this.faseJuego = FaseJuego.DADOS;
     this.ganador = "";
     this.ejercitoMasGrande = "";
+    this.carreterasGratis = 0;
   }
 }

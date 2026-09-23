@@ -18,6 +18,8 @@ import { moverLadron } from "../functions/moverLadron.js";
 import { robarJugador } from "../functions/robarJugador.js";
 import { jugarCaballero } from "../functions/jugarCaballero.js";
 import { jugarMonopolio } from "../functions/jugarMonopolio.js";
+import { intercambiarRecursos } from "../functions/intercambiarRecursos.js";
+import { construirCamino } from "../functions/construirCaminos.js";
 import { activarCartasCompradas } from "../functions/activarCartasCompradas.js";
 
 
@@ -301,6 +303,7 @@ export class CatanRoom extends Room {
       }
 
       this.ofertas.clear();
+      this.partida.ofertaIntercambio.limpiarOferta();
 
       /** Activar las cartas compradas del jugador */
       activarCartasCompradas(this.jugadores.get(client.sessionId));
@@ -323,7 +326,7 @@ export class CatanRoom extends Room {
         return;
       }
 
-      //*Verificar que el turno sea del jugador 
+      //*Verificar que el turno sea del jugador
       if (this.partida.turnoActual !== client.sessionId) {
         client.send("error", {
           mensajeError: "No es tu turno"
@@ -710,6 +713,278 @@ export class CatanRoom extends Room {
       //* Marcar que ya se utilizo una carta en este turno
       this.partida.cartaJugable = false;
 
+    },
+    msgIntercambiarJugador: (
+      client: Client,
+      mensaje: {
+        recursoEntregado: string,
+        cantidadEntregada: number,
+        recusoRecibido: string,
+        cantidadRecibida: number,
+      }
+    ) => {
+      //* Verificar que sea el turno del jugador
+      if (this.partida.turnoActual !== client.sessionId) {
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        })
+        return;
+      }
+
+      // * Verificar que estemos en la fase de acciones
+      if (this.partida.faseJuego !== FaseJuego.ACCIONES) {
+        client.send("error", {
+          mensajeError: "Termina de lanzar los dados primero"
+        })
+        return;
+      }
+
+      // * Verificar que no exista una oferta activa
+      if (this.partida.ofertaIntercambio.jugador !== "") {
+        client.send("error", {
+          mensajeError: "Ya existe una oferta activa"
+        })
+        return;
+      }
+
+      const jugador = this.jugadores.get(client.sessionId);
+
+      // * Verificar que los recursos sean validos
+      if (
+        !jugador.recursos.has(mensaje.recursoEntregado) ||
+        !jugador.recursos.has(mensaje.recusoRecibido)
+      ) {
+        client.send("error", {
+          mensajeError: "Los Recursos seleccionados no son validos"
+        })
+        return;
+      }
+
+      // * Verificar que las cantidades tengan sentido
+      if (mensaje.cantidadEntregada <= 0 || mensaje.cantidadRecibida <= 0) {
+        client.send("error", {
+          mensajeError: "No tienes suficientes recuros, mi loco"
+        })
+        return;
+      }
+
+      // * No se permite pedir y dar lo mismo
+      if (mensaje.recursoEntregado === mensaje.recusoRecibido) {
+        client.send("error", {
+          mensajeError: "No puedes pedir y dar el mismo recurso"
+        })
+        return;
+      }
+
+      // * Llenado de la oferta
+      this.partida.ofertaIntercambio.setOferta(
+        client.sessionId, this.jugadores,
+        mensaje.recursoEntregado, mensaje.cantidadEntregada,
+        mensaje.recusoRecibido, mensaje.cantidadRecibida
+      );
+    },
+
+    msgResponderIntercambio: (
+      client: Client,
+      mensaje: { respuesta: number }
+    ) => {
+      // * Verificar que exista una oferta activa
+      if (this.partida.ofertaIntercambio.jugador === "") {
+        client.send("error", {
+          mensajeError: "No hay una oferta activa"
+        })
+        return;
+      }
+
+      // * Verificar que no sea el jugador que la propuso
+      if (!this.partida.ofertaIntercambio.respuestas.has(client.sessionId)) {
+        client.send("error", {
+          mensajeError: "No puedes responde a esta oferta"
+        })
+        return;
+      }
+
+      // * Verificar que el jugador aún deba reponder
+      if (this.partida.ofertaIntercambio.respuestas.get(client.sessionId) !== 0) {
+        client.send("Error", {
+          mensajeError: "Ya respondiste a esta oferta"
+        })
+        return;
+      }
+
+      // * Verificar que sea una respueta valida
+      if (mensaje.respuesta !== 1 && mensaje.respuesta !== -1) {
+        client.send("Error", {
+          mensajeError: "Respuesta invalida"
+        })
+        return;
+      }
+
+      // ! Rechazo
+      if (mensaje.respuesta === -1) {
+        this.partida.ofertaIntercambio.registrarRespuesta(client.sessionId, -1);
+        // * Verificar si todos rechazaron
+        if (this.partida.ofertaIntercambio.todosRechazaron()) {
+          this.partida.ofertaIntercambio.limpiarOferta();
+        }
+        return;
+      }
+
+      const jugador = this.jugadores.get(client.sessionId);
+      const jugadorOferta = this.jugadores.get(this.partida.ofertaIntercambio.jugador);
+
+      // ? Acepto
+      if (mensaje.respuesta === 1) {
+        // * Destruir la ofera si el jugador que propuso ya gastó
+        if (jugadorOferta.recursos.get(
+          this.partida.ofertaIntercambio.recursoOfrecido
+        ) < this.partida.ofertaIntercambio.cantidadOfrecida) {
+          this.partida.ofertaIntercambio.limpiarOferta();
+
+          client.send("Error", {
+            mensajeError: "Oferta cancelada por falta de recursos"
+          })
+          return;
+        }
+
+        // * Verificar que el jugadr que acepta tenga suficientes recursos
+        if (jugador.recursos.get(
+          this.partida.ofertaIntercambio.recursoSolicitado
+        ) < this.partida.ofertaIntercambio.cantidadSolicitada) {
+          // * Automaticamente pasarlo a rechazo
+          this.partida.ofertaIntercambio.registrarRespuesta(client.sessionId, -1);
+          // * Verificar si todos rechazaron
+          if (this.partida.ofertaIntercambio.todosRechazaron()) {
+            this.partida.ofertaIntercambio.limpiarOferta();
+          }
+          return;
+        }
+
+        // * Intercambiar los recursos
+        intercambiarRecursos(
+          this.partida.ofertaIntercambio.jugador,
+          client.sessionId,
+          this.jugadores,
+          this.partida.ofertaIntercambio
+        );
+
+        // * Destruir la oferta
+        this.partida.ofertaIntercambio.limpiarOferta();
+      }
+    },
+
+    msgCartaCarreteras: (client: Client) => {
+      // * Verificar que la partida siga en curso
+      if (this.partida.fase === FasePartida.FINALIZADA) {
+        client.send("error", {
+          mensajeError: "La partida ha finalizado"
+        })
+        return;
+      }
+
+      if (this.partida.turnoActual !== client.sessionId) {
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        })
+        return;
+      }
+
+      // * Verificar que estemos en fase de acciones
+      if (this.partida.faseJuego !== FaseJuego.ACCIONES) {
+        client.send("error", {
+          mensajeError: "Termina de lanzar los dados primero"
+        })
+        return;
+      }
+
+      // * Verificar que se permita usar otra carta este turno
+      if (!this.partida.cartaJugable) {
+        client.send("error", {
+          mensajeError: "Solo una carta por turno"
+        })
+        return;
+      }
+
+      // * Verificar que tenemos la carta usable
+      const jugador = this.jugadores.get(client.sessionId);
+      if (jugador.cartas_usables.get(`${Desarrollo.CARRETERA}`) < 1) {
+        client.send("error", {
+          mensajeError: "No tienes la carta de carreteras"
+        })
+        return;
+      }
+
+      // * Eliminar la carta de carreteras del jugador
+      jugador.cartas_usables.set(
+        `${Desarrollo.CARRETERA}`,
+        jugador.cartas_usables.get(`${Desarrollo.CARRETERA}`) - 1
+      )
+
+      // * Activar el efeco de la carta de carreteras
+      this.partida.carreterasGratis = 2;
+      this.partida.faseJuego = FaseJuego.CARRETERAS;
+
+      // * Desactivar el uso de otra carta este turno
+      this.partida.cartaJugable = false;
+    },
+
+    msgCaminoGratis: (
+      client: Client,
+      mensaje: { h: number, d: number, p: number }
+    ) => {
+      // * Verificar que la partida siga en curso
+      if (this.partida.fase === FasePartida.FINALIZADA) {
+        client.send("error", {
+          mensajeError: "La partida ha finalizado"
+        })
+        return;
+      }
+
+      // * Verificar que sea el turno del jugador
+      if (this.partida.turnoActual !== client.sessionId) {
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        })
+        return;
+      }
+
+      // * Verificar que estemos en la fase de carretera
+      if (this.partida.faseJuego !== FaseJuego.CARRETERAS) {
+        client.send("error", {
+          mensajeError: "No es la fase de carreteras"
+        })
+        return;
+      }
+
+      // * Obtener al jugador del state y que exista
+      const jugador = this.jugadores.get(client.sessionId);
+      if (!jugador) return;
+      const { h, d, p } = mensaje;
+
+      // * Intentar construir el camino gratis
+      const resultado = construirCamino(
+        this.tablero.vertices,
+        this.tablero.aristas,
+        this.partida,
+        h, d, p,
+        jugador, this.banca, client.sessionId
+      )
+
+      // * Si no se pudo construir, se notifica el error
+      if (resultado.error && resultado.mensaje !== "No tienes caminos disponibles") {
+        client.send("error", {
+          mensajeError: resultado.mensaje
+        })
+        return;
+      }
+
+      // * Reducir la cantidad de caminos gratis restantes
+      this.partida.carreterasGratis -= 1;
+
+      // * Si ya no quedan caminos gratis, volver a fase de acciones
+      if (this.partida.carreterasGratis === 0) {
+        this.partida.faseJuego = FaseJuego.ACCIONES
+      }
     },
   };
 
