@@ -1,6 +1,6 @@
-import type { Banca } from '../datos/bancaPruebas';
-import type { Jugador } from '../datos/jugadoresPrueba';
-import { RECURSOS, PIEZA, NOMBRE_PIEZA } from '../datos/jugadoresPrueba';
+import type { Banca } from '../datos/banca';
+import type { Jugador } from '../datos/jugador';
+import { RECURSOS, PIEZA, NOMBRE_PIEZA } from '../datos/jugador';
 import './existencias.css';
 
 interface Props {
