@@ -20,6 +20,7 @@ import { jugarCaballero } from "../functions/jugarCaballero.js";
 import { activarCartasCompradas } from "../functions/activarCartasCompradas.js";
 import { OfertaIntercambio } from "../schemas/OfertaIntercambio.js";
 import { intercambiarRecursos } from "../functions/intercambiarRecursos.js";
+import { construirCamino } from "../functions/construirCaminos.js";
 
 
 export class CatanRoom extends Room {
@@ -805,6 +806,112 @@ export class CatanRoom extends Room {
 
         // * Destruir la oferta
         this.partida.ofertaIntercambio.limpiarOferta();
+      }
+    },
+
+    msgCartaCarreteras: (client: Client) => {
+      // * Verificar que la partida siga en curso
+      if(this.partida.fase === FasePartida.FINALIZADA){
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        })
+        return;
+      }
+
+      // * Verificar que estemos en fase de acciones
+      if(this.partida.faseJuego !== FaseJuego.ACCIONES){
+        client.send("error", {
+          mensajeError: "Termina de lanzar los dados primero"
+        })
+        return;
+      }
+
+      // * Verificar que estamos en fase de acciones
+      if(this.partida.faseJuego !== FaseJuego.ACCIONES){
+        client.send("error", {
+          mensajeError: "Termina de lanzar los dados primero"
+        })
+        return;
+      }
+
+      // * Verificar que tenemos la carta usable
+      const jugador = this.jugadores.get(client.sessionId);
+      if(jugador.cartas_usables.get(`${Desarrollo.CARRETERA}`) < 1 ) {
+        client.send("error", {
+          mensajeError: "No tienes la carta de carreteras"
+        })
+        return;
+      }
+
+      // * Eliminar la carta de carreteras del jugador
+      jugador.cartas_usables.set(
+        `${Desarrollo.CARRETERA}`,
+        jugador.cartas_usables.get(`${Desarrollo.CARRETERA}`) -1
+      )
+
+      // * Activar el efeco de la carta de carreteras
+      this.partida.carreterasGratis = 2;
+      this.partida.faseJuego = FaseJuego.CARRETERAS;
+
+      // * Desactivar el uso de otra carta este turno
+      this.partida.cartaJugable = false;
+    },
+
+    msgCaminoGratis: (
+      client: Client,
+      mensaje: {h: number, d: number, p: number}
+    ) => {
+      // * Verificar que la partida siga en curso
+      if(this.partida.fase === FasePartida.FINALIZADA){
+        client.send("error", {
+          mensajeError: "La partida ha finalizado"
+        })
+        return;
+      }
+
+      // * Verificar que sea el turno del jugador
+      if(this.partida.turnoActual !== client.sessionId) {
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        })
+        return;
+      }
+
+      // * Verificar que estemos en la fase de carretera
+      if(this.partida.faseJuego !== FaseJuego.CARRETERAS) {
+        client.send("error", {
+          mensajeError: "No es la fase de carreteras"
+        })
+        return;
+      }
+
+      // * Obtener al jugador del state y que exista
+      const jugador = this.jugadores.get(client.sessionId);
+      if(!jugador) return;
+      const {h, d, p} = mensaje;
+
+      // * Intentar construir el camino gratis
+      const resultado = construirCamino(
+        this.tablero.vertices,
+        this.tablero.aristas,
+        this.partida,
+        h, d, p,
+        jugador, this.banca, client.sessionId
+      )
+
+      // * Si no se pudo construir, se notifica el error
+      if(resultado.error && resultado.mensaje !== "No tienes caminos disponibles") {
+        client.send("error", {
+          mensajeError: resultado.mensaje
+        })
+      }
+
+      // * Reducir la cantidad de caminos gratis restantes
+      this.partida.carreterasGratis -= 1;
+
+      // * Si ya no quedan caminos gratis, volver a fase de acciones
+      if(this.partida.carreterasGratis === 0) {
+        this.partida.faseJuego = FaseJuego.ACCIONES
       }
     },
   };
