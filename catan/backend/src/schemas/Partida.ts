@@ -16,6 +16,7 @@ export class Partida extends Schema {
   @type("boolean") cartaJugable: boolean;
   @type("string") ganador: string;
   @type("string") ejercitoMasGrande: string;
+  @type("uint8") carreterasGratis: number;
   @type(OfertaIntercambio) ofertaIntercambio = new OfertaIntercambio();
 
   constructor() {
@@ -30,5 +31,6 @@ export class Partida extends Schema {
     this.faseJuego = FaseJuego.DADOS;
     this.ganador = "";
     this.ejercitoMasGrande = "";
+    this.carreterasGratis = 0;
   }
 }
