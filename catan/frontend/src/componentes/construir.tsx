@@ -1,6 +1,8 @@
 import type { Recursos } from '../datos/jugador';
 import './construir.css';
 
+function Construir() {
+
 // Estos nombres se envían al backend. No usamos las etiquetas visibles para
 // evitar que un cambio de texto rompa el protocolo entre cliente y servidor.
 export type TipoConstruccion = 'camino' | 'poblado' | 'ciudad';

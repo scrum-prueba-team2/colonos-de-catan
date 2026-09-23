@@ -1,0 +1,56 @@
+/* Boton de tirar el dado. Solo aparece si es tu turno; si no, se ve nada mas
+   el ultimo numero que salio. */
+.tdMarco {
+    font-size: clamp(8px, 4.4cqw, 16px);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    padding: 0.5em;
+    box-sizing: border-box;
+    min-height: 0;
+}
+
+.tdEtiqueta {
+    font-size: 0.83em;
+    color: #888;
+    flex: none;
+}
+
+/* El gif y el numero comparten este hueco, asi el panel no brinca al pasar
+   de uno al otro */
+.tdCaja {
+    flex: 1;
+    min-height: 3.3em;
+    width: 100%;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+}
+
+.tdGif {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.tdNumero {
+    font-size: 2.83em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.tdBoton {
+    flex: none;
+    font-size: 1em;
+    padding: 0.42em 1.17em;
+    border: 1px solid #2C4049;
+    border-radius: 0.42em;
+    background: #fff;
+    cursor: pointer;
+}
+.tdBoton:hover:not(:disabled) { background: #EEF1F2; }
+.tdBoton:disabled { opacity: .4; cursor: not-allowed; }

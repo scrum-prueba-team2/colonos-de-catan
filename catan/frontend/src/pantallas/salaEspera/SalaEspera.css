@@ -1,0 +1,182 @@
+/* ==========================================
+   SALA DE ESPERA
+   ========================================== */
+.sala-espera {
+  background-color: var(--bg-main, #fcfcfd);
+  color: var(--text-primary, #121826);
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  padding: 3rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sala-espera__card {
+  background: #ffffff;
+  border: 1px solid var(--border-color, #eaecf0);
+  border-radius: var(--radius-lg, 20px);
+  padding: 2.5rem 2rem;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0px 4px 16px -2px rgba(16, 24, 40, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.sala-espera__estado {
+  display: inline-block;
+  background-color: var(--accent-badge-bg, #f2f4f7);
+  color: var(--accent-badge-text, #344054);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.3rem 0.8rem;
+  border-radius: 9999px;
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.02em;
+}
+
+.sala-espera h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.35rem 0;
+  color: var(--text-primary, #121826);
+}
+
+.sala-espera__contador {
+  color: var(--text-muted, #4d5761);
+  font-size: 0.95rem;
+  margin: 0 0 1.5rem 0;
+}
+
+/* Barra de progreso */
+.sala-espera__barra {
+  width: 100%;
+  height: 8px;
+  background-color: var(--accent-badge-bg, #f2f4f7);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.sala-espera__barra-relleno {
+  height: 100%;
+  background-color: var(--brand-primary, #101828);
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+}
+
+/* Grilla de Asientos */
+.sala-espera__asientos {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.sala-espera__asiento {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid var(--border-color, #eaecf0);
+  border-radius: var(--radius-md, 12px);
+  padding: 1rem 0.5rem;
+  transition: all var(--transition-fast, 0.2s ease);
+}
+
+.sala-espera__asiento--ocupado {
+  border-color: var(--border-hover, #d0d5dd);
+  box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+.sala-espera__asiento--vacio {
+  border-style: dashed;
+  background-color: #fafafa;
+}
+
+.sala-espera__asiento-nombre {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted, #4d5761);
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Avatares */
+.sala-espera__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  background-color: var(--brand-primary, #101828);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.sala-espera__avatar--vacio {
+  background-color: #eaecf0;
+  position: relative;
+  animation: pulso 1.8s infinite ease-in-out;
+}
+
+@keyframes pulso {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.9; }
+  100% { opacity: 0.4; }
+}
+
+/* Botón Código de Sala */
+.sala-espera__codigo {
+  background-color: #f8fafc;
+  border: 1px solid var(--border-color, #eaecf0);
+  border-radius: var(--radius-md, 12px);
+  padding: 0.85rem 1.25rem;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text-primary, #121826);
+  transition: all var(--transition-fast, 0.2s ease);
+  margin-bottom: 1.25rem;
+}
+
+.sala-espera__codigo:hover {
+  background-color: #ffffff;
+  border-color: var(--brand-primary, #101828);
+  box-shadow: 0px 2px 8px rgba(16, 24, 40, 0.06);
+}
+
+.sala-espera__codigo strong {
+  letter-spacing: 0.05em;
+  font-family: monospace;
+  font-size: 1rem;
+}
+
+.sala-espera__codigo-hint {
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: var(--text-subtle, #858d9d);
+}
+
+/* Nota inferior */
+.sala-espera__nota {
+  font-size: 0.8125rem;
+  color: var(--text-subtle, #858d9d);
+  margin: 0;
+}

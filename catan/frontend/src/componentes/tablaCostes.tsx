@@ -3,6 +3,7 @@ import './tablaCostos.css'
 function TablaCostes() {
   return (
     <div className="tcMarco">
+
       <h2 className="tcTitulo">Tabla de costes</h2>
 
       <ul className="tcLista">

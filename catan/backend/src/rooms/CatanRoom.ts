@@ -1,13 +1,13 @@
 import { Room, Client, CloseCode, Delayed } from "colyseus";
 import { CatanState } from "../states/CatanState.js";
 import { Jugador } from "../schemas/Jugador.js";
-import { FaseJuego, FasePartida, FasePreconstruccion } from "../common/enums.js";
+import { Desarrollo, FaseJuego, FasePartida, FasePreconstruccion } from "../common/enums.js";
 import { buscarHexagonos } from "../functions/buscarHexagonos.js";
 import { darRecursosJugador } from "../functions/darRecursosJugador.js";
 import { verticesDelHexagono } from "../functions/verticesDelHexagono.js";
 import { lanzarDados } from "../functions/lanzarDados.js";
 import { mezclar } from "../common/mezclar.js";
-import { siguienteTurno } from "../functions/siguienteTruno.js";
+import { siguienteTurno } from "../functions/siguienteTurno.js";
 import { construirAsentamiento } from "../functions/construirAsentamiento.js";
 import { darMaterialInicial } from "../functions/darMaterialInicial.js";
 import { verificarVictoria } from "../functions/verificarVictoria.js";
@@ -16,6 +16,10 @@ import { comerciarBanca } from "../functions/comerciarBanca.js";
 import { descartarRecurso } from "../functions/descartarRecurso.js";
 import { moverLadron } from "../functions/moverLadron.js";
 import { robarJugador } from "../functions/robarJugador.js";
+import { jugarCaballero } from "../functions/jugarCaballero.js";
+import { activarCartasCompradas } from "../functions/activarCartasCompradas.js";
+import { OfertaIntercambio } from "../schemas/OfertaIntercambio.js";
+import { intercambiarRecursos } from "../functions/intercambiarRecursos.js";
 
 
 export class CatanRoom extends Room {
@@ -25,6 +29,7 @@ export class CatanRoom extends Room {
   tablero = this.state.tablero;
   banca = this.state.banca;
   jugadores = this.state.jugadores;
+  ofertas = new Map<string, unknown>();
   codigoAcceso = "";
 
 
@@ -296,74 +301,83 @@ export class CatanRoom extends Room {
         return;
       }
 
+      this.ofertas.clear();
+
+      /** Activar las cartas compradas del jugador */
+      activarCartasCompradas(this.jugadores.get(client.sessionId));
+
+      /** Permitir usar una carta en el siguiente turno */
+      this.partida.cartaJugable = true;
+
       siguienteTurno(this.partida);
+
     },
-    msgColocarAsentamiento:(
+    msgColocarAsentamiento: (
       client: Client,
-      mensaje: {h: number, d: number, p: number}
-    ) =>{
+      mensaje: { h: number, d: number, p: number }
+    ) => {
       //* Verificar que la partida siga en curso
-      if(this.partida.fase === FasePartida.FINALIZADA){
+      if (this.partida.fase === FasePartida.FINALIZADA) {
         client.send("error", {
           mensajeError: "La partida ha finalizado"
         })
-        return ;
+        return;
       }
 
       //*Verificar que el turno sea del jugador 
-      if(this.partida.turnoActual !== client.sessionId){
+      if (this.partida.turnoActual !== client.sessionId) {
         client.send("error", {
           mensajeError: "No es tu turno"
         })
-        return ;
+        return;
       }
 
       const jugador = this.jugadores.get(client.sessionId);
-      if(!jugador) return;
+      if (!jugador) return;
 
-      const {h, d, p} = mensaje;
+      const { h, d, p } = mensaje;
 
       //! FLUJO DE LA FASE PRECONSTRUCCION
-      if(this.partida.fase === FasePartida.PRECONSTRUCCION){
+      if (this.partida.fase === FasePartida.PRECONSTRUCCION) {
         //* Comprobar que estamos en la fase de colocar asentamiento
-        if(this.partida.fasePreconstruccion !== FasePreconstruccion.ASENTAMIENTO){
-          client.send("error",{
+        if (this.partida.fasePreconstruccion !== FasePreconstruccion.ASENTAMIENTO) {
+          client.send("error", {
             mensajeError: "Debes colocar un camino"
           })
-          return ;
+          return;
         }
 
         //* Intentar construir el asentamiento
         const resultado = construirAsentamiento(
           this.tablero.vertices,
-          this.tablero.aristas, 
-          this.partida, 
-          h, d, p, 
-          jugador, 
-          this.banca, 
+          this.tablero.aristas,
+          this.partida,
+          h, d, p,
+          jugador,
+          this.banca,
           client.sessionId)
 
-          if(resultado.error){
-            client.send("error", {
-              mensaje: resultado.mensaje
-            })
-            return ;
-          }
-
-          //* Si estamos en vuelta de regreso de la preconstruccion
-          if(this.partida.direccionPreconstruccion === -1){
-            darMaterialInicial(this.tablero.hexagonos, jugador, h, d, p, this.banca);
-          }
-
-          this.partida.fasePreconstruccion = FasePreconstruccion.CAMINO;
+        if (resultado.error) {
+          client.send("error", {
+            mensaje: resultado.mensaje
+          })
           return;
+        }
+
+        //* Si estamos en vuelta de regreso de la preconstruccion
+        if (this.partida.direccionPreconstruccion === -1) {
+          darMaterialInicial(this.tablero.hexagonos, jugador, h, d, p, this.banca);
+        }
+
+        this.partida.fasePreconstruccion = FasePreconstruccion.CAMINO;
+        return;
 
       }
 
       //!FLUJO EN JUEGO
-      if(this.partida.fase == FasePartida.JUEGO){
+      if (this.partida.fase == FasePartida.JUEGO) {
         //* Comprobar que estamos en la fase de acciones
-        if(this.partida.faseJuego !== FaseJuego.ACCIONES){
+        if (this.partida.faseJuego !== FaseJuego.ACCIONES) {
           client.send("error", {
             mensajeError: "Debes lanzar los dados primero"
           })
@@ -376,13 +390,13 @@ export class CatanRoom extends Room {
           this.tablero.aristas,
           this.partida,
           h, d, p,
-          jugador, 
+          jugador,
           this.banca,
           client.sessionId
         )
 
         //* Si algo fallo en la construccion, indicar el error
-        if(resultado.error){
+        if (resultado.error) {
           client.send("error", {
             mensajeError: resultado.mensaje
           })
@@ -536,7 +550,263 @@ export class CatanRoom extends Room {
 
 
       this.partida.faseJuego = FaseJuego.ROBO
-    }
+    },
+    msgCartaCaballero: (
+      client: Client,
+      mensaje: {h: number, d:number}
+    ) => {
+      //* Verificar que la partida siga en curso
+      if(this.partida.fase === FasePartida.FINALIZADA){
+        client.send("error", {
+          mensajeError: "La partida ha finalizado"
+        })
+        return;
+      }
+
+      //* Verificar que sea el turno del jugador
+      if(this.partida.turnoActual !== client.sessionId){
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        })
+        return;
+      }
+
+      //* Verificar si estamos en la fase de acciones
+      if(this.partida.faseJuego !== FaseJuego.ACCIONES){
+        client.send("error", {
+          mensajeError: "Termina de lanzar los dados primero"
+        })
+        return;
+      }
+
+
+      //* Verificar que se permita usar carta
+      if(!this.partida.cartaJugable){
+        client.send("error", {
+          mensajeError: "Solo una carta por turno"
+        })
+        return;
+      }
+
+
+      //* Verificar que el jugador tenga la carta de caballero
+      const jugador = this.jugadores.get(client.sessionId);
+      if(jugador.cartas_usables.get(`${Desarrollo.CABALLERO}`) < 1){
+        client.send("error", {
+          mensajeError: "No tienes la carta de caballero"
+        })
+        return;
+      }
+
+      //* Mover al ladron y obtener los jugadores involucrados
+      const {h, d} = mensaje;
+      const resultado = moverLadron(
+        this.tablero,
+        this.jugadores,
+        client.sessionId,
+        h, d);
+
+
+        //* Si no se puede mover el ladron, notificar error
+        if(resultado.error){
+          client.send("error", {
+            mensajeError: resultado.mensaje
+          })
+          return;
+        }
+
+        //* Eliminar la carta de caballero del jugador
+        jugarCaballero(this.jugadores, client.sessionId, this.partida);
+
+        //* Extraemos los jugadores involucrados en el robo
+        const jugadoresInvolucrados = resultado.jugadoresInvolucrados;
+
+        //* Si no hay jugadores, pasamos a las ACCIONES
+        if(jugadoresInvolucrados.length == 0){
+          this.partida.faseJuego = FaseJuego.ACCIONES;
+          return;
+        }
+
+        //* Si solo hubo un jugador, se le roba automaticamente
+        if(jugadoresInvolucrados.length === 1){
+          robarJugador(
+            this.jugadores.get(client.sessionId),
+            this.jugadores.get(jugadoresInvolucrados[0])
+          )
+          this.partida.faseJuego = FaseJuego.ACCIONES;
+          return;
+        }
+
+        //* Si hay 2 o mas jugadores involucrados, se pasa la lista de jugadores
+        this.partida.jugadoresParaRobar.clear();
+        this.partida.jugadoresParaRobar.push(...jugadoresInvolucrados);
+
+
+        //* Deshabilitar el uso de otra carta este turno
+        this.partida.cartaJugable = false;
+
+        //? Entramos a fase especial para decidir a quien robar
+
+        this.partida.faseJuego = FaseJuego.ROBO;
+
+    },
+
+    msgIntercambiarJugador: (
+      client: Client,
+      mensaje: {
+        recursoEntregado: string,
+        cantidadEntregada: number,
+        recusoRecibido: string,
+        cantidadRecibida: number,
+      }
+    ) => {
+      //* Verificar que sea el turno del jugador
+      if(this.partida.turnoActual !== client.sessionId) {
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        })
+        return;
+      }
+
+      // * Verificar que estemos en la fase de acciones
+      if(this.partida.faseJuego !== FaseJuego.ACCIONES) {
+        client.send("error", {
+          mensajeError: "Termina de lanzar los dados primero"
+        })
+        return;
+      }
+
+      // * Verificar que no exista una oferta activa
+      if(this.partida.ofertaIntercambio.jugador !== "")(
+        client.send("error", {
+          mensajeError: "Ya existe una oferta activa"
+        })
+      )
+
+      const jugador = this.jugadores.get(client.sessionId);
+
+      // * Verificar que los recursos sean validos
+      if(
+        !jugador.recursos.has(mensaje.recursoEntregado) ||
+        !jugador.recursos.has(mensaje.recusoRecibido)
+      ) {
+        client.send("error", {
+          mensajeError: "Los Recursos seleccionados no son validos"
+        })
+        return;
+      }
+
+      // * Verificar que las cantidades tengan sentido
+      if(mensaje.cantidadEntregada <= 0 || mensaje.cantidadRecibida <= 0){
+        client.send("error", {
+          mensajeError: "No tienes suficientes recuros, mi loco"
+        })
+        return;
+      }
+
+      // * No se permite pedir y dar lo mismo
+      if(mensaje.recursoEntregado === mensaje.recusoRecibido){
+        client.send("error", {
+          mensajeError: "No puedes pedir y dar el mismo recurso"
+        })
+        return;
+      }
+
+      // * Llenado de la oferta
+      this.partida.ofertaIntercambio.setOferta(
+        client.sessionId, this.jugadores,
+        mensaje.recursoEntregado, mensaje.cantidadEntregada,
+        mensaje.recusoRecibido, mensaje.cantidadRecibida
+      );
+    },
+
+    msgResponderIntercambio: (
+      client: Client,
+      mensaje: {respuesta: number}
+    ) => {
+      // * Verificar que exista una oferta activa
+      if(this.partida.ofertaIntercambio.jugador === ""){
+        client.send("error", {
+          mensajeError: "No hay una oferta activa"
+        })
+      }
+
+      // * Verificar que no sea el jugador que la propuso
+      if(!this.partida.ofertaIntercambio.respuestas.has(client.sessionId)){
+        client.send("error", {
+          mensajeError: "No puedes responde a esta oferta"
+        })
+        return;
+      }
+
+      // * Verificar que el jugador aún deba reponder
+      if(this.partida.ofertaIntercambio.respuestas.get(client.sessionId) !== 0){
+        client.send("Error", {
+          mensajeError: "Ya respondiste a esta oferta"
+        })
+        return;
+      }
+
+      // * Verificar que sea una respueta valida
+      if(mensaje.respuesta !== 1 && mensaje.respuesta !== -1){
+        client.send("Error", {
+          mensajeError: "Respuesta invalida"
+        })
+        return;
+      }
+
+      // ! Rechazo
+      if(mensaje.respuesta === -1) {
+        this.partida.ofertaIntercambio.registrarRespuesta(client.sessionId, -1);
+        // * Verificar si todos rechazaron
+        if(this.partida.ofertaIntercambio.todosRechazaron()){
+          this.partida.ofertaIntercambio.limpiarOferta();
+        }
+        return;
+      }
+
+      const jugador = this.jugadores.get(client.sessionId);
+      const jugadorOferta = this.jugadores.get(this.partida.ofertaIntercambio.jugador);
+
+      // ? Acepto
+      if(mensaje.respuesta === 1) {
+        // * Destruir la ofera si el jugador que propuso ya gastó
+        if(jugadorOferta.recursos.get(
+          this.partida.ofertaIntercambio.recursoOfrecido
+        ) < this.partida.ofertaIntercambio.cantidadOfrecida) {
+          this.partida.ofertaIntercambio.limpiarOferta();
+
+          client.send("Error", {
+            mensajeError: "Oferta cancelada por falta de recursos"
+          })
+          return;
+        }
+
+        // * Verificar que el jugadr que acepta tenga suficientes recursos
+        if(jugador.recursos.get(
+          this.partida.ofertaIntercambio.recursoSolicitado
+        ) < this.partida.ofertaIntercambio.cantidadSolicitada) { 
+          // * Automaticamente pasarlo a rechazo
+          this.partida.ofertaIntercambio.registrarRespuesta(client.sessionId, -1);
+          // * Verificar si todos rechazaron
+          if(this.partida.ofertaIntercambio.todosRechazaron()) {
+            this.partida.ofertaIntercambio.limpiarOferta();
+          }
+          return;
+        }
+
+        // * Intercambiar los recursos
+        intercambiarRecursos(
+          this.partida.ofertaIntercambio.jugador,
+          client.sessionId,
+          this.jugadores,
+          this.partida.ofertaIntercambio
+        );
+
+        // * Destruir la oferta
+        this.partida.ofertaIntercambio.limpiarOferta();
+      }
+    },
   };
 
   onCreate(options: any) {
