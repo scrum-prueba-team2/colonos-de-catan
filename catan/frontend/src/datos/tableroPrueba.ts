@@ -1,4 +1,4 @@
-import type { DatosTablero } from '../componentes/tablero';
+import type { DatosTablero } from './tablero';
 
 export const tableroPrueba: DatosTablero = {
   // clave 'h,d' -> hexagono. h = horizontal (+ a la derecha), d = diagonal (+ arriba a la derecha)
@@ -170,4 +170,6 @@ export const tableroPrueba: DatosTablero = {
     '8': { id: 8, tipo: 0, vertice1: '-1,-1,1', vertice2: '-2,0,0' },
     '9': { id: 9, tipo: 0, vertice1: '-2,1,1', vertice2: '-3,2,0' },
   },
+// Casilla del ladron: el desierto, igual que en el backend.
+ladron: { h: 0, d: 2 },
 };

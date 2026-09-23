@@ -1,9 +1,4 @@
-import type { Recursos } from './jugadoresPrueba';
-
-export interface Banca {
-  recursos: Recursos;
-  cartas: number[];
-}
+import type { Banca } from './banca';
 
 export const bancaPrueba: Banca = {
   // Al inicio son 19 de cada uno;
