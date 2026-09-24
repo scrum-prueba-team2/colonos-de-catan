@@ -51,9 +51,9 @@ function SalaEspera({ room, jugadores, maxJugadores }: SalaEsperaProps) {
           {asientos.map((jugador, i) =>
             jugador ? (
               <li key={jugador.sessionId} className="sala-espera__asiento sala-espera__asiento--ocupado">
-                <span className="sala-espera__avatar">{iniciales(jugador.sessionId)}</span>
+                <span className="sala-espera__avatar">{iniciales(jugador.nombre || jugador.sessionId)}</span>
                 <span className="sala-espera__asiento-nombre">
-                  {jugador.esUsuarioActual ? "Tú" : jugador.sessionId}
+                  {jugador.esUsuarioActual ? `${jugador.nombre} (Tú)` : jugador.nombre}
                 </span>
               </li>
             ) : (

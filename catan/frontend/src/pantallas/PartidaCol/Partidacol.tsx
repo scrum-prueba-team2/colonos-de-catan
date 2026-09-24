@@ -4,6 +4,7 @@ import "./Partida.css";
 
 export interface JugadorVista {
   sessionId: string;
+  nombre: string;
   score: number;
   esUsuarioActual: boolean;
   esSuTurno: boolean;
@@ -91,7 +92,7 @@ function Partida({
                   className={"partida__jugador" + (jugador.esSuTurno ? " partida__jugador--activo" : "")}
                 >
                   <span className="partida__jugador-nombre">
-                    {jugador.esUsuarioActual ? "Tú" : jugador.sessionId}
+                    {jugador.esUsuarioActual ? `${jugador.nombre} (Tú)` : jugador.nombre}
                   </span>
                   <span className="partida__jugador-score">{jugador.score} pts</span>
                 </li>
