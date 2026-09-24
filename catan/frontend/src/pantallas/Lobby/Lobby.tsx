@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import type { RoomAvailable } from "@colyseus/sdk";
 import "./Lobby.css";
-import { leerSalasRecientes, type SalaReciente } from "../salasRecientes";
+import { client } from "../colyseusClient";
 
 export type SalaTipo = "publica" | "privada";
 
@@ -11,26 +12,26 @@ export interface SalaDisponible {
   jugadores: number;
   maxJugadores: number;
   anfitrion: string;
-  esTuSala?: boolean;
 }
 
-// Datos de prueba: mientras el backend no exponga un listado real de salas.
-const SALAS_DE_PRUEBA: SalaDisponible[] = [
-  { id: "a1B2c3", nombre: "Isla de Catán", tipo: "publica", jugadores: 2, maxJugadores: 4, anfitrion: "gSY1wq" },
-  { id: "d4E5f6", nombre: "Partida rápida", tipo: "publica", jugadores: 3, maxJugadores: 4, anfitrion: "kLm9pQ" },
-  { id: "g7H8i9", nombre: "Amigos del viernes", tipo: "privada", jugadores: 1, maxJugadores: 4, anfitrion: "aNa22x" },
-  { id: "j1K2l3", nombre: "Solo para expertos", tipo: "privada", jugadores: 4, maxJugadores: 4, anfitrion: "trad3r" },
-];
+// Metadata que CatanRoom publica con setMetadata (ver onCreate en el backend).
+interface MetadataSala {
+  alias?: string;
+  estado?: string;
+  privada?: boolean;
+  anfitrion?: string;
+}
 
-function salaDesdeReciente(reciente: SalaReciente): SalaDisponible {
+type EstadoConexion = "conectando" | "conectado" | "error";
+
+function salaDesdeListado(sala: RoomAvailable<MetadataSala>): SalaDisponible {
   return {
-    id: reciente.id,
-    nombre: "Tu sala",
-    tipo: "publica",
-    jugadores: 1,
-    maxJugadores: 4,
-    anfitrion: "Tú",
-    esTuSala: true,
+    id: sala.roomId,
+    nombre: sala.metadata?.alias || "Catan Room",
+    tipo: sala.metadata?.privada ? "privada" : "publica",
+    jugadores: sala.clients,
+    maxJugadores: sala.maxClients,
+    anfitrion: sala.metadata?.anfitrion || "",
   };
 }
 
@@ -43,22 +44,62 @@ interface LobbyProps {
 function Lobby({ onCrearSala, onUnirseASala, onVolver }: LobbyProps) {
   const [codigoInput, setCodigoInput] = useState("");
   const [salaSeleccionada, setSalaSeleccionada] = useState<string | null>(null);
-  const [salasRecientes, setSalasRecientes] = useState<SalaReciente[]>([]);
+  const [listado, setListado] = useState<RoomAvailable<MetadataSala>[]>([]);
+  const [conexion, setConexion] = useState<EstadoConexion>("conectando");
 
   useEffect(() => {
-    function actualizar() {
-      setSalasRecientes(leerSalasRecientes());
-    }
+    // Nos unimos a la LobbyRoom del backend, que envía el listado completo al
+    // entrar ("rooms") y luego avisa cada vez que una sala aparece o cambia
+    // ("+") o se elimina ("-").
+    // Ojo: no filtramos por metadata en el servidor porque, al cambiar el
+    // estado a "EN JUEGO", la LobbyRoom no envía "-" (compara la sala con
+    // ella misma). Sí envía "+" con los datos nuevos, así que filtramos aquí.
+    let cancelado = false;
+    let salaLobby: Awaited<ReturnType<typeof client.joinOrCreate>> | null = null;
 
-    actualizar();
+    client
+      .joinOrCreate("lobby", { filter: { name: "catan" } })
+      .then((sala) => {
+        // En modo estricto React monta, desmonta y vuelve a montar el
+        // componente; si ya nos desmontaron, salimos de inmediato.
+        if (cancelado) {
+          sala.leave();
+          return;
+        }
+        salaLobby = sala;
+        setConexion("conectado");
 
-    // Si creas una sala en otra pestaña del mismo navegador, esta pantalla
-    // se actualiza sola gracias al evento "storage".
-    window.addEventListener("storage", actualizar);
-    return () => window.removeEventListener("storage", actualizar);
+        sala.onMessage("rooms", (salas: RoomAvailable<MetadataSala>[]) => setListado(salas));
+
+        sala.onMessage("+", ([roomId, datos]: [string, RoomAvailable<MetadataSala>]) => {
+          setListado((prev) => {
+            const indice = prev.findIndex((s) => s.roomId === roomId);
+            if (indice === -1) return [...prev, datos];
+            const copia = [...prev];
+            copia[indice] = datos;
+            return copia;
+          });
+        });
+
+        sala.onMessage("-", (roomId: string) => {
+          setListado((prev) => prev.filter((s) => s.roomId !== roomId));
+        });
+      })
+      .catch((error) => {
+        console.error("Error conectando al lobby:", error);
+        if (!cancelado) setConexion("error");
+      });
+
+    return () => {
+      cancelado = true;
+      salaLobby?.leave();
+    };
   }, []);
 
-  const salas: SalaDisponible[] = [...salasRecientes.map(salaDesdeReciente), ...SALAS_DE_PRUEBA];
+  // Solo mostramos salas que todavía esperan jugadores.
+  const salas: SalaDisponible[] = listado
+    .filter((sala) => sala.metadata?.estado === "EN LOBBY" && sala.clients < sala.maxClients)
+    .map(salaDesdeListado);
 
   function seleccionarSala(sala: SalaDisponible) {
     setSalaSeleccionada(sala.id);
@@ -101,7 +142,11 @@ function Lobby({ onCrearSala, onUnirseASala, onVolver }: LobbyProps) {
       <section className="lobby__lista">
         <h2>Salas disponibles</h2>
 
-        {salas.length === 0 ? (
+        {conexion === "conectando" ? (
+          <p className="lobby__vacio">Buscando salas...</p>
+        ) : conexion === "error" ? (
+          <p className="lobby__vacio">No se pudo conectar con el servidor. Revisa que el backend esté encendido.</p>
+        ) : salas.length === 0 ? (
           <p className="lobby__vacio">No hay salas abiertas. Crea una para empezar a jugar.</p>
         ) : (
           <ul>
@@ -111,7 +156,6 @@ function Lobby({ onCrearSala, onUnirseASala, onVolver }: LobbyProps) {
                 className={
                   "lobby__sala" +
                   (sala.tipo === "privada" ? " lobby__sala--privada" : " lobby__sala--publica") +
-                  (sala.esTuSala ? " lobby__sala--tuya" : "") +
                   (salaSeleccionada === sala.id ? " lobby__sala--seleccionada" : "")
                 }
                 onClick={() => seleccionarSala(sala)}
@@ -119,18 +163,13 @@ function Lobby({ onCrearSala, onUnirseASala, onVolver }: LobbyProps) {
                 <div className="lobby__sala-info">
                   <div className="lobby__sala-nombre-fila">
                     <span className="lobby__sala-nombre">{sala.nombre}</span>
-                    {sala.esTuSala ? (
-                      <span className="lobby__badge lobby__badge--tuya">Tu sala</span>
-                    ) : (
-                      <span className={"lobby__badge lobby__badge--" + sala.tipo}>
-                        {sala.tipo === "publica" ? "Pública" : "Privada"}
-                      </span>
-                    )}
+                    <span className={"lobby__badge lobby__badge--" + sala.tipo}>
+                      {sala.tipo === "publica" ? "Pública" : "Privada"}
+                    </span>
                   </div>
                   <span className="lobby__sala-detalle">
-                    {sala.esTuSala
-                      ? "Se acaba de crear, esperando jugadores"
-                      : `Anfitrión ${sala.anfitrion}, ${sala.jugadores} de ${sala.maxJugadores} jugadores`}
+                    {sala.anfitrion ? `Anfitrión ${sala.anfitrion}, ` : ""}
+                    {sala.jugadores} de {sala.maxJugadores} jugadores
                   </span>
                 </div>
 

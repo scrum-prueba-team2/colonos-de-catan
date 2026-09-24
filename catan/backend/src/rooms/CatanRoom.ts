@@ -269,7 +269,9 @@ export class CatanRoom extends Room {
       this.partida.fase = FasePartida.PRECONSTRUCCION;
 
       //* Actualización de metadata para mostrar en la Lobby
+      //* (setMetadata reemplaza todo, por eso conservamos el resto de campos)
       this.setMetadata({
+        ...this.metadata,
         estado: "EN JUEGO"
       });
     },
@@ -990,7 +992,8 @@ export class CatanRoom extends Room {
     this.setMetadata({
       alias: options.alias || "Catan Room",
       estado: "EN LOBBY",
-      privada: options.privada || false
+      privada: options.privada || false,
+      anfitrion: options.nombre || ""
     })
   }
 

@@ -7,7 +7,6 @@ import Lobby from "./pantallas/Lobby/Lobby";
 import IngresarNombre from "./pantallas/IngresarNombre/IngresarNombre";
 import SalaEspera from "./pantallas/SalaEspera/SalaEspera";
 import Partida, { type JugadorVista } from "./pantallas/PartidaCol/Partidacol";
-import { guardarSalaReciente } from "./pantallas/salasRecientes";
 
 import PartidaTablero from "./pantallas/Partida";
 
@@ -90,7 +89,6 @@ function Navegacion() {
   async function crearSala() {
     try {
       const nuevaSala = await client.create("catan", { nombre: nombreJugador });
-      guardarSalaReciente(nuevaSala.roomId);
       setRoom(nuevaSala);
     } catch (error) {
       console.error("Error creating room:", error);
