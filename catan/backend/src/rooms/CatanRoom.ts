@@ -21,6 +21,7 @@ import { activarCartasCompradas } from "../functions/activarCartasCompradas.js";
 import { OfertaIntercambio } from "../schemas/OfertaIntercambio.js";
 import { intercambiarRecursos } from "../functions/intercambiarRecursos.js";
 import { construirCamino } from "../functions/construirCaminos.js";
+import { jugarAbundancia } from "../functions/jugarAbundancia.js";
 
 
 export class CatanRoom extends Room {
@@ -914,6 +915,70 @@ export class CatanRoom extends Room {
         this.partida.faseJuego = FaseJuego.ACCIONES
       }
     },
+    msgCartaAbundancia:(
+      client: Client,
+      mensaje: { recurso1: string, recurso2: string}
+    ) => {
+      //* Verificar que la partida siga en curso
+      if(this.partida.fase === FasePartida.FINALIZADA){
+        client.send("error", {
+          mensaejError: "La partida ha finalizado"
+        })
+        return;
+      }
+
+      //* Verificar que sea el turno del jugador
+      if(this.partida.turnoActual !== client.sessionId){
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        })
+        return;
+      }
+
+      //* Verificar que estamos en fase de acciones
+      if(this.partida.faseJuego !== FaseJuego.ACCIONES){
+        client.send("error",{
+          mensajeError: "Termina de lanzar los dados primero"
+        })
+        return;
+      }
+
+
+      //* Verificar si se permite usar carta
+      if(!this.partida.cartaJugable){
+        client.send("error", {
+          mensajeError: "solo una carta por turno"
+        })
+        return;
+      }
+
+      //* Verificar que tenga la carta de abundancia
+      const jugador = this.jugadores.get(client.sessionId);
+      if(jugador.cartas_usables.get(`${Desarrollo.ABUNDANCIA}`) < 1){
+        client.send("error", {
+          mensajeError: "No tienes la carta de abundancia"
+        })
+        return;
+      }
+
+
+      //* Intentar jugar la carta de abundancia
+      const resultado = jugarAbundancia(
+        jugador, this.banca, mensaje.recurso1, mensaje.recurso2
+      );
+
+      //* Si no puede jugar, notificar error
+      if(resultado.error){
+        client.send("error", {
+          mensjaeError: resultado.mensaje
+        })
+        return;
+      }
+
+      //* Marcar que ya se utilizo una carta en este turno
+      this.partida.cartaJugable = false;
+
+    }
   };
 
   onCreate(options: any) {
