@@ -1,4 +1,4 @@
-import './tablaCostos.css'
+import './tablaCostes.css'
 
 function TablaCostes() {
   return (
