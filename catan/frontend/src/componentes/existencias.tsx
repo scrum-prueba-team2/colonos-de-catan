@@ -1,6 +1,6 @@
-import type { Banca } from '../datos/banca';
-import type { Jugador } from '../datos/jugador';
-import { RECURSOS, PIEZA, NOMBRE_PIEZA } from '../datos/jugador';
+import type { Banca } from '../common/banca';
+import type { Jugador } from '../common/jugador';
+import { RECURSOS, PIEZA, NOMBRE_PIEZA } from '../common/jugador';
 import './existencias.css';
 
 interface Props {

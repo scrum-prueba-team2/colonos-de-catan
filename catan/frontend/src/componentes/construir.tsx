@@ -1,4 +1,4 @@
-import type { Recursos } from '../datos/jugador';
+import type { Recursos } from '../common/jugador';
 import './construir.css';
 
 // Estos nombres se envían al backend. No usamos las etiquetas visibles para

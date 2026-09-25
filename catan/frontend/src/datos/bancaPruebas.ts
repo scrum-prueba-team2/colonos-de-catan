@@ -1,4 +1,4 @@
-import type { Banca } from './banca';
+import type { Banca } from '../common/banca';
 
 export const bancaPrueba: Banca = {
   // Al inicio son 19 de cada uno;

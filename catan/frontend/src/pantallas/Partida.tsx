@@ -10,8 +10,8 @@ import Existencias from '../componentes/existencias';
 import { tableroPrueba } from '../datos/tableroPrueba'
 import TablaCostes from '../componentes/tablaCostes';
 import Tablero from '../componentes/tablero';
-import type { DatosTablero } from '../datos/tablero';
-import type { Recursos } from '../datos/jugador';
+import type { DatosTablero } from '../common/tablero';
+import type { Recursos } from '../common/jugador';
 import Construir, {
   type ObjetivoConstruccion,
   type SolicitudConstruccion,

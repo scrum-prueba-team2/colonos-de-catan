@@ -1,4 +1,4 @@
-import type { DatosTablero } from './tablero';
+import type { DatosTablero } from '../common/tablero';
 
 export const tableroPrueba: DatosTablero = {
   // clave 'h,d' -> hexagono. h = horizontal (+ a la derecha), d = diagonal (+ arriba a la derecha)
