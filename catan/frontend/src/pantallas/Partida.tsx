@@ -10,8 +10,8 @@ import Existencias from '../componentes/existencias';
 import { tableroPrueba } from '../datos/tableroPrueba'
 import TablaCostes from '../componentes/tablaCostes';
 import Tablero from '../componentes/tablero';
-import type { DatosTablero } from '../common/tablero';
 import type { Recursos } from '../common/jugador';
+import type { EstadoCatan } from '../common/estado';
 import Construir, {
   type ObjetivoConstruccion,
   type SolicitudConstruccion,
@@ -19,9 +19,6 @@ import Construir, {
 } from '../componentes/construir';
 import './Partida.css'
 
-// Mientras la conexión de la issue #25 no esté integrada, estos recursos solo
-// sirven para probar la interfaz. El estado real debe llegar desde el jugador
-// que publica Colyseus, nunca calcularse de forma definitiva en el cliente.
 const recursosPrueba: Recursos = {
   madera: 2,
   ladrillo: 2,
@@ -30,13 +27,16 @@ const recursosPrueba: Recursos = {
   mineral: 3,
 };
 
-/* Lo que llega en room.state usa las mismas claves (h, d, p, terreno, constuccion...) 
-   no hay nada que traducir.
-   Devuelve null si el estado todavia no llego. */
-function leerTablero(sala: Room): DatosTablero | null {
-  const estado = sala.state as { tablero?: { toJSON(): DatosTablero } } | undefined;
-  if (!estado || !estado.tablero) return null;
-  return estado.tablero.toJSON();
+/* room.state es un Schema de Colyseus: toJSON() lo vuelve objeto plano. Las
+   claves son las mismas que en common/ (h, d, p, terreno, constuccion, nombre,
+   recursos, cartas_usables...), asi que no hay nada que traducir.
+   Devuelve null mientras el estado no haya llegado completo. */
+function leerEstado(sala: Room): EstadoCatan | null {
+  const raiz = sala.state as { toJSON?: () => EstadoCatan } | undefined;
+  if (!raiz?.toJSON) return null;
+  const estado = raiz.toJSON();
+  if (!estado.tablero || !estado.jugadores || !estado.partida || !estado.banca) return null;
+  return estado;
 }
 
 interface Props {
@@ -54,27 +54,34 @@ function Partida({ sala, onSolicitarConstruccion }: Props) {
   const [objetivoConstruccion, setObjetivoConstruccion] = useState<ObjetivoConstruccion | null>(null);
   const [estadoConstruccion, setEstadoConstruccion] = useState('');
 
-  // El tablero que manda el servidor. null = todavia no llega, o no hay sala.
-  const [tableroReal, setTableroReal] = useState<DatosTablero | null>(null);
+  // Todo lo que manda el servidor. null = todavia no llega, o no hay sala.
+  const [estadoReal, setEstadoReal] = useState<EstadoCatan | null>(null);
 
   useEffect(() => {
     if (!sala) return;
     const salaActual = sala;
 
-    function actualizarTablero() {
-      setTableroReal(leerTablero(salaActual));
+    function actualizarEstado() {
+      setEstadoReal(leerEstado(salaActual));
     }
 
-    actualizarTablero();
+    actualizarEstado();
 
-    // Actualisa el tablero con cada cambio que mande el servidor.
-    salaActual.onStateChange(actualizarTablero);
-    return () => { salaActual.onStateChange.remove(actualizarTablero); };
+    // Se vuelve a leer con cada cambio que mande el servidor.
+    salaActual.onStateChange(actualizarEstado);
+    return () => { salaActual.onStateChange.remove(actualizarEstado); };
   }, [sala]);
 
-  /* Sin sala se usa el tablero de prueba: es la misma forma de datos, asi que
-     <Tablero> no nota la diferencia y no hay que tocarlo. */
-  const datosTablero = tableroReal ?? tableroPrueba;
+  /* Sin sala, o antes del primer estado, se usan los datos de prueba: tienen la
+     misma forma, asi que los componentes no notan la diferencia. Los seis
+     salen de la misma fuente para no mezclar un sessionId real con jugadores
+     de prueba. */
+  const datosTablero = estadoReal?.tablero ?? tableroPrueba;
+  const jugadores = estadoReal?.jugadores ?? jugadoresPrueba;
+  const ordenJugadores = estadoReal?.partida.ordenJugadores ?? ordenJugadoresPrueba;
+  const turnoActual = estadoReal?.partida.turnoActual ?? turnoActualPrueba;
+  const banca = estadoReal?.banca ?? bancaPrueba;
+  const miSessionId = estadoReal ? (sala?.sessionId ?? '') : miSessionIdPrueba;
 
   function seleccionarConstruccion(tipo: TipoConstruccion | null) {
     setTipoConstruccion(tipo);
@@ -119,10 +126,10 @@ function Partida({ sala, onSolicitarConstruccion }: Props) {
         </div>
         <div className="infoJugadores">
           <InfoJugadores
-            jugadores={jugadoresPrueba}
-            ordenJugadores={ordenJugadoresPrueba}
-            turnoActual={turnoActualPrueba}
-            miSessionId={miSessionIdPrueba}
+            jugadores={jugadores}
+            ordenJugadores={ordenJugadores}
+            turnoActual={turnoActual}
+            miSessionId={miSessionId}
           />
         </div>
         <div className="infoPartida">
@@ -156,8 +163,8 @@ function Partida({ sala, onSolicitarConstruccion }: Props) {
         </div>
         <div className="existencias">
           <Existencias
-            banca={bancaPrueba}
-            miJugador={jugadoresPrueba[miSessionIdPrueba]}
+            banca={banca}
+            miJugador={jugadores[miSessionId]}
           />
         </div>
     </div>

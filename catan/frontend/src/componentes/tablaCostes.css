@@ -1,84 +1,86 @@
-/* Tabla de costes de la columna izquierda.
-   Los iconos vienen del sprite public/svg/piezas.svg y toman su color de la
-   propiedad color, porque estan dibujados con fill="currentColor". Por eso
-   aqui si quedan reglas de color: no tinen texto, dibujan los iconos. */
 .tcMarco {
-    font-size: clamp(8px, 4.4cqw, 16px);
+    background: #f7ecd6;
+    border: 4px double #b89a5e;
+    border-radius: 10px;
+    padding: 2%;
+    padding-top: 4%;
+    color: #3a2a17;
+
+    /* Ocupa todo el contenedor padre. */
+    width: 100%;
     height: 100%;
+    box-sizing: border-box;
+
+    /* Columna: título arriba, lista repartida en el resto. */
     display: flex;
     flex-direction: column;
-    gap: 0.33em;
-    padding: 0.66em 0.75em;
-    box-sizing: border-box;
-    min-height: 0;
-    overflow: hidden;
+    gap: 2%;
+
+    /* Referencia para las unidades cqi/cqh de los hijos. */
+    container-type: size;
 }
 
 .tcTitulo {
-    font-size: 0.83em;
-    color: #888;
+    margin: 0;
+    text-align: center;
+    border-bottom: 2px solid #b89a5e;
+    padding-bottom: 6px;
+    /* El título escala con el ancho del contenedor. */
+    font-size: clamp(1.2rem, 2cqi, 1.4rem);
 }
 
 .tcLista {
     list-style: none;
     margin: 0;
     padding: 0;
-    flex: 1;
+
+    /* Ocupa el alto restante y reparte las filas por igual. */
+    flex: 1 1 auto;
     min-height: 0;
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
 }
 
-/* Una fila por construccion: a la izquierda la pieza, a la derecha lo que paga */
 .tcFila {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.66em;
-    padding: 0.4em 0;
-    border-bottom: 1px solid #EDF1F2;
-    min-width: 0;
-}
-.tcFila:last-child { border-bottom: 0; }
+    gap: 0px;
+    padding: 1% 0;
+    border-bottom: 1px solid #cbb083;
 
-.tcPieza {
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-    min-width: 0;
-    color: #2C4049;
+    /* Cada fila ocupa el mismo alto disponible. */
+    flex: 1 1 0;
+    min-height: 0;
+
+    /* El texto escala con el alto de la fila (cqh). */
+    font-size: clamp(1rem, 5cqh, 1.1rem);
 }
 
-.tcIconoPieza { width: 1.42em; height: 1.42em; flex: none; }
-
-.tcNombre {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.tcFila > img{
+  font-size: clamp(0.8rem, 5cqh, 1.1rem);
 }
 
-.tcPaga {
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
+.tcFila > span{
+  font-size: clamp(1rem, 5cqh, 1.1rem);
+}
+
+.tcFila:last-child {
+    border-bottom: none;
+}
+
+.tcIconoPieza,
+.tcRecurso {
+    /* En em: escalan con el font-size de la fila. */
+    width: 2em;
+    height: 2em;
+    object-fit: contain;
     flex: none;
 }
 
-.tcCosto { display: flex; align-items: center; gap: 0.08em; }
-.tcRecurso { width: 1.5em; height: 1.5em; }
-
-.tcCantidad {
-    font-size: 0.92em;
+.tcNombre {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
-
-/* El color de cada recurso. */
-.tcRec-madera   { color: #2F6B44; }
-.tcRec-ladrillo { color: #BF6437; }
-.tcRec-lana     { color: #7FA84B; }
-.tcRec-trigo    { color: #D9A22C; }
-.tcRec-piedra   { color: #7A8391; }
-
-/* Las cartas de desarrollo estan fuera de esta version */
-.tcInactiva { opacity: .38; }
-
