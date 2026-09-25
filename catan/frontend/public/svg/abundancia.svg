@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="250" height="250">
+  <!-- Cuerpo de la bolsa (redondo y ancho) -->
+  <path d="M 25 45 
+           Q 15 60 18 75 
+           Q 22 92 50 92 
+           Q 78 92 82 75 
+           Q 85 60 75 45 
+           Z" 
+        fill="#D4A24C" stroke="#7B4A1E" stroke-width="3" stroke-linejoin="round"/>
+  
+  <!-- Sombra lateral derecha -->
+  <path d="M 75 45 Q 85 60 82 75 Q 78 92 50 92 Q 60 90 68 78 Q 74 62 68 45 Z" 
+        fill="#B8853A" opacity="0.6"/>
+  
+  <!-- Cuello fruncido de la bolsa -->
+  <path d="M 30 42 
+           Q 28 35 32 30 
+           Q 38 28 42 32 
+           Q 46 28 50 32 
+           Q 54 28 58 32 
+           Q 62 28 68 30 
+           Q 72 35 70 42 
+           Z" 
+        fill="#D4A24C" stroke="#7B4A1E" stroke-width="3" stroke-linejoin="round"/>
+  
+  <!-- Cinta/cordel atado -->
+  <path d="M 28 45 Q 50 40 72 45" 
+        fill="none" stroke="#7B4A1E" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- Nudo central -->
+  <circle cx="50" cy="43" r="4" fill="#8B5A2B" stroke="#5D3A1A" stroke-width="2"/>
+  
+  <!-- Cordel colgando -->
+  <path d="M 52 45 Q 60 55 62 70 Q 63 78 58 82" 
+        fill="none" stroke="#7B4A1E" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 60 70 Q 66 72 70 68" 
+        fill="none" stroke="#7B4A1E" stroke-width="2.5" stroke-linecap="round"/>
+  
+  <!-- "+2" con borde (contorno) -->
+  <text x="50" y="70" 
+        font-family="Arial, Helvetica, sans-serif" 
+        font-size="32" 
+        font-weight="bold" 
+        fill="none"
+        stroke="#ffdea4ff" 
+        stroke-width="5"
+        stroke-linejoin="round"
+        text-anchor="middle" 
+        dominant-baseline="middle">+2</text>
+  <!-- "+2" relleno -->
+  <text x="50" y="70" 
+        font-family="Arial, Helvetica, sans-serif" 
+        font-size="32" 
+        font-weight="bold" 
+        fill="#7B4A1E" 
+        text-anchor="middle" 
+        dominant-baseline="middle">+2</text>
+</svg>
