@@ -4,9 +4,9 @@ import { client } from "./pantallas/colyseusClient";
 import Home from "./pantallas/Home/Home";
 import ElegirModo from "./pantallas/ElegirModo/ElegirModo";
 import Lobby from "./pantallas/Lobby/Lobby";
+import IngresarNombre from "./pantallas/IngresarNombre/IngresarNombre";
 import SalaEspera from "./pantallas/SalaEspera/SalaEspera";
 import Partida, { type JugadorVista } from "./pantallas/PartidaCol/Partidacol";
-import { guardarSalaReciente } from "./pantallas/salasRecientes";
 
 import PartidaTablero from "./pantallas/Partida";
 
@@ -28,10 +28,12 @@ interface EstadoDeSala {
   };
 }
 
-type Vista = "inicio" | "elegir" | "lobby";
+type Vista = "inicio" | "nombre" | "elegir" | "lobby";
 
 function Navegacion() {
   const [vista, setVista] = useState<Vista>("inicio");
+  // El nombre vive solo en memoria: al recargar la página se vuelve a pedir.
+  const [nombreJugador, setNombreJugador] = useState("");
   const [room, setRoom] = useState<Room | null>(null);
   const [turnoActual, setTurnoActual] = useState("");
   const [jugadores, setJugadores] = useState<JugadorVista[]>([]);
@@ -67,6 +69,7 @@ function Navegacion() {
       state.jugadores.forEach((jugador, sessionId) => {
         listaJugadores.push({
           sessionId,
+          nombre: jugador.nombre,
           score: jugador.puntuacion,
           esUsuarioActual: sessionId === salaActual.sessionId,
           esSuTurno: sessionId === state.partida.turnoActual,
@@ -85,8 +88,7 @@ function Navegacion() {
 
   async function crearSala() {
     try {
-      const nuevaSala = await client.create("catan");
-      guardarSalaReciente(nuevaSala.roomId);
+      const nuevaSala = await client.create("catan", { nombre: nombreJugador });
       setRoom(nuevaSala);
     } catch (error) {
       console.error("Error creating room:", error);
@@ -95,7 +97,7 @@ function Navegacion() {
 
   async function unirseASala(codigo: string) {
     try {
-      const nuevaSala = await client.joinById(codigo, {});
+      const nuevaSala = await client.joinById(codigo, { nombre: nombreJugador });
       setRoom(nuevaSala);
     } catch (error) {
       console.error("Error connecting to room:", error);
@@ -124,7 +126,19 @@ function Navegacion() {
 
   if (!room) {
     if (vista === "inicio") {
-      return <Home onAbrirMenu={() => setVista("elegir")} />;
+      return <Home onAbrirMenu={() => setVista(nombreJugador ? "elegir" : "nombre")} />;
+    }
+
+    if (vista === "nombre") {
+      return (
+        <IngresarNombre
+          nombreInicial={nombreJugador}
+          onConfirmar={(nombre) => {
+            setNombreJugador(nombre);
+            setVista("elegir");
+          }}
+        />
+      );
     }
 
     if (vista === "elegir") {
