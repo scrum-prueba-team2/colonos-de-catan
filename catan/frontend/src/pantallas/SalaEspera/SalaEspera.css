@@ -174,6 +174,30 @@
   color: var(--text-subtle, #858d9d);
 }
 
+/* Botón Iniciar partida (solo lo ve el creador de la sala) */
+.sala-espera__iniciar {
+  width: 100%;
+  background-color: var(--brand-primary, #101828);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md, 12px);
+  padding: 0.9rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--transition-fast, 0.2s ease);
+  margin-bottom: 0.75rem;
+}
+
+.sala-espera__iniciar:hover:not(:disabled) {
+  background-color: var(--brand-hover, #1d2939);
+}
+
+.sala-espera__iniciar:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* Nota inferior */
 .sala-espera__nota {
   font-size: 0.8125rem;

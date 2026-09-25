@@ -9,8 +9,15 @@ import SalaEspera from "./pantallas/SalaEspera/SalaEspera";
 import Partida, { type JugadorVista } from "./pantallas/PartidaCol/Partidacol";
 
 import PartidaTablero from "./pantallas/Partida";
+import { FASE_PARTIDA } from "./common/fases";
 
+// Cupo de la sala. Debe coincidir con maxClients de CatanRoom en el backend.
 const MAX_JUGADORES = 4;
+
+// Mínimo para poder iniciar. El backend también lo valida en
+// msgIniciarPartida; aquí solo se usa para deshabilitar el botón y evitar
+// que el creador reciba un error que ya sabemos que va a ocurrir.
+const MIN_JUGADORES_PARA_INICIAR = 2;
 
 interface JugadorEstado {
   nombre: string;
@@ -38,6 +45,13 @@ function Navegacion() {
   const [turnoActual, setTurnoActual] = useState("");
   const [jugadores, setJugadores] = useState<JugadorVista[]>([]);
 
+  // Ambos valores los publica el backend en state.partida:
+  // - fase: en qué etapa está la partida (ver common/fases.ts).
+  // - creador: sessionId del primer jugador que entró a la sala. Es el único
+  //   al que el backend le acepta msgIniciarPartida.
+  const [fasePartida, setFasePartida] = useState<number>(FASE_PARTIDA.LOBBY);
+  const [creador, setCreador] = useState("");
+
   // Chat / dado son solo de exhibición: el backend aún no tiene
   // registrados los onMessage correspondientes (ver CatanRoom.ts),
   // así que estos estados se quedan vacíos por ahora.
@@ -50,11 +64,18 @@ function Navegacion() {
 
   const esMiTurno = room !== null && turnoActual === room.sessionId;
 
-  // Regla de negocio del frontend: con 4 jugadores conectados se pasa a
-  // PartidaCol, sin depender de que el backend cambie state.partida.fase
-  // (por ahora esa fase nunca avanza porque el backend no tiene registrado
-  // el handler de iniciar partida).
-  const salaCompleta = jugadores.length >= MAX_JUGADORES;
+  // El paso de la sala de espera al tablero lo decide el BACKEND, no el
+  // cliente. Mientras la fase sea LOBBY mostramos la sala de espera; en
+  // cuanto el creador inicia la partida, el backend cambia la fase a
+  // PRECONSTRUCCION y, como esa fase se sincroniza con todos los clientes,
+  // cada jugador pasa al tablero por su cuenta sin tener que hacer nada.
+  // (Antes se contaba jugadores.length >= 4, lo que impedía jugar de 2 o 3
+  // y dejaba sin usar el orden de turnos que mezcla el backend.)
+  const partidaIniciada = fasePartida !== FASE_PARTIDA.LOBBY;
+
+  // Solo el creador ve el botón de iniciar. Comparamos el creador que
+  // publica el backend con nuestra propia sesión.
+  const esCreador = room !== null && creador === room.sessionId;
 
   useEffect(() => {
     if (!room) return;
@@ -64,6 +85,8 @@ function Navegacion() {
       if (!state || !state.jugadores || !state.partida) return;
 
       setTurnoActual(state.partida.turnoActual);
+      setFasePartida(state.partida.fase);
+      setCreador(state.partida.creador);
 
       const listaJugadores: JugadorVista[] = [];
       state.jugadores.forEach((jugador, sessionId) => {
@@ -79,11 +102,23 @@ function Navegacion() {
     }
 
     sincronizarEstado(salaActual.state as unknown as EstadoDeSala);
-    salaActual.onStateChange((state: EstadoDeSala) => sincronizarEstado(state));
+    salaActual.onStateChange(sincronizarEstado);
 
+    // Aquí llegan, entre otros, los rechazos de msgIniciarPartida
+    // (no ser el creador, menos de 2 jugadores, partida ya iniciada).
     salaActual.onMessage("error", (err: { mensajeError: string }) => {
       alert(err.mensajeError);
     });
+
+    // El backend avisa con "inicio" cuando arranca la partida. No lo usamos
+    // para navegar (eso lo decide la fase, ver partidaIniciada), pero lo
+    // registramos para que el SDK no muestre el aviso de "mensaje sin handler".
+    salaActual.onMessage("inicio", () => {});
+
+    // Al cambiar de sala dejamos de escuchar los cambios de la anterior.
+    return () => {
+      salaActual.onStateChange.remove(sincronizarEstado);
+    };
   }, [room]);
 
   async function crearSala() {
@@ -102,6 +137,13 @@ function Navegacion() {
     } catch (error) {
       console.error("Error connecting to room:", error);
     }
+  }
+
+  // Le pide al backend que inicie la partida. No cambiamos de pantalla aquí:
+  // si el backend lo acepta cambiará la fase y todos (incluido el creador)
+  // avanzarán al tablero; si lo rechaza, llega un mensaje "error".
+  function iniciarPartida() {
+    room?.send("msgIniciarPartida");
   }
 
   // Estos handlers están listos para cuando el backend registre los
@@ -150,8 +192,17 @@ function Navegacion() {
     return <Lobby onCrearSala={crearSala} onUnirseASala={unirseASala} onVolver={() => setVista("elegir")} />;
   }
 
-  if (!salaCompleta) {
-    return <SalaEspera room={room} jugadores={jugadores} maxJugadores={MAX_JUGADORES} />;
+  if (!partidaIniciada) {
+    return (
+      <SalaEspera
+        room={room}
+        jugadores={jugadores}
+        maxJugadores={MAX_JUGADORES}
+        minJugadores={MIN_JUGADORES_PARA_INICIAR}
+        esCreador={esCreador}
+        onIniciarPartida={iniciarPartida}
+      />
+    );
   }
 
   // No entiendo que tanto hay aqui asi que prefiero no tocar nada
