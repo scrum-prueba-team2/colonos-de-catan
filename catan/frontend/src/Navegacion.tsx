@@ -5,8 +5,7 @@ import Home from "./pantallas/Home/Home";
 import ElegirModo from "./pantallas/ElegirModo/ElegirModo";
 import Lobby from "./pantallas/Lobby/Lobby";
 import IngresarNombre from "./pantallas/IngresarNombre/IngresarNombre";
-import SalaEspera from "./pantallas/SalaEspera/SalaEspera";
-import type { JugadorVista } from "./pantallas/Partidacol";
+import SalaEspera, { type JugadorVista } from "./pantallas/SalaEspera/SalaEspera";
 import PartidaTablero from "./pantallas/Partida";
 
 const MAX_JUGADORES = 4;
@@ -36,13 +35,8 @@ function Navegacion() {
   const [room, setRoom] = useState<Room | null>(null);
   const [jugadores, setJugadores] = useState<JugadorVista[]>([]);
 
-  // Chat / dado son solo de exhibición: el backend aún no tiene
-  // registrados los onMessage correspondientes (ver CatanRoom.ts),
-  // así que estos estados se quedan vacíos por ahora.
-
-
   // Regla de negocio del frontend: con 4 jugadores conectados se pasa a
-  // PartidaCol, sin depender de que el backend cambie state.partida.fase
+  // la partida, sin depender de que el backend cambie state.partida.fase
   // (por ahora esa fase nunca avanza porque el backend no tiene registrado
   // el handler de iniciar partida).
   const salaCompleta = jugadores.length >= MAX_JUGADORES;
