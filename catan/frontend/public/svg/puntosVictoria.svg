@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="250" height="250">
+  <!-- Estrella de 5 puntas más gordita -->
+  <polygon points="50,6 64,36 96,40 72,62 78,94 50,78 22,94 28,62 4,40 36,36" 
+           fill="#F1C40F" stroke="#B7950B" stroke-width="4" stroke-linejoin="round"/>
+  
+  <!-- Número 1 centrado -->
+  <text x="50" y="55" 
+        font-family="Arial, Helvetica, sans-serif" 
+        font-size="55" 
+        font-weight="bold" 
+        fill="#2C3E50" 
+        text-anchor="middle" 
+        dominant-baseline="central">1</text>
+</svg>

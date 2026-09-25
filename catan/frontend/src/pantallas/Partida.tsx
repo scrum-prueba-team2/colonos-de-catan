@@ -12,6 +12,8 @@ import TablaCostes from '../componentes/tablaCostes';
 import Tablero from '../componentes/tablero';
 import type { Recursos } from '../common/jugador';
 import type { EstadoCatan } from '../common/estado';
+import CarRecursos from '../componentes/carRecursos';
+import CarDesarrollo from '../componentes/carDesarrollo';
 import Construir, {
   type ObjetivoConstruccion,
   type SolicitudConstruccion,
@@ -117,7 +119,7 @@ function Partida({ sala, onSolicitarConstruccion }: Props) {
         </div>
         <div className="construir">
           <Construir
-            recursos={recursosPrueba}
+            recursos={jugadores[miSessionId]?.recursos ?? recursosPrueba}
             esMiTurno={true}
             seleccion={tipoConstruccion}
             onSeleccionar={seleccionarConstruccion}
@@ -144,10 +146,10 @@ function Partida({ sala, onSolicitarConstruccion }: Props) {
           />
         </div>
         <div className="carRecursos">
-          area de cartas de recursos
+          <CarRecursos miJugador={jugadores[miSessionId]} />
         </div>
         <div className="carDesarrollo">
-          area de cartas de desarollo
+          <CarDesarrollo miJugador={jugadores[miSessionId]} />
         </div>
         <div className="carEspeciales">
           area de cartas especiales 
