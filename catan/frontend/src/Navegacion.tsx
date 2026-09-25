@@ -6,8 +6,7 @@ import ElegirModo from "./pantallas/ElegirModo/ElegirModo";
 import Lobby from "./pantallas/Lobby/Lobby";
 import IngresarNombre from "./pantallas/IngresarNombre/IngresarNombre";
 import SalaEspera from "./pantallas/SalaEspera/SalaEspera";
-import Partida, { type JugadorVista } from "./pantallas/PartidaCol/Partidacol";
-
+import type { JugadorVista } from "./pantallas/Partidacol";
 import PartidaTablero from "./pantallas/Partida";
 
 const MAX_JUGADORES = 4;
@@ -35,20 +34,12 @@ function Navegacion() {
   // El nombre vive solo en memoria: al recargar la página se vuelve a pedir.
   const [nombreJugador, setNombreJugador] = useState("");
   const [room, setRoom] = useState<Room | null>(null);
-  const [turnoActual, setTurnoActual] = useState("");
   const [jugadores, setJugadores] = useState<JugadorVista[]>([]);
 
   // Chat / dado son solo de exhibición: el backend aún no tiene
   // registrados los onMessage correspondientes (ver CatanRoom.ts),
   // así que estos estados se quedan vacíos por ahora.
-  const [diceResult] = useState("");
-  const [turnHistory] = useState<string[]>([]);
-  const [chatMessages] = useState<{ from: string; text: string; isPrivate: boolean }[]>([]);
-  const [messageInput, setMessageInput] = useState("");
-  const [privateMessageInput, setPrivateMessageInput] = useState("");
-  const [privateReceiverInput, setPrivateReceiverInput] = useState("");
 
-  const esMiTurno = room !== null && turnoActual === room.sessionId;
 
   // Regla de negocio del frontend: con 4 jugadores conectados se pasa a
   // PartidaCol, sin depender de que el backend cambie state.partida.fase
@@ -63,7 +54,6 @@ function Navegacion() {
     function sincronizarEstado(state: EstadoDeSala) {
       if (!state || !state.jugadores || !state.partida) return;
 
-      setTurnoActual(state.partida.turnoActual);
 
       const listaJugadores: JugadorVista[] = [];
       state.jugadores.forEach((jugador, sessionId) => {
@@ -104,25 +94,7 @@ function Navegacion() {
     }
   }
 
-  // Estos handlers están listos para cuando el backend registre los
-  // onMessage; por ahora el envío no tendrá efecto visible.
-  function pasarTurno() {
-    room?.send("pasarTurno");
-  }
-  function lanzarDado() {
-    room?.send("lanzarDados");
-  }
-  function enviarMensaje() {
-    if (!messageInput.trim()) return;
-    room?.send("message", messageInput);
-    setMessageInput("");
-  }
-  function enviarMensajePrivado() {
-    if (!privateMessageInput.trim() || !privateReceiverInput.trim()) return;
-    room?.send("privatemessage", { text: privateMessageInput, to: privateReceiverInput });
-    setPrivateMessageInput("");
-    setPrivateReceiverInput("");
-  }
+ 
 
   if (!room) {
     if (vista === "inicio") {
@@ -159,27 +131,7 @@ function Navegacion() {
   if (room) return <PartidaTablero sala={room} />;
 
 
-  return (
-    <Partida
-      room={room}
-      jugadores={jugadores}
-      numeroDeTurno={1}
-      esMiTurno={esMiTurno}
-      diceResult={diceResult}
-      turnHistory={turnHistory}
-      chatMessages={chatMessages}
-      messageInput={messageInput}
-      setMessageInput={setMessageInput}
-      privateMessageInput={privateMessageInput}
-      setPrivateMessageInput={setPrivateMessageInput}
-      privateReceiverInput={privateReceiverInput}
-      setPrivateReceiverInput={setPrivateReceiverInput}
-      onPasarTurno={pasarTurno}
-      onLanzarDado={lanzarDado}
-      onEnviarMensaje={enviarMensaje}
-      onEnviarMensajePrivado={enviarMensajePrivado}
-    />
-  );
+  
 }
 
 export default Navegacion;
