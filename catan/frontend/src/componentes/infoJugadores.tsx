@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
-import type { Jugadores } from '../datos/jugador';
-import { totalEnMano, totalRecursos, enRiesgoDeDescarte, colorDeJugador } from '../datos/jugador';
+import type { Jugadores } from '../common/jugador';
+import { totalEnMano, totalRecursos, enRiesgoDeDescarte, colorDeJugador } from '../common/jugador';
 import './infoJugadores.css';
 
 interface Props {

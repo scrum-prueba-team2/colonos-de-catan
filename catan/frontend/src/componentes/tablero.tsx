@@ -1,6 +1,6 @@
 import type { ObjetivoConstruccion, TipoConstruccion } from './construir';
-import type { DatosTablero } from '../datos/tablero';
-import { NOMBRE_PUERTO } from '../datos/tablero';
+import type { DatosTablero } from '../common/tablero';
+import { NOMBRE_PUERTO } from '../common/tablero';
 import "./tablero.css"
 
 // Lado del hexagono.

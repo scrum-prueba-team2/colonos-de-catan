@@ -2,7 +2,7 @@ export interface DatosPartida {
   // sessionId de quien creo la sala. Solo el puede iniciar la partida.
   creador: string;
 
-  // Ver datos/fases.ts
+  // Ver common/fases.ts
   fase: number;
   fasePreconstruccion: number;
   faseJuego: number;
@@ -27,4 +27,27 @@ export interface DatosPartida {
 
   // sessionId del ganador. Vacio mientras la partida siga.
   ganador: string;
+
+  // sessionId del que tiene el ejercito mas grande. Vacio si todavia nadie.
+  ejercitoMasGrande: string;
+
+  // Carreteras que puede construir sin pagar (carta de carreteras).
+  carreterasGratis: number;
+
+  // La oferta de intercambio que este sobre la mesa ahora mismo.
+  ofertaIntercambio: Oferta;
+}
+
+/* schemas/OfertaIntercambio.ts — un jugador propone cambiar recursos y los
+   demas votan. */
+export interface Oferta {
+  // sessionId de quien propone. Vacio si no hay ninguna oferta en curso.
+  jugador: string;
+  recursoOfrecido: string;
+  cantidadOfrecida: number;
+  recursoSolicitado: string;
+  cantidadSolicitada: number;
+  /* sessionId -> voto: 0 no ha contestado, 1 acepta, -1 rechaza. El backend la
+     llena con todos los jugadores menos el que propone. */
+  respuestas: Record<string, number>;
 }

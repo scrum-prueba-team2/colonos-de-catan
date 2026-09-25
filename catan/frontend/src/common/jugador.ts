@@ -12,10 +12,10 @@ export interface Recursos {
 export const RECURSOS: Recurso[] = ['madera', 'trigo', 'lana', 'ladrillo', 'mineral'];
 
 
-/* cartas de desarrollo 
-   El backend las guarda en UN solo mapa llamado "cartas". Las claves son el
-   enum CartasDesarrollo y van entre comillas porque las claves de un MapSchema
-   siempre llegan como texto. */
+/* cartas de desarrollo
+   El backend las guarda en DOS mapas, cartas_usables y cartas_inusables. Las
+   claves son el enum CartasDesarrollo y van entre comillas porque las claves de
+   un MapSchema siempre llegan como texto. */
 
 export const CARTA = {
   CABALLERO: '1',
@@ -67,17 +67,23 @@ export const NOMBRE_PIEZA: Record<string, string> = {
 
 /* el jugador
    La clave del mapa es el sessionId que Colyseus le asigna a cada cliente.
-   El backend NO manda color ni caballerosJugados: no los agregues aqui. */
+   Los nueve campos son copia literal de backend/src/schemas/Jugador.ts. Lo
+   unico que el backend NO manda es el color: se calcula abajo. */
 
 export interface Jugador {
   nombre: string;
   puntuacion: number;
   puntosParaGanar: number;
   recursos: Recursos;
-  cartas: Cartas;
+  /* Son dos mapas separados: las inusables se compraron este turno y pasan a
+     usables al pasar el turno. No los junten en uno solo. */
+  cartas_usables: Cartas;
+  cartas_inusables: Cartas;
   construccionesDisponibles: ConstruccionesDisponibles;
   // Clave del vertice donde puso su ultimo asentamiento, para la preconstruccion.
   ultimoAsentamiento: string;
+  // Caballeros que ya jugo. Decide quien tiene el ejercito mas grande.
+  caballerosJugados: number;
 }
 
 /* Aqui SI va un Record de clave suelta, porque las claves son sessionId que no
@@ -112,9 +118,9 @@ export function totalRecursos(jugador: Jugador): number {
   return sumar(jugador.recursos);
 }
 
-// Cartas de desarrollo en la mano.
+// Cartas de desarrollo en la mano, se puedan jugar ahora o no.
 export function totalCartas(jugador: Jugador): number {
-  return sumar(jugador.cartas);
+  return sumar(jugador.cartas_usables) + sumar(jugador.cartas_inusables);
 }
 
 // Todas las cartas en la mano: recursos mas desarrollo.
