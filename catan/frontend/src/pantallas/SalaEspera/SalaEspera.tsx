@@ -1,7 +1,14 @@
 import { useState } from "react";
 import type { Room } from "@colyseus/sdk";
-import type { JugadorVista } from "../Partidacol";
 import "./SalaEspera.css";
+
+export interface JugadorVista {
+  sessionId: string;
+  nombre: string;
+  score: number;
+  esUsuarioActual: boolean;
+  esSuTurno: boolean;
+}
 
 interface SalaEsperaProps {
   room: Room;
