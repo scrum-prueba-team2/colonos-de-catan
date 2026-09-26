@@ -1,341 +1,210 @@
 /* ==========================================
-   VARIABLES & RESET BÁSICO
+   HOME
+   Colores y tipografía vienen de ../tema.css
    ========================================== */
-:root {
-  --bg-main: #fcfcfd;
-  --bg-card: #ffffff;
-  --text-primary: #121826;
-  --text-muted: #4d5761;
-  --text-subtle: #858d9d;
-  --brand-primary: #101828;
-  --brand-hover: #1d2939;
-  --accent-badge-bg: #f2f4f7;
-  --accent-badge-text: #344054;
-  --border-color: #eaecf0;
-  --border-hover: #d0d5dd;
-  --shadow-sm: 0px 1px 2px rgba(16, 24, 40, 0.05);
-  --shadow-md: 0px 4px 12px -2px rgba(16, 24, 40, 0.08);
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius-full: 9999px;
-  --transition-fast: 0.2s ease;
+.home {
+  padding: 0 20px 64px;
 }
 
-.home {
-  background-color: var(--bg-main);
-  color: var(--text-primary);
-  min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  padding: 0 1.5rem 4rem;
+.home > *:not(.decoracion) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- Navegación ---------- */
+.home__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   max-width: 900px;
   margin: 0 auto;
-}
-
-/* ==========================================
-   NAVEGACIÓN
-   ========================================== */
-.home__nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 0;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.home {
-  min-height: 100vh;
-  background: radial-gradient(circle at 15% -10%, rgba(108, 92, 224, 0.18), transparent 45%),
-    radial-gradient(circle at 85% 0%, rgba(61, 220, 151, 0.1), transparent 40%), #10131a;
-  color: #eef1f7;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
-
-.home__nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 20px;
-  border-bottom: 1px solid #1f2534;
-  position: sticky;
-  top: 0;
-  background: rgba(16, 19, 26, 0.85);
-  backdrop-filter: blur(8px);
-  z-index: 10;
+  padding: 18px 0;
 }
 
 .home__marca {
-  font-weight: 700;
-  font-size: 1.125rem;
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--fuente-titulo);
+  font-weight: 600;
+  font-size: 1.35rem;
+  color: var(--pizarra);
+}
+
+.home__marca-hex {
+  width: 26px;
+  aspect-ratio: 1 / 1.1547;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: conic-gradient(var(--bosque-claro) 0 60deg, var(--ladrillo) 0 120deg, var(--trigo-claro) 0 180deg,
+      var(--pradera) 0 240deg, var(--montana) 0 300deg, var(--desierto) 0);
+  animation: home-girar 12s linear infinite;
+}
+
+@keyframes home-girar {
+  to { transform: rotate(360deg); }
 }
 
 .home__nav-btn {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 0.5rem 0.75rem;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
-}
-
-.home__nav-btn:hover {
-  background: var(--accent-badge-bg);
-  border-color: var(--border-hover);
-}
-
-/* ==========================================
-   HERO / ENCABEZADO
-   ========================================== */
-.home__hero {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
   align-items: center;
-  text-align: center;
-  padding: 3rem 1rem 3.5rem;
-  border-bottom: 1px solid var(--border-color);
-  font-size: 17px;
-  letter-spacing: -0.01em;
+  gap: 6px;
 }
 
-.home__nav-btn {
-  background: #6c5ce0;
-  border: none;
-  border-radius: 12px;
-  width: 44px;
-  height: 44px;
-  font-size: 20px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  box-shadow: 0 4px 14px rgba(108, 92, 224, 0.35);
-  transition: transform 0.15s ease, background 0.15s ease;
-}
-
-.home__nav-btn:hover {
-  background: #5b4bd0;
-  transform: translateY(-1px);
-}
-
-.home__nav-btn:active {
-  transform: translateY(0);
-}
-
+/* ---------- Hero ---------- */
 .home__hero {
   max-width: 640px;
   margin: 0 auto;
-  padding: clamp(40px, 8vw, 72px) 20px 48px;
+  padding: clamp(24px, 6vw, 48px) 0 44px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.home__badge {
-  display: inline-block;
-  background-color: var(--accent-badge-bg);
-  color: var(--accent-badge-text);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  padding: 0.35rem 0.85rem;
-  border-radius: var(--radius-full);
-  margin-bottom: 1.5rem;
-  letter-spacing: 0.01em;
-  font-size: 13px;
-  font-weight: 600;
-  color: #b5aef7;
-  background: rgba(108, 92, 224, 0.14);
-  border: 1px solid rgba(108, 92, 224, 0.35);
-  border-radius: 999px;
-  padding: 6px 14px;
-  margin-bottom: 24px;
 }
 
 .home__hex-arte {
   width: 100%;
-  max-width: 360px;
+  max-width: 380px;
   height: auto;
-  margin: 0.5rem 0 1.5rem;
-  filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.04));
+  margin: 22px auto 18px;
+  overflow: visible;
+  filter: drop-shadow(0 10px 12px rgba(27, 42, 49, 0.3));
+}
+
+/* Las fichas "caen" sobre la mesa una tras otra al cargar. */
+.home__hex {
+  transform-box: fill-box;
+  transform-origin: center;
+  /* backwards (no both): al terminar suelta el transform y el hover funciona. */
+  animation: home-caer 0.55s cubic-bezier(0.2, 0.8, 0.3, 1.3) backwards;
+  transition: transform 0.2s ease;
+}
+
+.home__hex:hover {
+  transform: translateY(-6px) scale(1.04);
+}
+
+@keyframes home-caer {
+  from { opacity: 0; transform: translateY(-40px) scale(0.6); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.home__hex-numero {
+  font-family: var(--fuente-titulo);
+  font-size: 17px;
+  font-weight: 600;
+  fill: #2a2a2a;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.home__hex-numero--rojo {
+  fill: var(--rojo-ficha);
+}
+
+.home__ladron {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  animation: home-ladron 2.6s ease-in-out infinite;
+}
+
+@keyframes home-ladron {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
 }
 
 .home__hero h1 {
-  font-size: 2.25rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  margin: 0 0 0.75rem;
-  color: var(--text-primary);
+  font-size: clamp(1.9rem, 5.5vw, 2.75rem);
+  line-height: 1.15;
+  margin: 0 0 14px;
+  color: var(--pizarra);
+}
+
+.home__resalte {
+  display: inline-block;
+  padding: 0 8px;
+  border-radius: 10px;
+  color: #fff;
+  transform: rotate(-2deg);
+}
+
+.home__resalte--ladrillo {
+  background: var(--ladrillo);
+}
+
+.home__resalte--bosque {
+  background: #3f8a4f;
+  transform: rotate(2deg);
 }
 
 .home__hero p {
-  color: var(--text-muted);
+  color: var(--pizarra);
   font-size: 1.05rem;
-  max-width: 520px;
-  margin: 0 0 2rem;
+  margin: 0 0 28px;
+  max-width: 480px;
 }
 
 .home__cta {
-  background-color: var(--brand-primary);
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 0.95rem;
-  padding: 0.85rem 2rem;
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: background-color var(--transition-fast), transform var(--transition-fast);
+  font-size: 1.15rem;
+  padding: 14px 36px;
 }
 
-.home__cta:hover {
-  background-color: var(--brand-hover);
-  transform: translateY(-1px);
-}
-
-/* ==========================================
-   SECCIÓN EQUIPO
-   ========================================== */
+/* ---------- Equipo ---------- */
 .home__equipo {
-  padding-top: 3rem;
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 26px 24px 28px;
 }
 
 .home__equipo h2 {
   font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-bottom: 1.5rem;
+  margin: 0 0 16px;
+  padding-bottom: 8px;
+  text-align: center;
+  border-bottom: 2px solid var(--dorado);
 }
 
 .home__equipo h3 {
   font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-subtle);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 2.5rem 0 1rem;
-}
-
-/* Roles de Liderazgo */
-.home__roles {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1rem;
-}
-
-.home__rol {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  padding: 1rem 1.25rem;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  transition: border-color var(--transition-fast);
-}
-
-.home__rol:hover {
-  border-color: var(--border-hover);
-  max-width: 340px;
-  height: auto;
-  margin: 0 auto 28px;
-  display: block;
-}
-
-.home__hero h1 {
-  font-size: clamp(26px, 5vw, 34px);
-  font-weight: 700;
-  margin: 0 0 14px;
-  letter-spacing: -0.01em;
-}
-
-.home__hero p {
-  color: #8b93a7;
-  font-size: 15px;
-  line-height: 1.6;
-  margin: 0 0 28px;
-  max-width: 460px;
-}
-
-.home__cta {
-  background: #6c5ce0;
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 14px 32px;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(108, 92, 224, 0.3);
-  transition: transform 0.15s ease, background 0.15s ease;
-}
-
-.home__cta:hover {
-  background: #5b4bd0;
-  transform: translateY(-1px);
-}
-
-.home__equipo {
-  max-width: 620px;
-  margin: 0 auto;
-  padding: 0 20px 64px;
-}
-
-.home__equipo h2 {
-  font-size: 13px;
-  font-weight: 700;
-  color: #8b93a7;
-  margin: 0 0 16px;
-  padding-top: 32px;
-  border-top: 1px solid #1f2534;
+  font-weight: 500;
+  color: var(--tinta-suave);
+  margin: 24px 0 10px;
 }
 
 .home__roles {
   display: flex;
   gap: 12px;
-  margin-bottom: 28px;
   flex-wrap: wrap;
 }
 
 .home__rol {
   flex: 1;
   min-width: 220px;
-  background: #1a1f2e;
-  border: 1px solid #2a3142;
-  border-radius: 14px;
-  padding: 16px;
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 12px 14px;
+  background: var(--pergamino-claro);
+  border: 2px solid var(--dorado-claro);
+  border-radius: var(--radio-md);
+  transition: transform 0.15s ease;
+}
+
+.home__rol:hover {
+  transform: rotate(-1deg) translateY(-2px);
 }
 
 .home__rol-texto {
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .home__rol-nombre {
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 800;
 }
 
 .home__rol-cargo {
-  color: #8b93a7;
-  font-size: 13px;
-}
-
-.home__equipo h3 {
-  font-size: 13px;
-  font-weight: 600;
-  color: #8b93a7;
-  margin: 0 0 10px;
+  color: var(--tinta-suave);
+  font-size: 0.875rem;
 }
 
 .home__desarrolladores {
@@ -343,46 +212,46 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   gap: 8px;
 }
 
 .home__desarrolladores li {
-  background: #1a1f2e;
-  border: 1px solid #2a3142;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 14px;
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  background: var(--pergamino-claro);
+  border: 2px solid var(--dorado-claro);
+  border-radius: var(--radio-md);
+  transition: transform 0.15s ease;
+}
+
+.home__desarrolladores li:nth-child(odd):hover {
+  transform: rotate(-1.5deg);
+}
+
+.home__desarrolladores li:nth-child(even):hover {
+  transform: rotate(1.5deg);
 }
 
 .home__avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
-  color: #10131a;
-  flex-shrink: 0;
+  width: 40px;
 }
 
 .home__avatar--chico {
-  width: 26px;
-  height: 26px;
-  font-size: 11px;
+  width: 30px;
+  font-size: 0.75rem;
 }
 
 @media (max-width: 480px) {
-  .home__nav {
-    padding: 14px 16px;
+  .home {
+    padding: 0 16px 48px;
   }
 
-  .home__hero {
-    padding-top: 32px;
+  .home__equipo {
+    padding: 22px 16px;
   }
 }
