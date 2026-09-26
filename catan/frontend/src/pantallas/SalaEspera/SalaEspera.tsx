@@ -14,14 +14,25 @@ interface SalaEsperaProps {
   room: Room;
   jugadores: JugadorVista[];
   maxJugadores: number;
+  minJugadores: number;
+  esCreador: boolean;
+  onIniciarPartida: () => void;
 }
 
 function iniciales(texto: string): string {
   return texto.slice(0, 2).toUpperCase();
 }
 
-function SalaEspera({ room, jugadores, maxJugadores }: SalaEsperaProps) {
+function SalaEspera({
+  room,
+  jugadores,
+  maxJugadores,
+  minJugadores,
+  esCreador,
+  onIniciarPartida,
+}: SalaEsperaProps) {
   const [codigoCopiado, setCodigoCopiado] = useState(false);
+  const puedeIniciar = jugadores.length >= minJugadores;
 
   async function copiarCodigo() {
     try {
@@ -79,7 +90,20 @@ function SalaEspera({ room, jugadores, maxJugadores }: SalaEsperaProps) {
           </span>
         </button>
 
-        <p className="sala-espera__nota">La partida inicia automáticamente al completarse la sala.</p>
+        {esCreador ? (
+          <>
+            <button className="sala-espera__iniciar" onClick={onIniciarPartida} disabled={!puedeIniciar}>
+              Iniciar partida
+            </button>
+            <p className="sala-espera__nota">
+              {puedeIniciar
+                ? "Puedes iniciar ahora o esperar a que se unan más jugadores."
+                : `Se necesitan al menos ${minJugadores} jugadores para iniciar.`}
+            </p>
+          </>
+        ) : (
+          <p className="sala-espera__nota">Esperando a que el anfitrión inicie la partida.</p>
+        )}
       </div>
     </div>
   );

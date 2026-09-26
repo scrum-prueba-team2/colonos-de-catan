@@ -7,8 +7,11 @@ import Lobby from "./pantallas/Lobby/Lobby";
 import IngresarNombre from "./pantallas/IngresarNombre/IngresarNombre";
 import SalaEspera, { type JugadorVista } from "./pantallas/SalaEspera/SalaEspera";
 import PartidaTablero from "./pantallas/Partida";
+import { FASE_PARTIDA } from "./common/fases";
 
 const MAX_JUGADORES = 4;
+// El backend rechaza msgIniciarPartida con menos de 2 jugadores.
+const MIN_JUGADORES = 2;
 
 interface JugadorEstado {
   nombre: string;
@@ -34,12 +37,13 @@ function Navegacion() {
   const [nombreJugador, setNombreJugador] = useState("");
   const [room, setRoom] = useState<Room | null>(null);
   const [jugadores, setJugadores] = useState<JugadorVista[]>([]);
+  const [fase, setFase] = useState<number>(FASE_PARTIDA.LOBBY);
+  const [creador, setCreador] = useState("");
 
-  // Regla de negocio del frontend: con 4 jugadores conectados se pasa a
-  // la partida, sin depender de que el backend cambie state.partida.fase
-  // (por ahora esa fase nunca avanza porque el backend no tiene registrado
-  // el handler de iniciar partida).
-  const salaCompleta = jugadores.length >= MAX_JUGADORES;
+  // La partida empieza cuando el backend deja de estar en LOBBY (lo cambia
+  // msgIniciarPartida), así todos los clientes avanzan a la vez.
+  const partidaIniciada = fase !== FASE_PARTIDA.LOBBY;
+  const esCreador = room !== null && creador === room.sessionId;
 
   useEffect(() => {
     if (!room) return;
@@ -48,6 +52,8 @@ function Navegacion() {
     function sincronizarEstado(state: EstadoDeSala) {
       if (!state || !state.jugadores || !state.partida) return;
 
+      setFase(state.partida.fase);
+      setCreador(state.partida.creador);
 
       const listaJugadores: JugadorVista[] = [];
       state.jugadores.forEach((jugador, sessionId) => {
@@ -116,8 +122,17 @@ function Navegacion() {
     return <Lobby onCrearSala={crearSala} onUnirseASala={unirseASala} onVolver={() => setVista("elegir")} />;
   }
 
-  if (!salaCompleta) {
-    return <SalaEspera room={room} jugadores={jugadores} maxJugadores={MAX_JUGADORES} />;
+  if (!partidaIniciada) {
+    return (
+      <SalaEspera
+        room={room}
+        jugadores={jugadores}
+        maxJugadores={MAX_JUGADORES}
+        minJugadores={MIN_JUGADORES}
+        esCreador={esCreador}
+        onIniciarPartida={() => room.send("msgIniciarPartida")}
+      />
+    );
   }
 
   // No entiendo que tanto hay aqui asi que prefiero no tocar nada
