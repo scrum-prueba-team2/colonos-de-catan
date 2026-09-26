@@ -1,102 +1,138 @@
 /* ==========================================
-   ELEGIR MODO (MODO DE JUEGO)
+   ELEGIR MODO
    ========================================== */
 .elegir {
-  background-color: var(--bg-main, #fcfcfd);
-  color: var(--text-primary, #121826);
-  min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  padding: 2rem 1.5rem 4rem;
-  max-width: 680px;
+  padding: 28px 20px 56px;
+}
+
+.elegir__contenido {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
-/* Botón Volver */
-.elegir__volver {
-  background: transparent;
-  border: 1px solid var(--border-color, #eaecf0);
-  border-radius: var(--radius-sm, 8px);
-  color: var(--text-muted, #4d5761);
-  font-size: 0.875rem;
-  font-weight: 500;
-  padding: 0.5rem 0.85rem;
-  cursor: pointer;
-  margin-bottom: 2.5rem;
-  transition: all var(--transition-fast, 0.2s ease);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+.elegir__header {
+  margin: 28px 0 26px;
 }
 
-.elegir__volver:hover {
-  background-color: #ffffff;
-  border-color: var(--border-hover, #d0d5dd);
-  color: var(--text-primary, #121826);
-  transform: translateX(-2px);
-}
-
-/* Encabezados */
-.elegir h1 {
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  margin: 0 0 0.5rem 0;
-  color: var(--text-primary, #121826);
-}
-
-.elegir p {
-  color: var(--text-muted, #4d5761);
-  font-size: 1.05rem;
-  margin: 0 0 2rem 0;
-}
-
-/* Opciones (Tarjetas Seleccionables) */
-.elegir__opciones {
+.elegir__saludo {
   display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+  color: var(--pizarra);
+}
+
+.elegir__cambiar {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--mar-oscuro);
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: underline dotted;
+  cursor: pointer;
+}
+
+.elegir__header h1 {
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  margin: 0 0 6px;
+  color: var(--pizarra);
+}
+
+.elegir__header > p:last-child {
+  margin: 0;
+  color: var(--pizarra);
+  font-size: 1.05rem;
+}
+
+/* Dos cartas grandes, como las de desarrollo de la partida. */
+.elegir__opciones {
   width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 22px;
 }
 
 .elegir__opcion {
-  background: #ffffff;
-  border: 1.5px solid var(--border-color, #eaecf0);
-  border-radius: var(--radius-md, 12px);
-  padding: 1.5rem;
+  font: inherit;
   text-align: left;
   cursor: pointer;
-  box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.04);
-  transition: all var(--transition-fast, 0.2s ease);
+  padding: 24px 22px 22px;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  width: 100%;
+  gap: 6px;
+  border-top: 10px solid;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.3, 1.3), box-shadow 0.2s ease;
+  animation: tema-aparecer 0.45s cubic-bezier(0.2, 0.8, 0.3, 1.2) backwards;
+}
+
+.elegir__opcion--crear {
+  border-top-color: var(--ladrillo);
+}
+
+.elegir__opcion--unirse {
+  border-top-color: var(--teal);
+  animation-delay: 0.08s;
+}
+
+.elegir__opcion--crear:hover {
+  transform: translateY(-6px) rotate(-1.5deg);
+}
+
+.elegir__opcion--unirse:hover {
+  transform: translateY(-6px) rotate(1.5deg);
 }
 
 .elegir__opcion:hover {
-  border-color: var(--brand-primary, #101828);
-  box-shadow: 0px 4px 12px -2px rgba(16, 24, 40, 0.08);
-  transform: translateY(-2px);
+  box-shadow: 0 2px 0 var(--dorado-claro), 0 22px 34px -14px rgba(27, 42, 49, 0.5);
 }
 
 .elegir__opcion:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.98);
 }
 
-/* Texto interno de los botones */
+.elegir__opcion:focus-visible {
+  outline: 3px solid var(--trigo);
+  outline-offset: 4px;
+}
+
+.elegir__opcion-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  aspect-ratio: 1 / 1.1547;
+  margin-bottom: 8px;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+}
+
+.elegir__opcion--crear .elegir__opcion-icono {
+  background: #f8e2d6;
+}
+
+.elegir__opcion--unirse .elegir__opcion-icono {
+  background: #d7ebee;
+}
+
+.elegir__opcion-icono img {
+  width: 34px;
+  height: 34px;
+}
+
 .elegir__opcion-titulo {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--text-primary, #121826);
-  letter-spacing: -0.01em;
+  font-family: var(--fuente-titulo);
+  font-size: 1.35rem;
+  font-weight: 600;
 }
 
 .elegir__opcion-detalle {
-  font-size: 0.9rem;
-  color: var(--text-muted, #4d5761);
-  line-height: 1.45;
+  font-size: 0.95rem;
+  color: var(--tinta-suave);
 }

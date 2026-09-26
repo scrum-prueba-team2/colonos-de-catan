@@ -48,10 +48,12 @@ interface Props {
   // room.send('construir', solicitud).
   // Así esta pantalla no crea una segunda conexión al backend.
   onSolicitarConstruccion?: (solicitud: SolicitudConstruccion) => void;
+  // Navegacion borra el token de reconexión y abandona la sala.
+  onSalir?: () => void;
 }
 
 // Pantalla principal de la partida. Contiene todos los componentes de la partida.
-function Partida({ sala, onSolicitarConstruccion }: Props) {
+function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const [tipoConstruccion, setTipoConstruccion] = useState<TipoConstruccion | null>(null);
   const [objetivoConstruccion, setObjetivoConstruccion] = useState<ObjetivoConstruccion | null>(null);
   const [estadoConstruccion, setEstadoConstruccion] = useState('');
@@ -109,7 +111,7 @@ function Partida({ sala, onSolicitarConstruccion }: Props) {
   return (
     <div className="marcoPartida">
         <div className="salir"> 
-            <button className="btnSalida">Salir</button>
+            <button className="btnSalida" onClick={onSalir}>Salir</button>
         </div>
         <div className="tabCostos">
             <TablaCostes />

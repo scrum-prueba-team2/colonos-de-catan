@@ -1,0 +1,148 @@
+.crear-sala {
+  display: flex;
+  justify-content: center;
+  padding: 28px 16px 56px;
+}
+
+.crear-sala__contenido {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.crear-sala__card {
+  width: 100%;
+  padding: 26px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.crear-sala__header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--dorado);
+}
+
+.crear-sala__icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 56px;
+  aspect-ratio: 1 / 1.1547;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: #f8e2d6;
+}
+
+.crear-sala__icono img {
+  width: 30px;
+  height: 30px;
+}
+
+.crear-sala__header h1 {
+  font-size: 1.6rem;
+  margin: 0;
+}
+
+.crear-sala__header p {
+  margin: 0;
+  color: var(--tinta-suave);
+}
+
+/* ---------- Interruptor pública / privada ---------- */
+.crear-sala__privacidad {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  background: #e3f1dc;
+  border: 2px solid #9cc68c;
+  border-radius: var(--radio-md);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.crear-sala__privacidad--privada {
+  background: #f8e2d6;
+  border-color: #e0a58c;
+}
+
+.crear-sala__privacidad-texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.crear-sala__privacidad-titulo {
+  font-family: var(--fuente-titulo);
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.crear-sala__privacidad-detalle {
+  font-size: 0.85rem;
+  color: var(--tinta-suave);
+}
+
+.crear-sala__interruptor {
+  position: relative;
+  flex-shrink: 0;
+  width: 58px;
+  height: 32px;
+  padding: 0;
+  border-radius: 999px;
+  border: 2px solid var(--bosque);
+  background: #3f8a4f;
+  cursor: pointer;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.crear-sala__interruptor[aria-checked="true"] {
+  background: var(--ladrillo);
+  border-color: var(--ladrillo-oscuro);
+}
+
+.crear-sala__interruptor:focus-visible {
+  outline: 3px solid var(--trigo);
+  outline-offset: 3px;
+}
+
+/* La perilla es un hexágono de pergamino que se desliza. */
+.crear-sala__interruptor-perilla {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  width: 22px;
+  aspect-ratio: 1 / 1.1547;
+  height: auto;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: var(--pergamino-claro);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.3, 1.4);
+}
+
+.crear-sala__interruptor[aria-checked="true"] .crear-sala__interruptor-perilla {
+  transform: translateX(26px) rotate(60deg);
+}
+
+.crear-sala__codigo {
+  font-family: "Courier New", monospace;
+  font-size: 1.2rem;
+  letter-spacing: 0.25em;
+  /* Sin text-transform: el backend compara el código tal cual se escribió,
+     así que debe verse exactamente lo que se envía. */
+}
+
+.crear-sala__codigo::placeholder {
+  font-family: var(--fuente-texto);
+  font-size: 1rem;
+  letter-spacing: normal;
+}
