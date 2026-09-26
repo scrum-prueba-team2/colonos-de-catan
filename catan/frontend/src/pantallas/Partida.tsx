@@ -14,11 +14,13 @@ import type { Recursos } from '../common/jugador';
 import type { EstadoCatan } from '../common/estado';
 import CarRecursos from '../componentes/carRecursos';
 import CarDesarrollo from '../componentes/carDesarrollo';
+import TirarDados, { type ResultadoDados } from '../componentes/tirarDados';
 import Construir, {
   type ObjetivoConstruccion,
   type SolicitudConstruccion,
   type TipoConstruccion,
 } from '../componentes/construir';
+import { FASE_JUEGO, FASE_PARTIDA } from '../common/fases';
 import './Partida.css'
 
 const recursosPrueba: Recursos = {
@@ -57,6 +59,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const [tipoConstruccion, setTipoConstruccion] = useState<TipoConstruccion | null>(null);
   const [objetivoConstruccion, setObjetivoConstruccion] = useState<ObjetivoConstruccion | null>(null);
   const [estadoConstruccion, setEstadoConstruccion] = useState('');
+  const [resultadoDados, setResultadoDados] = useState<ResultadoDados | null>(null);
+  const [lanzandoDados, setLanzandoDados] = useState(false);
 
   // Todo lo que manda el servidor. null = todavia no llega, o no hay sala.
   const [estadoReal, setEstadoReal] = useState<EstadoCatan | null>(null);
@@ -76,6 +80,29 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
     return () => { salaActual.onStateChange.remove(actualizarEstado); };
   }, [sala]);
 
+  useEffect(() => {
+    if (!sala) return;
+
+    // CatanRoom transmite este evento a todos los jugadores, incluido quien
+    // lanzó. Por eso el mismo resultado se ve en todas las pantallas.
+    const dejarDeEscucharDados = sala.onMessage('dados', (resultado: ResultadoDados) => {
+      setResultadoDados(resultado);
+      setLanzandoDados(false);
+    });
+
+    // CatanRoom responde "error" al cliente si una validación falla. El
+    // navegador ya muestra ese mensaje desde Navegacion; aquí solo liberamos
+    // el botón para que la interfaz no quede bloqueada tras el rechazo.
+    const dejarDeEscucharErrores = sala.onMessage('error', () => {
+      setLanzandoDados(false);
+    });
+
+    return () => {
+      dejarDeEscucharDados();
+      dejarDeEscucharErrores();
+    };
+  }, [sala]);
+
   /* Sin sala, o antes del primer estado, se usan los datos de prueba: tienen la
      misma forma, asi que los componentes no notan la diferencia. Los seis
      salen de la misma fuente para no mezclar un sessionId real con jugadores
@@ -86,6 +113,21 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const turnoActual = estadoReal?.partida.turnoActual ?? turnoActualPrueba;
   const banca = estadoReal?.banca ?? bancaPrueba;
   const miSessionId = estadoReal ? (sala?.sessionId ?? '') : miSessionIdPrueba;
+  const esMiTurno = estadoReal !== null && turnoActual === miSessionId;
+  const puedeLanzarDados = Boolean(
+    sala
+      && esMiTurno
+      && estadoReal?.partida.fase === FASE_PARTIDA.JUEGO
+      && estadoReal.partida.faseJuego === FASE_JUEGO.DADOS,
+  );
+
+  function lanzarDados() {
+    // El backend vuelve a validar turno y fase; esta condición solo evita un
+    // clic inválido en la interfaz y bloquea repeticiones mientras responde.
+    if (!sala || !puedeLanzarDados || lanzandoDados) return;
+    setLanzandoDados(true);
+    sala.send('msgLanzarDados');
+  }
 
   function seleccionarConstruccion(tipo: TipoConstruccion | null) {
     setTipoConstruccion(tipo);
@@ -160,7 +202,12 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             area de negociar   
         </div>
         <div className="tirDado">
-          area de tirar dado
+          <TirarDados
+            resultado={resultadoDados}
+            puedeLanzar={puedeLanzarDados}
+            lanzando={lanzandoDados}
+            onLanzar={lanzarDados}
+          />
         </div>
         <div className="finTurno">
           area de finaliszar turno
