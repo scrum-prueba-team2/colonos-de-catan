@@ -1,5 +1,11 @@
 import "./Home.css";
-import Decoracion from "../Decoracion/Decoracion";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
+import Typography from "@mui/material/Typography";
 
 interface HomeProps {
   onAbrirMenu: () => void;
@@ -71,8 +77,8 @@ function HexIsla() {
 
   return (
     <svg viewBox="0 0 400 220" className="home__hex-arte" aria-hidden="true">
-      {FICHAS_ISLA.map((ficha, i) => (
-        <g key={`${ficha.cx}-${ficha.cy}`} className="home__hex" style={{ animationDelay: `${i * 0.08}s` }}>
+      {FICHAS_ISLA.map((ficha) => (
+        <g key={`${ficha.cx}-${ficha.cy}`}>
           <polygon points={puntosHex(ficha.cx, ficha.cy)} fill={ficha.color} stroke="#f3ede0" strokeWidth={4} />
           {ficha.numero !== null ? (
             <>
@@ -80,14 +86,18 @@ function HexIsla() {
               <text
                 x={ficha.cx}
                 y={ficha.cy}
-                className={"home__hex-numero" + (ficha.numero === 6 || ficha.numero === 8 ? " home__hex-numero--rojo" : "")}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize={17}
+                fontWeight={600}
+                fill={ficha.numero === 6 || ficha.numero === 8 ? "#b3261e" : "#2a2a2a"}
               >
                 {ficha.numero}
               </text>
             </>
           ) : (
             // En el desierto empieza el ladrón.
-            <g className="home__ladron">
+            <g>
               <ellipse cx={ficha.cx} cy={ficha.cy + 14} rx={11} ry={5} fill="#333" />
               <ellipse cx={ficha.cx} cy={ficha.cy + 2} rx={8} ry={12} fill="#333" />
               <circle cx={ficha.cx} cy={ficha.cy - 13} r={7} fill="#333" />
@@ -101,63 +111,72 @@ function HexIsla() {
 
 function Home({ onAbrirMenu }: HomeProps) {
   return (
-    <div className="home tema-fondo">
-      <Decoracion />
-
-      <nav className="home__nav">
-        <span className="home__marca">
-          <span className="home__marca-hex" aria-hidden="true" />
-          Catan Online
-        </span>
-        <button className="home__nav-btn tema-btn tema-btn--chico" onClick={onAbrirMenu} aria-label="Abrir menú de partidas">
-          <span aria-hidden="true">👥</span> Jugar
-        </button>
+    <div className="bg-info-subtle min-vh-100 pb-5">
+      <nav className="navbar bg-body-tertiary border-bottom mb-4">
+        <div className="container">
+          <span className="navbar-brand fw-semibold">Catan Online</span>
+          <Button variant="contained" size="small" onClick={onAbrirMenu} aria-label="Abrir menú de partidas">
+            Jugar
+          </Button>
+        </div>
       </nav>
 
-      <header className="home__hero">
-        <span className="tema-insignia tema-insignia--marca">🛠️ En desarrollo · versión de prueba</span>
-        <HexIsla />
-        <h1>
-          Construye, <span className="home__resalte home__resalte--ladrillo">comercia</span>,{" "}
-          <span className="home__resalte home__resalte--bosque">coloniza</span>
-        </h1>
-        <p>
+      <header className="container text-center mb-5">
+        <Chip label="En desarrollo · versión de prueba" color="primary" variant="outlined" size="small" />
+        <div className="my-3">
+          <HexIsla />
+        </div>
+        <Typography variant="h3" component="h1" gutterBottom>
+          Construye, comercia, coloniza
+        </Typography>
+        <p className="lead mx-auto mb-4 home__texto">
           La versión en línea de Catan que estamos construyendo para jugar por
           turnos con tus amigos, desde cualquier navegador o celular.
         </p>
-        <button className="home__cta tema-btn tema-btn--ladrillo" onClick={onAbrirMenu}>
-          🎲 Jugar ahora
-        </button>
+        <Button variant="contained" color="warning" size="large" onClick={onAbrirMenu}>
+          Jugar ahora
+        </Button>
       </header>
 
-      <section className="home__equipo tema-pergamino">
-        <h2>El equipo</h2>
+      <section className="container home__equipo">
+        <Card variant="outlined">
+          <CardContent>
+            <Typography variant="h5" component="h2" align="center" gutterBottom>
+              El equipo
+            </Typography>
+            <Divider className="mb-3" />
 
-        <div className="home__roles">
-          {LIDERAZGO.map((persona) => (
-            <div className="home__rol" key={persona.nombre}>
-              <span className="tema-hex home__avatar" style={{ background: colorParaNombre(persona.nombre) }}>
-                {iniciales(persona.nombre)}
-              </span>
-              <div className="home__rol-texto">
-                <span className="home__rol-nombre">{persona.nombre}</span>
-                <span className="home__rol-cargo">{persona.rol}</span>
-              </div>
+            <div className="row g-3">
+              {LIDERAZGO.map((persona) => (
+                <div className="col-12 col-sm-6" key={persona.nombre}>
+                  <div className="d-flex align-items-center gap-3 border rounded p-2 bg-light">
+                    <Avatar sx={{ bgcolor: colorParaNombre(persona.nombre) }}>{iniciales(persona.nombre)}</Avatar>
+                    <div>
+                      <div className="fw-bold">{persona.nombre}</div>
+                      <small className="text-body-secondary">{persona.rol}</small>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <h3>Desarrolladores</h3>
-        <ul className="home__desarrolladores">
-          {DESARROLLADORES.map((nombre) => (
-            <li key={nombre}>
-              <span className="tema-hex home__avatar home__avatar--chico" style={{ background: colorParaNombre(nombre) }}>
-                {iniciales(nombre)}
-              </span>
-              {nombre}
-            </li>
-          ))}
-        </ul>
+            <Typography variant="subtitle1" component="h3" color="text.secondary" className="mt-4 mb-2">
+              Desarrolladores
+            </Typography>
+            <ul className="list-unstyled row g-2 mb-0">
+              {DESARROLLADORES.map((nombre) => (
+                <li className="col-12 col-sm-6 col-md-4" key={nombre}>
+                  <div className="d-flex align-items-center gap-2 border rounded p-2 bg-light">
+                    <Avatar sx={{ bgcolor: colorParaNombre(nombre), width: 30, height: 30, fontSize: "0.75rem" }}>
+                      {iniciales(nombre)}
+                    </Avatar>
+                    <span className="fw-semibold">{nombre}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
       </section>
     </div>
   );
