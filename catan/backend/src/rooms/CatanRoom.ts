@@ -1083,6 +1083,27 @@ export class CatanRoom extends Room {
   onLeave(client: Client, code: CloseCode) {
     //* todo: issue fase del juego
     console.log(`${client.sessionId} left the room`);
+
+    //* Primero revisamos si estamos en la fase de lobby
+    if (this.partida.fase === FasePartida.LOBBY) {
+      //* Sacamos al jugador que salio
+      this.jugadores.delete(client.sessionId);
+
+      //* Borrar al jugador del orden de jugadores
+      const indice = this.partida.ordenJugadores.indexOf(client.sessionId);
+      if (indice !== -1) {
+        this.partida.ordenJugadores.splice(indice, 1);
+      }
+
+      //* Si se fue el creador, el siguiente en entrar pasa a ser el anfitrión
+      if (this.partida.creador === client.sessionId) {
+        this.partida.creador = this.partida.ordenJugadores[0] ?? "";
+        this.setMetadata({
+          ...this.metadata,
+          anfitrion: this.jugadores.get(this.partida.creador)?.nombre ?? ""
+        });
+      }
+    }
   }
 
   onDispose() {
