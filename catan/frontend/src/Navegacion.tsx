@@ -18,6 +18,7 @@ import {
   type InfoSala,
 } from "./pantallas/sesionGuardada";
 import { ERROR_CODIGO_INCORRECTO } from "./pantallas/validacionSala";
+import { guardarNombreJugador, leerNombreJugador } from "./pantallas/nombreJugador";
 
 const MAX_JUGADORES = 4;
 // El backend rechaza msgIniciarPartida con menos de 2 jugadores.
@@ -69,8 +70,9 @@ function mensajeDeError(error: unknown, accion: "crear" | "unirse"): string {
 function Navegacion() {
   // Si hay un token guardado, lo primero es intentar volver a esa sala.
   const [vista, setVista] = useState<Vista>(() => (leerSesion() ? "reconectando" : "inicio"));
-  // El nombre vive en memoria; tras una reconexión se recupera del estado.
-  const [nombreJugador, setNombreJugador] = useState("");
+  // El nombre se guarda en sessionStorage; tras una reconexión también se
+  // recupera del estado de la sala.
+  const [nombreJugador, setNombreJugador] = useState(leerNombreJugador);
   const [room, setRoom] = useState<Room | null>(null);
   const [infoSala, setInfoSala] = useState<InfoSala | null>(null);
   const [jugadores, setJugadores] = useState<JugadorVista[]>([]);
@@ -245,6 +247,7 @@ function Navegacion() {
         <IngresarNombre
           nombreInicial={nombreJugador}
           onConfirmar={(nombre) => {
+            guardarNombreJugador(nombre);
             setNombreJugador(nombre);
             setVista("elegir");
           }}
