@@ -1,3 +1,23 @@
+// Se usa sessionStorage (igual que sesionGuardada.ts) para que el nombre
+// sobreviva a una recarga y cada pestaña siga siendo un jugador distinto.
+const CLAVE = "catan:nombre";
+
+export function leerNombreJugador(): string {
+  try {
+    return sessionStorage.getItem(CLAVE) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+export function guardarNombreJugador(nombre: string) {
+  try {
+    sessionStorage.setItem(CLAVE, nombre);
+  } catch {
+    // Sin almacenamiento se vuelve a pedir el nombre al recargar.
+  }
+}
+
 export const LARGO_MINIMO_NOMBRE = 2;
 export const LARGO_MAXIMO_NOMBRE = 20;
 
