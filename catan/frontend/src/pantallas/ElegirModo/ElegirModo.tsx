@@ -1,4 +1,7 @@
 import "./ElegirModo.css";
+import Button from "@mui/material/Button";
+import Link from "@mui/material/Link";
+import Typography from "@mui/material/Typography";
 
 interface ElegirModoProps {
   nombreJugador?: string;
@@ -12,25 +15,29 @@ function ElegirModo({ nombreJugador, onCrear, onUnirse, onVolver, onCambiarNombr
   return (
     <div className="bg-info-subtle min-vh-100 px-3 py-4">
       <div className="mx-auto d-flex flex-column align-items-start elegir__contenido">
-        <button className="tema-volver" onClick={onVolver}>
+        <Button variant="text" onClick={onVolver}>
           ← Volver
-        </button>
+        </Button>
 
-        <header className="elegir__header tema-aparecer">
+        <header className="mt-4 mb-4">
           {nombreJugador && (
-            <p className="elegir__saludo">
+            <p className="d-flex flex-wrap align-items-baseline gap-2 mb-1 fs-5">
               <span>
                 ¡Hola, <strong>{nombreJugador}</strong>!
               </span>
               {onCambiarNombre && (
-                <button className="elegir__cambiar" onClick={onCambiarNombre}>
+                <Link component="button" variant="body2" onClick={onCambiarNombre}>
                   cambiar nombre
-                </button>
+                </Link>
               )}
             </p>
           )}
-          <h1>¿Qué quieres hacer?</h1>
-          <p>Puedes empezar una partida nueva o entrar a una que ya esté abierta.</p>
+          <Typography variant="h4" component="h1" gutterBottom>
+            ¿Qué quieres hacer?
+          </Typography>
+          <p className="mb-0 text-body-secondary">
+            Puedes empezar una partida nueva o entrar a una que ya esté abierta.
+          </p>
         </header>
 
         <div className="elegir__opciones">
