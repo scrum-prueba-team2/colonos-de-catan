@@ -1,46 +1,50 @@
-import './tablaCostes.css'
+import { Card, ListGroup } from 'react-bootstrap';
+
+type Recurso = { img: string; cantidad?: number };
+type Fila = { icono: string; nombre: string; recursos: Recurso[] };
+
+const RECURSOS = {
+  madera:   '/svg/madera.svg',
+  ladrillo: '/svg/ladrillo.svg',
+  trigo:    '/svg/trigo.svg',
+  lana:     '/svg/lana.svg',
+  piedra:   '/svg/piedra.svg',
+} as const;
+
+const FILAS: Fila[] = [
+  { icono: '/svg/carretera.svg', nombre: 'Carretera',
+    recursos: [{ img: RECURSOS.madera }, { img: RECURSOS.ladrillo }] },
+  { icono: '/svg/poblado.svg', nombre: 'Poblado',
+    recursos: [{ img: RECURSOS.madera }, { img: RECURSOS.ladrillo }, { img: RECURSOS.trigo }, { img: RECURSOS.lana }] },
+  { icono: '/svg/ciudad.svg', nombre: 'Ciudad',
+    recursos: [{ img: RECURSOS.trigo, cantidad: 2 }, { img: RECURSOS.piedra, cantidad: 3 }] },
+  { icono: '/svg/desarrollo.svg', nombre: 'Carta de desarrollo',
+    recursos: [{ img: RECURSOS.trigo }, { img: RECURSOS.lana }, { img: RECURSOS.piedra }] },
+];
 
 function TablaCostes() {
   return (
-    <div className="tcMarco">
-
-      <h2 className="tcTitulo">Tabla de costes</h2>
-
-      <ul className="tcLista">
-        <li className="tcFila">
-          <img className="tcIconoPieza" src="/svg/carretera.svg" alt="Carretera" />
-          <span className="tcNombre">Carretera</span>
-          <img className="tcRecurso" src="/svg/madera.svg" alt="Madera" />
-          <img className="tcRecurso" src="/svg/ladrillo.svg" alt="Ladrillo" />
-        </li>
-
-        <li className="tcFila">
-          <img className="tcIconoPieza" src="/svg/poblado.svg" alt="Poblado" />
-          <span className="tcNombre">Poblado</span>
-          <img className="tcRecurso" src="/svg/madera.svg" alt="Madera" />
-          <img className="tcRecurso" src="/svg/ladrillo.svg" alt="Ladrillo" />
-          <img className="tcRecurso" src="/svg/trigo.svg" alt="Trigo" />
-          <img className="tcRecurso" src="/svg/lana.svg" alt="Lana" />
-        </li>
-
-        <li className="tcFila">
-          <img className="tcIconoPieza" src="/svg/ciudad.svg" alt="Ciudad" />
-          <span className="tcNombre">Ciudad</span>
-          <span>2</span>
-          <img className="tcRecurso" src="/svg/trigo.svg" alt="Trigo" />
-          <span>3</span>
-          <img className="tcRecurso" src="/svg/piedra.svg" alt="Piedra" />
-        </li>
-
-        <li className="tcFila">
-          <img className="tcIconoPieza" src="/svg/desarrollo.svg" alt="Carta de desarrollo" />
-          <span className="tcNombre">Carta de desarrollo</span>
-          <img className="tcRecurso" src="/svg/trigo.svg" alt="Trigo" />
-          <img className="tcRecurso" src="/svg/lana.svg" alt="Lana" />
-          <img className="tcRecurso" src="/svg/piedra.svg" alt="Piedra" />
-        </li>
-      </ul>
-    </div>
+    <Card className="h-100 w-100 overflow-hidden d-flex flex-column">
+      <Card.Header as="h2" className="text-center fs-5 shrink-0 py-1">
+        Tabla de costes
+      </Card.Header>
+      <ListGroup variant="flush" className="flex-fill overflow-hidden d-flex flex-column">
+        {FILAS.map(({ icono, nombre, recursos }) => (
+          <ListGroup.Item
+            key={nombre}
+            className="d-flex align-items-center flex-fill overflow-hidden min-w-0 py-0 px-1">
+            <img src={icono} alt={nombre} width={32} height={32} />
+            <span className="flex-grow-1 text-truncate ms-1">{nombre}</span>
+            {recursos.map(({ img, cantidad }) => (
+              <span key={img} className="d-flex align-items-center">
+                {cantidad && <span className="ms-1">{cantidad}</span>}
+                <img src={img} alt="" width={32} height={32} />
+              </span>
+            ))}
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
+    </Card>
   );
 }
 

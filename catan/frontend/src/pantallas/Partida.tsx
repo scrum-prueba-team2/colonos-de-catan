@@ -22,7 +22,8 @@ import Construir, {
 } from '../componentes/construir';
 import { FASE_JUEGO, FASE_PARTIDA } from '../common/fases';
 import Typography from '@mui/material/Typography';
-import './Partida.css'
+
+import "./Partida.css"
 
 const recursosPrueba: Recursos = {
   madera: 2,
