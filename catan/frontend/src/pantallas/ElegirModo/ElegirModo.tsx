@@ -1,5 +1,4 @@
 import "./ElegirModo.css";
-import Decoracion from "../Decoracion/Decoracion";
 
 interface ElegirModoProps {
   nombreJugador?: string;
@@ -11,10 +10,8 @@ interface ElegirModoProps {
 
 function ElegirModo({ nombreJugador, onCrear, onUnirse, onVolver, onCambiarNombre }: ElegirModoProps) {
   return (
-    <div className="elegir tema-fondo">
-      <Decoracion />
-
-      <div className="elegir__contenido">
+    <div className="bg-info-subtle min-vh-100 px-3 py-4">
+      <div className="mx-auto d-flex flex-column align-items-start elegir__contenido">
         <button className="tema-volver" onClick={onVolver}>
           ← Volver
         </button>
