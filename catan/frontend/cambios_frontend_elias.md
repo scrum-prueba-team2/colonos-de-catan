@@ -1,8 +1,12 @@
-# Cambios en el Home: Bootstrap + MUI
+# Cambios en el frontend: Bootstrap + MUI
 
-El Home (`src/pantallas/Home/Home.tsx`) ahora usa librerías en vez de CSS hecho a mano.
-Se quitaron las animaciones propias (fichas que caen, ladrón que se mueve, logo que gira,
-efectos de hover) y los recursos flotantes de fondo (`Decoracion`).
+Las pantallas se van pasando, una por una, de CSS hecho a mano a librerías.
+Se quitan las animaciones propias y los recursos flotantes de fondo (`Decoracion`).
+
+Pantallas migradas:
+
+1. [Home](#1-home)
+2. [Ingresar nombre](#2-ingresar-nombre)
 
 ## Librerías instaladas
 
@@ -13,9 +17,19 @@ efectos de hover) y los recursos flotantes de fondo (`Decoracion`).
 | `@emotion/react`, `@emotion/styled` | ^11 | Requeridos por MUI |
 
 Bootstrap se importa una vez en `src/main.tsx` (`bootstrap/dist/css/bootstrap.min.css`),
-antes del CSS propio, para que el CSS propio pueda ajustarlo.
+antes del CSS propio, para que el CSS propio pueda ajustarlo. Solo se usan sus clases CSS,
+no su JavaScript.
 
-## Bootstrap usado (solo clases CSS, sin JavaScript de Bootstrap)
+---
+
+## 1. Home
+
+Archivo: `src/pantallas/Home/Home.tsx`
+
+Se quitaron las animaciones propias (fichas que caen, ladrón que se mueve, logo que gira,
+efectos de hover) y los recursos flotantes de fondo (`Decoracion`).
+
+### Bootstrap usado
 
 - **Navbar:** `navbar`, `navbar-brand`, `bg-body-tertiary`, `border-bottom`
 - **Layout / grid:** `container`, `row`, `col-12`, `col-sm-6`, `col-md-4`, `g-2`, `g-3`
@@ -25,7 +39,7 @@ antes del CSS propio, para que el CSS propio pueda ajustarlo.
 - **Fondos y bordes:** `bg-info-subtle`, `bg-light`, `border`, `rounded`
 - **Otros:** `min-vh-100`, `list-unstyled`
 
-## Componentes de MUI usados
+### Componentes de MUI usados
 
 | Componente | Dónde |
 |---|---|
@@ -36,7 +50,7 @@ antes del CSS propio, para que el CSS propio pueda ajustarlo.
 | `Divider` | Línea bajo "El equipo" |
 | `Avatar` | Iniciales de cada integrante |
 
-## CSS propio que queda (`Home.css`)
+### CSS propio que queda (`Home.css`)
 
 Solo 3 reglas de ancho máximo:
 
@@ -46,6 +60,50 @@ Solo 3 reglas de ancho máximo:
 
 El SVG de la isla de hexágonos se mantiene (Bootstrap es para lo que *no* es SVG), pero ahora
 es estático.
+
+---
+
+## 2. Ingresar nombre
+
+Archivo: `src/pantallas/IngresarNombre/IngresarNombre.tsx`
+
+Se quitaron la animación de aparecer de la tarjeta, el hexágono flotante con el poblado y los
+recursos flotantes de fondo (`Decoracion`). El ícono del poblado (`/svg/poblado.svg`) se
+mantiene, pero quieto junto a la etiqueta "Catan Online".
+
+La lógica no cambió: misma validación (`validarNombreJugador`), mismo contador de caracteres,
+el error solo se muestra después de intentar continuar y el botón se desactiva si el campo
+está vacío.
+
+### Bootstrap usado
+
+- **Layout / flex:** `d-flex`, `flex-column`, `align-items-center`, `align-items-start`,
+  `justify-content-center`, `justify-content-between`, `gap-3`, `w-100`
+- **Espaciados:** `px-3`, `py-4`, `p-4`, `mb-3`, `mb-4`, `mt-3`
+- **Texto:** `text-body-secondary`
+- **Fondo:** `bg-info-subtle`, `min-vh-100`
+
+### Componentes de MUI usados
+
+| Componente | Dónde |
+|---|---|
+| `Button` (`variant="text"`) | Botón "← Volver" |
+| `Card` + `CardContent` | Tarjeta del formulario (`CardContent` hace de `<form>`) |
+| `Chip` | Etiqueta "Catan Online" |
+| `Typography` | Título "¿Cómo te llamas, colono?" |
+| `TextField` | Campo del nombre: etiqueta, placeholder, estado de error, mensaje de error y contador (en `helperText`) y largo máximo |
+| `Button` (`variant="contained"`) | Botón "Continuar →" |
+
+Antes el campo usaba las clases `tema-etiqueta`, `tema-input`, `tema-ayuda` y `tema-error` de
+`tema.css`. Ahora todo eso lo resuelve `TextField`.
+
+### CSS propio que queda (`IngresarNombre.css`)
+
+Una sola regla:
+
+- `.ingresar-nombre__contenido`: ancho máximo (440px) de la columna con el botón Volver y la tarjeta
+
+---
 
 ## Cómo correrlo
 
