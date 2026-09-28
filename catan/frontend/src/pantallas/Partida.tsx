@@ -21,6 +21,7 @@ import Construir, {
   type TipoConstruccion,
 } from '../componentes/construir';
 import { FASE_JUEGO, FASE_PARTIDA } from '../common/fases';
+import Typography from '@mui/material/Typography';
 import './Partida.css'
 
 const recursosPrueba: Recursos = {
@@ -153,7 +154,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   return (
     <div className="marcoPartida">
         <div className="salir"> 
-            <button className="btnSalida" onClick={onSalir}>Salir</button>
+          <button className="btn btn-danger w-100 h-100" onClick={onSalir}>Salir</button>
         </div>
         <div className="tabCostos">
             <TablaCostes />
@@ -168,7 +169,11 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             seleccion={tipoConstruccion}
             onSeleccionar={seleccionarConstruccion}
           />
-          {estadoConstruccion && <p className="estadoConstruccion" role="status">{estadoConstruccion}</p>}
+          {estadoConstruccion && (
+            <Typography variant="caption" color="primary" component="p" role="status">
+              {estadoConstruccion}
+            </Typography>
+          )}
         </div>
         <div className="infoJugadores">
           <InfoJugadores
