@@ -24,6 +24,7 @@ import { FASE_JUEGO, FASE_PARTIDA } from '../common/fases';
 import Typography from '@mui/material/Typography';
 
 import "./Partida.css"
+import InfoTurno from '../componentes/infoTurno';
 
 const recursosPrueba: Recursos = {
   madera: 2,
@@ -185,7 +186,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
           />
         </div>
         <div className="infoPartida">
-            area de informacion de partida
+          {/*INFORMACION DE LA PARTIDA*/}
+            <InfoTurno sessionIdTurno={turnoActual} jugadores={jugadores} />
         </div>
         <div className="tablero">
           <Tablero
