@@ -1,7 +1,29 @@
 import "./ElegirModo.css";
 import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardActionArea from "@mui/material/CardActionArea";
+import CardContent from "@mui/material/CardContent";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
+
+// Las dos opciones de la pantalla. El borde de arriba usa colores del tema
+// de MUI: rojo para crear (ladrillo) y celeste para unirse (mar).
+const OPCIONES = [
+  {
+    id: "crear",
+    titulo: "Crear partida",
+    detalle: "Abre una sala nueva, pública o privada, y espera a que se unan los demás jugadores.",
+    icono: "/svg/ciudad.svg",
+    colorBorde: "error.main",
+  },
+  {
+    id: "unirse",
+    titulo: "Unirse a partida",
+    detalle: "Mira las salas disponibles o entra con el identificador que te compartieron.",
+    icono: "/svg/carretera.svg",
+    colorBorde: "info.main",
+  },
+] as const;
 
 interface ElegirModoProps {
   nombreJugador?: string;
@@ -14,7 +36,7 @@ interface ElegirModoProps {
 function ElegirModo({ nombreJugador, onCrear, onUnirse, onVolver, onCambiarNombre }: ElegirModoProps) {
   return (
     <div className="bg-info-subtle min-vh-100 px-3 py-4">
-      <div className="mx-auto d-flex flex-column align-items-start elegir__contenido">
+      <div className="mx-auto elegir__contenido">
         <Button variant="text" onClick={onVolver}>
           ← Volver
         </Button>
@@ -40,26 +62,24 @@ function ElegirModo({ nombreJugador, onCrear, onUnirse, onVolver, onCambiarNombr
           </p>
         </header>
 
-        <div className="elegir__opciones">
-          <button className="elegir__opcion elegir__opcion--crear tema-pergamino" onClick={onCrear}>
-            <span className="elegir__opcion-icono" aria-hidden="true">
-              <img src="/svg/ciudad.svg" alt="" />
-            </span>
-            <span className="elegir__opcion-titulo">Crear partida</span>
-            <span className="elegir__opcion-detalle">
-              Abre una sala nueva, pública o privada, y espera a que se unan los demás jugadores.
-            </span>
-          </button>
-
-          <button className="elegir__opcion elegir__opcion--unirse tema-pergamino" onClick={onUnirse}>
-            <span className="elegir__opcion-icono" aria-hidden="true">
-              <img src="/svg/carretera.svg" alt="" />
-            </span>
-            <span className="elegir__opcion-titulo">Unirse a partida</span>
-            <span className="elegir__opcion-detalle">
-              Mira las salas disponibles o entra con el identificador que te compartieron.
-            </span>
-          </button>
+        <div className="row g-3">
+          {OPCIONES.map((opcion) => (
+            <div className="col-12 col-sm-6" key={opcion.id}>
+              <Card variant="outlined" className="h-100" sx={{ borderTop: 6, borderTopColor: opcion.colorBorde }}>
+                <CardActionArea className="h-100" onClick={opcion.id === "crear" ? onCrear : onUnirse}>
+                  <CardContent className="d-flex flex-column gap-2">
+                    <img src={opcion.icono} alt="" aria-hidden="true" width={40} height={40} />
+                    <Typography variant="h6" component="span">
+                      {opcion.titulo}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {opcion.detalle}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </div>
+          ))}
         </div>
       </div>
     </div>
