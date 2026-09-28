@@ -7,6 +7,7 @@ Pantallas migradas:
 
 1. [Home](#1-home)
 2. [Ingresar nombre](#2-ingresar-nombre)
+3. [Elegir modo](#3-elegir-modo)
 
 ## Librerías instaladas
 
@@ -102,6 +103,53 @@ Antes el campo usaba las clases `tema-etiqueta`, `tema-input`, `tema-ayuda` y `t
 Una sola regla:
 
 - `.ingresar-nombre__contenido`: ancho máximo (440px) de la columna con el botón Volver y la tarjeta
+
+---
+
+## 3. Elegir modo
+
+Archivo: `src/pantallas/ElegirModo/ElegirModo.tsx`
+
+Se quitaron la animación de aparecer de las tarjetas, el giro y la elevación al pasar el mouse,
+el ícono dentro de un hexágono y los recursos flotantes de fondo (`Decoracion`). Los íconos de
+ciudad y carretera (`/svg/ciudad.svg`, `/svg/carretera.svg`) se mantienen, pero quietos.
+
+La lógica no cambió: el saludo con el nombre y el enlace "cambiar nombre" solo aparecen si hay
+nombre, y cada tarjeta sigue llamando a `onCrear` o a `onUnirse`.
+
+Las dos opciones ahora salen de una lista (`OPCIONES`) y se dibujan con un `map`, en vez de
+repetir el mismo bloque dos veces.
+
+### Bootstrap usado
+
+- **Grid:** `row`, `g-3`, `col-12`, `col-sm-6` (una tarjeta por fila en celular, dos en pantallas más anchas)
+- **Flex:** `d-flex`, `flex-column`, `flex-wrap`, `align-items-baseline`, `gap-2`
+- **Espaciados:** `px-3`, `py-4`, `mt-4`, `mb-4`, `mb-1`, `mb-0`, `mx-auto`
+- **Texto:** `fs-5`, `text-body-secondary`
+- **Tamaño:** `h-100` (las dos tarjetas quedan del mismo alto)
+- **Fondo:** `bg-info-subtle`, `min-vh-100`
+
+### Componentes de MUI usados
+
+| Componente | Dónde |
+|---|---|
+| `Button` (`variant="text"`) | Botón "← Volver" |
+| `Link` (`component="button"`) | Enlace "cambiar nombre" junto al saludo |
+| `Typography` | Título "¿Qué quieres hacer?", título y detalle de cada tarjeta |
+| `Card` | Tarjetas "Crear partida" y "Unirse a partida" |
+| `CardActionArea` | Hace que toda la tarjeta sea clickeable (antes era un `<button>` con CSS propio) |
+| `CardContent` | Contenido de cada tarjeta |
+
+El borde de color de arriba de cada tarjeta se hace con la prop `sx` de MUI
+(`borderTop: 6` y `borderTopColor`), usando los colores del tema de MUI: `error.main` (rojo)
+para crear e `info.main` (celeste) para unirse. No se usó `border-danger` de Bootstrap porque
+pinta los cuatro lados.
+
+### CSS propio que queda (`ElegirModo.css`)
+
+Una sola regla:
+
+- `.elegir__contenido`: ancho máximo (720px) del contenido
 
 ---
 
