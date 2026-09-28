@@ -16,10 +16,15 @@ Pantallas migradas:
 | `bootstrap` | ^5.3.8 | CSS: layout, espaciados, colores, tipografía |
 | `@mui/material` | ^9.4.0 | Componentes React |
 | `@emotion/react`, `@emotion/styled` | ^11 | Requeridos por MUI |
+| `react-bootstrap` | ^2.10.10 | Componentes React de Bootstrap (lo agregó otro integrante para los componentes de la partida) |
 
 Bootstrap se importa una vez en `src/main.tsx` (`bootstrap/dist/css/bootstrap.min.css`),
 antes del CSS propio, para que el CSS propio pueda ajustarlo. Solo se usan sus clases CSS,
 no su JavaScript.
+
+En las pantallas de este documento (Home, Ingresar nombre y Elegir modo) no se usa
+`react-bootstrap`: los componentes salen de MUI y Bootstrap se usa solo por sus clases.
+Así cada pantalla usa una sola librería de componentes.
 
 ---
 
