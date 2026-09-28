@@ -1,45 +1,42 @@
+import { Card, ListGroup } from 'react-bootstrap';
 import type { Jugador, Recurso } from '../common/jugador';
 import { RECURSOS } from '../common/jugador';
-import './carRecursos.css';
 
 const ICONO: Record<Recurso, string> = {
-  madera: '/svg/madera.svg',
-  trigo: '/svg/trigo.svg',
-  lana: '/svg/lana.svg',
+  madera:   '/svg/madera.svg',
+  trigo:    '/svg/trigo.svg',
+  lana:     '/svg/lana.svg',
   ladrillo: '/svg/ladrillo.svg',
-  mineral: '/svg/piedra.svg',
+  mineral:  '/svg/piedra.svg',
 };
 
 interface Props {
-  // Opcional: si todavia no hay jugador se avisa, en vez de fallar.
   miJugador?: Jugador;
 }
 
 function CarRecursos({ miJugador }: Props) {
   return (
-    <div className="crMarco">
-      <h3 className="crTitulo">Mis recursos</h3>
+    <Card className="h-100 w-100 overflow-y-auto overflow-x-hidden d-flex flex-column">
+      <h3 className="text-center fs-6 fw-bold border-bottom mb-0 py-1">Mis recursos</h3>
+
       {miJugador ? (
-        <ul className="crLista">
-          {RECURSOS.map((recurso) => {
-            const cantidad = miJugador.recursos[recurso];
-            return (
-              <li
-                key={recurso}
-                className="crFila"
-                title={recurso}
-              >
-                <img className="crIcono" src={ICONO[recurso]} alt={recurso} />
-                <span className="crNombre">{recurso}</span>
-                <span className="crCantidad">{cantidad}</span>
-              </li>
-            );
-          })}
-        </ul>
+        <ListGroup variant="flush" className="flex-fill">
+          {RECURSOS.map((recurso) => (
+            <ListGroup.Item
+              key={recurso}
+              title={recurso}
+              className="d-flex align-items-center gap-2 py-0 text-capitalize"
+            >
+              <img src={ICONO[recurso]} alt={recurso} width={30} height={30} />
+              <span className="flex-grow-1 text-truncate">{recurso}</span>
+              <span className="fw-bold">{miJugador.recursos[recurso]}</span>
+            </ListGroup.Item>
+          ))}
+        </ListGroup>
       ) : (
-        <p className="crAviso">sin jugador</p>
+        <p className="text-muted text-center my-auto">sin jugador</p>
       )}
-    </div>
+    </Card>
   );
 }
 

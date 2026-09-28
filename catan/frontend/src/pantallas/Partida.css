@@ -33,17 +33,3 @@
 .infoPartida { grid-area: 2 / 7 / 3 / 8; }
 .infoJugadores { grid-area: 1 / 2 / 2 / 8; }
 .tablero { grid-area: 2 / 2 / 4 / 7; }
-
-.estadoConstruccion {
-    margin: 0;
-    padding: 0 10px 8px;
-    color: #276c86;
-    font-size: .75rem;
-}
-
-/* El unico elemento que se dibuja directo en la pantalla, sin componente */
-.btnSalida {
-    width: 100%;
-    height: 100%;
-    background-color: red;
-}
