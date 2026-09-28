@@ -1,6 +1,11 @@
 import { useState, type FormEvent } from "react";
 import "./IngresarNombre.css";
-import Decoracion from "../Decoracion/Decoracion";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import { LARGO_MAXIMO_NOMBRE, validarNombreJugador } from "../nombreJugador";
 
 interface IngresarNombreProps {
@@ -23,51 +28,53 @@ function IngresarNombre({ nombreInicial = "", onConfirmar, onVolver }: IngresarN
   }
 
   return (
-    <div className="ingresar-nombre tema-fondo">
-      <Decoracion />
-
-      <div className="ingresar-nombre__contenido">
+    <div className="bg-info-subtle min-vh-100 d-flex align-items-center justify-content-center px-3 py-4">
+      <div className="w-100 d-flex flex-column align-items-start gap-3 ingresar-nombre__contenido">
         {onVolver && (
-          <button type="button" className="tema-volver" onClick={onVolver}>
+          <Button variant="text" onClick={onVolver}>
             ← Volver
-          </button>
+          </Button>
         )}
 
-        <form className="ingresar-nombre__card tema-pergamino tema-aparecer" onSubmit={confirmar}>
-          <span className="ingresar-nombre__icono" aria-hidden="true">
-            <img src="/svg/poblado.svg" alt="" />
-          </span>
-          <span className="tema-insignia tema-insignia--marca">Catan Online</span>
-          <h1>¿Cómo te llamas, colono?</h1>
-          <p>Este nombre lo verán los demás jugadores en el lobby y durante la partida.</p>
+        <Card variant="outlined" className="w-100">
+          <CardContent component="form" onSubmit={confirmar} className="p-4">
+            <div className="d-flex align-items-center justify-content-between mb-3">
+              <Chip label="Catan Online" color="primary" variant="outlined" size="small" />
+              <img src="/svg/poblado.svg" alt="" aria-hidden="true" width={32} height={32} />
+            </div>
 
-          <label className="tema-etiqueta" htmlFor="nombre-jugador">
-            Tu nombre de jugador
-          </label>
-          <input
-            id="nombre-jugador"
-            className={"tema-input" + (mostrarError ? " tema-input--error" : "")}
-            type="text"
-            placeholder="Ej. Colono Valiente"
-            value={nombre}
-            maxLength={LARGO_MAXIMO_NOMBRE}
-            autoFocus
-            aria-invalid={Boolean(mostrarError)}
-            aria-describedby="nombre-jugador-ayuda"
-            onChange={(e) => setNombre(e.target.value)}
-          />
+            <Typography variant="h5" component="h1" gutterBottom>
+              ¿Cómo te llamas, colono?
+            </Typography>
+            <p className="text-body-secondary mb-4">
+              Este nombre lo verán los demás jugadores en el lobby y durante la partida.
+            </p>
 
-          <span className="tema-ayuda" id="nombre-jugador-ayuda">
-            <span className="tema-error">{mostrarError ? error : ""}</span>
-            <span>
-              {nombre.trim().length}/{LARGO_MAXIMO_NOMBRE}
-            </span>
-          </span>
+            <TextField
+              id="nombre-jugador"
+              label="Tu nombre de jugador"
+              placeholder="Ej. Colono Valiente"
+              fullWidth
+              autoFocus
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              error={Boolean(mostrarError)}
+              helperText={
+                <span className="d-flex justify-content-between">
+                  <span>{mostrarError ? error : ""}</span>
+                  <span>
+                    {nombre.trim().length}/{LARGO_MAXIMO_NOMBRE}
+                  </span>
+                </span>
+              }
+              slotProps={{ htmlInput: { maxLength: LARGO_MAXIMO_NOMBRE } }}
+            />
 
-          <button type="submit" className="ingresar-nombre__btn tema-btn tema-btn--ancho" disabled={!nombre.trim()}>
-            Continuar →
-          </button>
-        </form>
+            <Button type="submit" variant="contained" fullWidth size="large" className="mt-3" disabled={!nombre.trim()}>
+              Continuar →
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
