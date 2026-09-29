@@ -3,6 +3,8 @@ import "./CrearSala.css";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import Divider from "@mui/material/Divider";
+import Typography from "@mui/material/Typography";
 import {
   LARGO_MAXIMO_ALIAS,
   LARGO_MAXIMO_CODIGO,
@@ -69,14 +71,17 @@ function CrearSala({ nombreJugador, onCrear, onVolver }: CrearSalaProps) {
 
         <Card variant="outlined" className="w-100">
           <CardContent component="form" onSubmit={crear} noValidate className="p-4 d-flex flex-column gap-3">
-            <header className="crear-sala__header">
-              <span className="crear-sala__icono" aria-hidden="true">
-                <img src="/svg/ciudad.svg" alt="" />
-              </span>
-              <div>
-                <h1>Funda tu sala</h1>
-                <p>Ponle nombre y decide quién puede entrar.</p>
+            <header>
+              <div className="d-flex align-items-center gap-3 mb-3">
+                <img src="/svg/ciudad.svg" alt="" aria-hidden="true" width={40} height={40} />
+                <div>
+                  <Typography variant="h5" component="h1">
+                    Funda tu sala
+                  </Typography>
+                  <p className="mb-0 text-body-secondary">Ponle nombre y decide quién puede entrar.</p>
+                </div>
               </div>
+              <Divider />
             </header>
 
             <div className="crear-sala__campo">

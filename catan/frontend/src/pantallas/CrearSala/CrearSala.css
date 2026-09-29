@@ -2,40 +2,6 @@
   max-width: 480px;
 }
 
-.crear-sala__header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding-bottom: 14px;
-  border-bottom: 2px solid var(--dorado);
-}
-
-.crear-sala__icono {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 56px;
-  aspect-ratio: 1 / 1.1547;
-  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-  background: #f8e2d6;
-}
-
-.crear-sala__icono img {
-  width: 30px;
-  height: 30px;
-}
-
-.crear-sala__header h1 {
-  font-size: 1.6rem;
-  margin: 0;
-}
-
-.crear-sala__header p {
-  margin: 0;
-  color: var(--tinta-suave);
-}
-
 /* ---------- Interruptor pública / privada ---------- */
 .crear-sala__privacidad {
   display: flex;
