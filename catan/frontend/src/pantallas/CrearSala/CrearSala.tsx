@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import "./CrearSala.css";
+import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -165,14 +166,12 @@ function CrearSala({ nombreJugador, onCrear, onVolver }: CrearSalaProps) {
             )}
 
             {errorServidor && (
-              <p className="tema-aviso" role="alert">
-                ⚠️ {errorServidor}
-              </p>
+              <Alert severity="error">{errorServidor}</Alert>
             )}
 
-            <button type="submit" className="tema-btn tema-btn--ladrillo tema-btn--ancho" disabled={creando}>
+            <Button type="submit" variant="contained" color="error" fullWidth size="large" disabled={creando}>
               {creando ? "Creando sala…" : "🏗️ Crear sala"}
-            </button>
+            </Button>
           </CardContent>
         </Card>
       </div>
