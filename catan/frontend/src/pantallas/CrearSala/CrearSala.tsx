@@ -6,6 +6,7 @@ import CardContent from "@mui/material/CardContent";
 import Divider from "@mui/material/Divider";
 import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
+import type { Theme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import {
   LARGO_MAXIMO_ALIAS,
@@ -131,33 +132,36 @@ function CrearSala({ nombreJugador, onCrear, onVolver }: CrearSalaProps) {
             </div>
 
             {privada && (
-              <div className="crear-sala__campo crear-sala__campo--codigo tema-aparecer">
-                <label className="tema-etiqueta" htmlFor="codigo-sala">
-                  Código de acceso
-                </label>
-                <input
-                  id="codigo-sala"
-                  className={"tema-input crear-sala__codigo" + (mostrarErrorCodigo ? " tema-input--error" : "")}
-                  type="text"
-                  placeholder="Ej. OVEJA7"
-                  value={codigo}
-                  maxLength={LARGO_MAXIMO_CODIGO}
-                  autoComplete="off"
-                  spellCheck={false}
-                  aria-invalid={Boolean(mostrarErrorCodigo)}
-                  aria-describedby="codigo-sala-ayuda"
-                  // Los espacios no se admiten: se quitan mientras se escribe.
-                  onChange={(e) => setCodigo(e.target.value.replace(/\s/g, ""))}
-                />
-                <span className="tema-ayuda" id="codigo-sala-ayuda">
-                  <span className={mostrarErrorCodigo ? "tema-error" : ""}>
-                    {mostrarErrorCodigo ? errorCodigo : "De 4 a 8 letras o números. Distingue mayúsculas."}
+              <TextField
+                id="codigo-sala"
+                label="Código de acceso"
+                placeholder="Ej. OVEJA7"
+                fullWidth
+                autoComplete="off"
+                value={codigo}
+                // Los espacios no se admiten: se quitan mientras se escribe.
+                onChange={(e) => setCodigo(e.target.value.replace(/\s/g, ""))}
+                error={Boolean(mostrarErrorCodigo)}
+                helperText={
+                  <span className="d-flex justify-content-between gap-2">
+                    <span>{mostrarErrorCodigo ? errorCodigo : "De 4 a 8 letras o números. Distingue mayúsculas."}</span>
+                    <span>
+                      {codigo.length}/{LARGO_MAXIMO_CODIGO}
+                    </span>
                   </span>
-                  <span>
-                    {codigo.length}/{LARGO_MAXIMO_CODIGO}
-                  </span>
-                </span>
-              </div>
+                }
+                slotProps={{ htmlInput: { maxLength: LARGO_MAXIMO_CODIGO, spellCheck: false } }}
+                // Letra monoespaciada para leer bien el código. Sin text-transform:
+                // el backend compara el código tal cual se escribió.
+                sx={{
+                  "& .MuiInputBase-input": { fontFamily: "monospace", fontSize: "1.2rem", letterSpacing: "0.25em" },
+                  "& .MuiInputBase-input::placeholder": {
+                    fontFamily: (theme: Theme) => theme.typography.fontFamily,
+                    fontSize: "1rem",
+                    letterSpacing: "normal",
+                  },
+                }}
+              />
             )}
 
             {errorServidor && (
