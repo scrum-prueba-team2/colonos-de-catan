@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Divider from "@mui/material/Divider";
+import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import {
   LARGO_MAXIMO_ALIAS,
@@ -84,31 +85,25 @@ function CrearSala({ nombreJugador, onCrear, onVolver }: CrearSalaProps) {
               <Divider />
             </header>
 
-            <div className="crear-sala__campo">
-              <label className="tema-etiqueta" htmlFor="alias-sala">
-                Nombre de la sala
-              </label>
-              <input
-                id="alias-sala"
-                className={"tema-input" + (mostrarErrorAlias ? " tema-input--error" : "")}
-                type="text"
-                placeholder="Ej. Isla de los Amigos"
-                value={alias}
-                maxLength={LARGO_MAXIMO_ALIAS}
-                autoFocus
-                aria-invalid={Boolean(mostrarErrorAlias)}
-                aria-describedby="alias-sala-ayuda"
-                onChange={(e) => setAlias(e.target.value)}
-              />
-              <span className="tema-ayuda" id="alias-sala-ayuda">
-                <span className={mostrarErrorAlias ? "tema-error" : ""}>
-                  {mostrarErrorAlias ? errorAlias : "De 4 a 20 letras, números o espacios."}
+            <TextField
+              id="alias-sala"
+              label="Nombre de la sala"
+              placeholder="Ej. Isla de los Amigos"
+              fullWidth
+              autoFocus
+              value={alias}
+              onChange={(e) => setAlias(e.target.value)}
+              error={Boolean(mostrarErrorAlias)}
+              helperText={
+                <span className="d-flex justify-content-between gap-2">
+                  <span>{mostrarErrorAlias ? errorAlias : "De 4 a 20 letras, números o espacios."}</span>
+                  <span>
+                    {alias.trim().length}/{LARGO_MAXIMO_ALIAS}
+                  </span>
                 </span>
-                <span>
-                  {alias.trim().length}/{LARGO_MAXIMO_ALIAS}
-                </span>
-              </span>
-            </div>
+              }
+              slotProps={{ htmlInput: { maxLength: LARGO_MAXIMO_ALIAS } }}
+            />
 
             <div className={"crear-sala__privacidad" + (privada ? " crear-sala__privacidad--privada" : "")}>
               <div className="crear-sala__privacidad-texto">
