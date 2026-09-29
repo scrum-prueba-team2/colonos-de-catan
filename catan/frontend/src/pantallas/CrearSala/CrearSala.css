@@ -2,14 +2,6 @@
   max-width: 480px;
 }
 
-.crear-sala__card {
-  width: 100%;
-  padding: 26px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
 .crear-sala__header {
   display: flex;
   align-items: center;
