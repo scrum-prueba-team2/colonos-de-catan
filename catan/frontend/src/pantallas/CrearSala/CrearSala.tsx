@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from "react";
 import "./CrearSala.css";
-import Decoracion from "../Decoracion/Decoracion";
 import {
   LARGO_MAXIMO_ALIAS,
   LARGO_MAXIMO_CODIGO,
@@ -59,10 +58,8 @@ function CrearSala({ nombreJugador, onCrear, onVolver }: CrearSalaProps) {
   }
 
   return (
-    <div className="crear-sala tema-fondo">
-      <Decoracion />
-
-      <div className="crear-sala__contenido">
+    <div className="bg-info-subtle min-vh-100 px-3 py-4">
+      <div className="mx-auto d-flex flex-column align-items-start gap-3 crear-sala__contenido">
         <button type="button" className="tema-volver" onClick={onVolver}>
           ← Volver
         </button>

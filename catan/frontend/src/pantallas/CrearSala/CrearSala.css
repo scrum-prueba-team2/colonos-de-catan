@@ -1,18 +1,5 @@
-.crear-sala {
-  display: flex;
-  justify-content: center;
-  padding: 28px 16px 56px;
-}
-
 .crear-sala__contenido {
-  position: relative;
-  z-index: 1;
-  width: 100%;
   max-width: 480px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 18px;
 }
 
 .crear-sala__card {
