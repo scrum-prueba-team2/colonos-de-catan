@@ -8,6 +8,7 @@ Pantallas migradas:
 1. [Home](#1-home)
 2. [Ingresar nombre](#2-ingresar-nombre)
 3. [Elegir modo](#3-elegir-modo)
+4. [Crear sala](#4-crear-sala)
 
 ## Librerías instaladas
 
@@ -22,7 +23,7 @@ Bootstrap se importa una vez en `src/main.tsx` (`bootstrap/dist/css/bootstrap.mi
 antes del CSS propio, para que el CSS propio pueda ajustarlo. Solo se usan sus clases CSS,
 no su JavaScript.
 
-En las pantallas de este documento (Home, Ingresar nombre y Elegir modo) no se usa
+En las pantallas de este documento (Home, Ingresar nombre, Elegir modo y Crear sala) no se usa
 `react-bootstrap`: los componentes salen de MUI y Bootstrap se usa solo por sus clases.
 Así cada pantalla usa una sola librería de componentes.
 
@@ -155,6 +156,59 @@ pinta los cuatro lados.
 Una sola regla:
 
 - `.elegir__contenido`: ancho máximo (720px) del contenido
+
+---
+
+## 4. Crear sala
+
+Archivo: `src/pantallas/CrearSala/CrearSala.tsx`
+
+Se quitaron la animación de aparecer de la tarjeta y del campo del código, el hexágono detrás
+del ícono, el interruptor hecho a mano (con la perilla hexagonal que giraba) y los recursos
+flotantes de fondo (`Decoracion`). El ícono de ciudad (`/svg/ciudad.svg`) se mantiene, pero
+quieto junto al título.
+
+La lógica no cambió: mismas validaciones (`validarAlias`, `validarCodigoAcceso`), el nombre
+sugerido al entrar (`aliasSugerido`), la sala es pública por defecto, el campo del código solo
+aparece si la sala es privada, los espacios del código se quitan mientras se escribe, los
+errores solo se muestran después de intentar crear y el botón se desactiva mientras se crea
+la sala.
+
+### Bootstrap usado
+
+- **Layout / flex:** `d-flex`, `flex-column`, `align-items-start`, `align-items-center`,
+  `justify-content-between`, `gap-2`, `gap-3`, `w-100`
+- **Espaciados:** `px-3`, `py-4`, `p-3`, `p-4`, `mb-0`, `mb-3`, `mx-auto`
+- **Texto:** `fw-semibold`, `text-body-secondary`
+- **Fondos y bordes:** `bg-info-subtle`, `bg-success-subtle` / `border-success-subtle`
+  (sala pública), `bg-danger-subtle` / `border-danger-subtle` (sala privada), `border`, `rounded`
+- **Otros:** `min-vh-100`
+
+### Componentes de MUI usados
+
+| Componente | Dónde |
+|---|---|
+| `Button` (`variant="text"`) | Botón "← Volver" |
+| `Card` + `CardContent` | Tarjeta del formulario (`CardContent` hace de `<form>`) |
+| `Typography` | Título "Funda tu sala" |
+| `Divider` | Línea bajo el encabezado |
+| `TextField` | Campos "Nombre de la sala" y "Código de acceso": etiqueta, placeholder, estado de error, mensaje de error y contador (en `helperText`) y largo máximo |
+| `Switch` (`color="error"`) | Interruptor sala pública / privada (antes era un `<button role="switch">` con CSS propio) |
+| `Alert` (`severity="error"`) | Error que devuelve el servidor al crear la sala |
+| `Button` (`variant="contained"`, `color="error"`) | Botón "Crear sala" |
+
+Antes los campos usaban las clases `tema-etiqueta`, `tema-input`, `tema-ayuda` y `tema-error`
+de `tema.css`, el aviso usaba `tema-aviso` y el botón `tema-btn`. Ahora todo eso lo resuelve MUI.
+
+La letra monoespaciada del código de acceso se hace con la prop `sx` del `TextField`
+(el placeholder vuelve a la letra normal del tema). No se pasa a mayúsculas porque el backend
+compara el código tal cual se escribió.
+
+### CSS propio que queda (`CrearSala.css`)
+
+Una sola regla:
+
+- `.crear-sala__contenido`: ancho máximo (480px) de la columna con el botón Volver y la tarjeta
 
 ---
 
