@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Divider from "@mui/material/Divider";
+import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import {
@@ -105,27 +106,28 @@ function CrearSala({ nombreJugador, onCrear, onVolver }: CrearSalaProps) {
               slotProps={{ htmlInput: { maxLength: LARGO_MAXIMO_ALIAS } }}
             />
 
-            <div className={"crear-sala__privacidad" + (privada ? " crear-sala__privacidad--privada" : "")}>
-              <div className="crear-sala__privacidad-texto">
-                <span className="crear-sala__privacidad-titulo" id="privacidad-titulo">
+            <div
+              className={
+                "d-flex align-items-center justify-content-between gap-3 p-3 border rounded " +
+                (privada ? "bg-danger-subtle border-danger-subtle" : "bg-success-subtle border-success-subtle")
+              }
+            >
+              <div className="d-flex flex-column">
+                <span className="fw-semibold" id="privacidad-titulo">
                   {privada ? "🔒 Sala privada" : "🌍 Sala pública"}
                 </span>
-                <span className="crear-sala__privacidad-detalle">
+                <small className="text-body-secondary">
                   {privada
                     ? "Aparece en el listado, pero solo entra quien tenga el código."
                     : "Cualquiera puede verla en el listado y entrar."}
-                </span>
+                </small>
               </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={privada}
-                aria-labelledby="privacidad-titulo"
-                className="crear-sala__interruptor"
-                onClick={() => setPrivada((p) => !p)}
-              >
-                <span className="crear-sala__interruptor-perilla" />
-              </button>
+              <Switch
+                checked={privada}
+                onChange={(e) => setPrivada(e.target.checked)}
+                color="error"
+                slotProps={{ input: { "aria-labelledby": "privacidad-titulo" } }}
+              />
             </div>
 
             {privada && (
