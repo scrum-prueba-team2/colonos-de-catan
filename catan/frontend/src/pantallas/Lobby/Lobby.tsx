@@ -2,6 +2,9 @@ import { useEffect, useState, type FormEvent } from "react";
 import type { RoomAvailable } from "@colyseus/sdk";
 import "./Lobby.css";
 import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { client } from "../colyseusClient";
 import type { InfoSala } from "../sesionGuardada";
@@ -218,35 +221,38 @@ function Lobby({ onCrearSala, onUnirseASala, onVolver }: LobbyProps) {
           <p className="mb-0 text-body-secondary">Elige una sala para zarpar, o funda la tuya.</p>
         </header>
 
-        <form
-          className="lobby__manual tema-pergamino"
-          onSubmit={(e) => {
-            e.preventDefault();
-            unirseManual();
-          }}
-        >
-          <label className="tema-etiqueta lobby__manual-etiqueta" htmlFor="id-sala">
-            ¿Te pasaron el identificador de una sala?
-          </label>
-          <div className="lobby__manual-fila">
-            <input
-              id="id-sala"
-              className="tema-input lobby__manual-input"
-              type="text"
-              placeholder="Identificador de sala"
-              value={idInput}
-              autoComplete="off"
-              spellCheck={false}
-              onChange={(e) => {
-                setIdInput(e.target.value);
-                setSalaSeleccionada(null);
-              }}
-            />
-            <button type="submit" className="tema-btn" disabled={!idInput.trim() || uniendo !== null}>
-              Unirse
-            </button>
-          </div>
-        </form>
+        <Card variant="outlined" className="w-100 mb-3">
+          <CardContent
+            component="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              unirseManual();
+            }}
+          >
+            <label className="d-block fw-semibold mb-2" htmlFor="id-sala">
+              ¿Te pasaron el identificador de una sala?
+            </label>
+            <div className="d-flex flex-column flex-sm-row gap-2">
+              <TextField
+                id="id-sala"
+                placeholder="Identificador de sala"
+                size="small"
+                className="flex-grow-1"
+                autoComplete="off"
+                value={idInput}
+                onChange={(e) => {
+                  setIdInput(e.target.value);
+                  setSalaSeleccionada(null);
+                }}
+                slotProps={{ htmlInput: { spellCheck: false } }}
+                sx={{ "& .MuiInputBase-input": { fontFamily: "monospace" } }}
+              />
+              <Button type="submit" variant="contained" disabled={!idInput.trim() || uniendo !== null}>
+                Unirse
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {errorGeneral && (
           <p className="tema-aviso lobby__aviso" role="alert">

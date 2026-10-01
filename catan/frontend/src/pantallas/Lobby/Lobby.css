@@ -5,23 +5,6 @@
   max-width: 900px;
 }
 
-/* ---------- Entrar con identificador ---------- */
-.lobby__manual {
-  width: 100%;
-  padding: 16px 18px;
-  margin-bottom: 16px;
-}
-
-.lobby__manual-fila {
-  display: flex;
-  gap: 10px;
-}
-
-.lobby__manual-input {
-  flex: 1;
-  font-family: "Courier New", monospace;
-}
-
 .lobby__aviso {
   width: 100%;
   margin-bottom: 16px;
@@ -246,10 +229,6 @@
 }
 
 @media (max-width: 480px) {
-  .lobby__manual-fila {
-    flex-direction: column;
-  }
-
   .lobby__lista ul {
     grid-template-columns: 1fr;
   }
