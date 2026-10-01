@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Room } from "@colyseus/sdk";
 import "./SalaEspera.css";
 import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
@@ -138,31 +139,44 @@ function SalaEspera({
             </ul>
           </div>
 
-          <div className="sala-espera__compartir">
-            <div className="sala-espera__dato">
-              <span className="sala-espera__dato-etiqueta">Identificador de sala</span>
-              <code className="sala-espera__dato-valor">{room.roomId}</code>
-              <button
-                className="tema-btn tema-btn--chico tema-btn--pergamino sala-espera__copiar"
+          <div className="w-100 d-flex flex-column gap-2 mb-4">
+            <div className="d-flex flex-column flex-sm-row align-items-sm-center gap-2 p-3 border rounded text-start bg-body-tertiary">
+              <div className="flex-grow-1 text-break">
+                <Typography variant="overline" component="div" color="text.secondary">
+                  Identificador de sala
+                </Typography>
+                <code className="fs-5 fw-bold text-body">{room.roomId}</code>
+              </div>
+              <Button
+                variant="outlined"
+                size="small"
+                className="text-nowrap"
                 onClick={() => copiar(room.roomId, "id")}
                 aria-label="Copiar identificador de sala"
               >
                 {copiado === "id" ? "✔ ¡Copiado!" : "📋 Copiar"}
-              </button>
+              </Button>
             </div>
 
             {/* El código solo lo conoce quien lo escribió (creador o quien entró con él). */}
             {infoSala?.privada && infoSala.codigoAcceso && (
-              <div className="sala-espera__dato sala-espera__dato--codigo">
-                <span className="sala-espera__dato-etiqueta">Código de acceso</span>
-                <code className="sala-espera__dato-valor">{infoSala.codigoAcceso}</code>
-                <button
-                  className="tema-btn tema-btn--chico tema-btn--pergamino sala-espera__copiar"
+              <div className="d-flex flex-column flex-sm-row align-items-sm-center gap-2 p-3 border border-danger-subtle rounded text-start bg-danger-subtle">
+                <div className="flex-grow-1 text-break">
+                  <Typography variant="overline" component="div" color="text.secondary">
+                    Código de acceso
+                  </Typography>
+                  <code className="fs-5 fw-bold text-body">{infoSala.codigoAcceso}</code>
+                </div>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  className="text-nowrap"
                   onClick={() => copiar(infoSala.codigoAcceso ?? "", "codigo")}
                   aria-label="Copiar código de acceso"
                 >
                   {copiado === "codigo" ? "✔ ¡Copiado!" : "📋 Copiar"}
-                </button>
+                </Button>
               </div>
             )}
           </div>

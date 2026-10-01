@@ -5,59 +5,6 @@
   max-width: 560px;
 }
 
-/* ---------- Identificador y código ---------- */
-.sala-espera__compartir {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.sala-espera__dato {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-areas:
-    "etiqueta boton"
-    "valor boton";
-  align-items: center;
-  column-gap: 12px;
-  padding: 10px 12px 10px 14px;
-  text-align: left;
-  background: var(--pergamino-claro);
-  border: 2px dashed var(--dorado);
-  border-radius: var(--radio-md);
-}
-
-.sala-espera__dato--codigo {
-  border-color: var(--ladrillo);
-  background: #fbeee7;
-}
-
-.sala-espera__dato-etiqueta {
-  grid-area: etiqueta;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--tinta-suave);
-}
-
-.sala-espera__dato-valor {
-  grid-area: valor;
-  font-family: "Courier New", monospace;
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--tinta);
-  overflow-wrap: anywhere;
-}
-
-.sala-espera__copiar {
-  grid-area: boton;
-  white-space: nowrap;
-}
-
 /* ---------- Acciones ---------- */
 .sala-espera__iniciar {
   font-size: 1.1rem;
@@ -93,15 +40,4 @@
 
 .sala-espera__salir:focus-visible {
   outline: 3px solid var(--trigo);
-}
-
-@media (max-width: 420px) {
-  .sala-espera__dato {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "etiqueta"
-      "valor"
-      "boton";
-    row-gap: 6px;
-  }
 }
