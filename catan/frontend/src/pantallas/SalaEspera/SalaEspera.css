@@ -1,22 +1,8 @@
 /* ==========================================
    SALA DE ESPERA
    ========================================== */
-.sala-espera {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 16px;
-}
-
 .sala-espera__card {
-  z-index: 1;
-  width: 100%;
   max-width: 560px;
-  padding: 26px 26px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
 }
 
 .sala-espera__superior {
@@ -238,10 +224,6 @@
 }
 
 @media (max-width: 420px) {
-  .sala-espera__card {
-    padding: 22px 16px 16px;
-  }
-
   .sala-espera__dato {
     grid-template-columns: 1fr;
     grid-template-areas:
