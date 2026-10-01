@@ -24,6 +24,7 @@ import { construirCamino } from "../functions/construirCaminos.js";
 import { jugarAbundancia } from "../functions/jugarAbundancia.js";
 import { jugarMonopolio } from "../functions/jugarMonopolio.js";
 import { siguienteTurnoPreconstruccion } from "../functions/siguienteTurnoPreconstruccion.js";
+import { comprarCarta } from "../functions/comprarCarta.js";
 
 
 export class CatanRoom extends Room {
@@ -898,7 +899,48 @@ export class CatanRoom extends Room {
         this.partida.ofertaIntercambio.limpiarOferta();
       }
     },
+    msgComprarCarta: (client: Client) => {
+        //* Verificar que la partida siga en curso
+        if(this.partida.fase === FasePartida.FINALIZADA){
+            client.send("error", {
+                mensajeError: "La partida ha finalizado"
+            })
+            return;
+        }
 
+        //* Verificar que sea el turno del jugador
+        if(this.partida.turnoActual !== client.sessionId){
+            client.send("error", {
+                mensajeError: "No es tu turno"
+            })
+            return;
+        }
+
+        //* Verificar que estamos en fase de acciones
+        if(this.partida.faseJuego !== FaseJuego.ACCIONES){
+            client.send("error", {
+                mensajeError: "Termina de lanzar los dados primero"
+            })
+            return;
+        }
+
+        //* Intentar comprar la carta
+        const resultado = comprarCarta(
+            this.jugadores.get(client.sessionId), this.banca
+        )
+
+        //* Si no se pudo comprar, notificar error
+        if(resultado.error){
+            client.send("error", {
+                mensajeError: resultado.mensaje
+            })
+            return;    
+        }
+
+        //* Verificar si el jugador ha ganado
+        verificarVictoria(this.partida, this.jugadores.get(client.sessionId), client.sessionId);
+        
+    },
     msgCartaCarreteras: (client: Client) => {
       // * Verificar que la partida siga en curso
       if (this.partida.fase === FasePartida.FINALIZADA) {
