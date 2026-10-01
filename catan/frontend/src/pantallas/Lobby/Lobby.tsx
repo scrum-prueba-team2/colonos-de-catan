@@ -1,9 +1,12 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { RoomAvailable } from "@colyseus/sdk";
 import "./Lobby.css";
+import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import CircularProgress from "@mui/material/CircularProgress";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { client } from "../colyseusClient";
@@ -255,29 +258,35 @@ function Lobby({ onCrearSala, onUnirseASala, onVolver }: LobbyProps) {
         </Card>
 
         {errorGeneral && (
-          <p className="tema-aviso lobby__aviso" role="alert">
-            ⚠️ {errorGeneral}
-          </p>
+          <Alert severity="error" className="w-100 mb-3">
+            {errorGeneral}
+          </Alert>
         )}
 
-        <section className="lobby__lista">
-          <div className="lobby__lista-cabecera">
-            <h2>Salas disponibles</h2>
-            {conexion === "conectado" && (
-              <span className="lobby__en-vivo">
-                <span className="lobby__en-vivo-punto" aria-hidden="true" /> En vivo
-              </span>
-            )}
+        <section className="lobby__lista w-100 mt-2">
+          <div className="d-flex align-items-center justify-content-between mb-3">
+            <Typography variant="h5" component="h2">
+              Salas disponibles
+            </Typography>
+            {conexion === "conectado" && <Chip label="● En vivo" color="success" variant="outlined" size="small" />}
           </div>
 
           {conexion === "conectando" ? (
-            <p className="lobby__vacio tema-pergamino">⛵ Buscando salas…</p>
+            <Card variant="outlined" className="mb-4">
+              <CardContent className="d-flex align-items-center justify-content-center gap-2 text-body-secondary">
+                <CircularProgress size={20} /> Buscando salas…
+              </CardContent>
+            </Card>
           ) : conexion === "error" ? (
-            <p className="lobby__vacio tema-pergamino">
-              🌊 No se pudo conectar con el servidor. Revisa que el backend esté encendido.
-            </p>
+            <Alert severity="error" className="mb-4">
+              No se pudo conectar con el servidor. Revisa que el backend esté encendido.
+            </Alert>
           ) : salas.length === 0 ? (
-            <p className="lobby__vacio tema-pergamino">🏝️ No hay salas abiertas. ¡Crea una para empezar a jugar!</p>
+            <Card variant="outlined" className="mb-4">
+              <CardContent className="text-center fw-semibold text-body-secondary">
+                🏝️ No hay salas abiertas. ¡Crea una para empezar a jugar!
+              </CardContent>
+            </Card>
           ) : (
             <ul>
               {salas.map((sala, i) => (

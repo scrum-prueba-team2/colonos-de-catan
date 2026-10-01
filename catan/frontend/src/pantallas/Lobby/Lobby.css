@@ -5,58 +5,7 @@
   max-width: 900px;
 }
 
-.lobby__aviso {
-  width: 100%;
-  margin-bottom: 16px;
-}
-
 /* ---------- Lista de salas ---------- */
-.lobby__lista {
-  width: 100%;
-  margin-top: 12px;
-}
-
-.lobby__lista-cabecera {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.lobby__lista h2 {
-  font-size: 1.3rem;
-  margin: 0;
-  color: var(--pizarra);
-}
-
-.lobby__en-vivo {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--fuente-titulo);
-  font-size: 0.85rem;
-  color: var(--bosque);
-  background: rgba(251, 245, 232, 0.8);
-  padding: 3px 10px;
-  border-radius: 999px;
-}
-
-.lobby__en-vivo-punto {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #3f8a4f;
-  animation: tema-rebote 1.4s ease-in-out infinite;
-}
-
-.lobby__vacio {
-  margin: 0 0 28px;
-  padding: 22px;
-  text-align: center;
-  font-weight: 700;
-  color: var(--tinta-suave);
-}
-
 .lobby__lista ul {
   list-style: none;
   margin: 0 0 28px;
