@@ -85,3 +85,20 @@
   stroke: #000;
   stroke-width: 1;
 }
+
+/* Circulo para elegir a que hexagono mover al ladron. Es semitransparente
+   para que se siga viendo el numero de la ficha. */
+.tbObjetivoLadron {
+  cursor: pointer;
+  fill: #ffffff55;
+  stroke: #276C86;
+  stroke-width: 4;
+  stroke-dasharray: 8 5;
+}
+
+.tbObjetivoLadron:hover,
+.tbObjetivoLadron:focus {
+  fill: #4F46E533;
+  stroke: #4F46E5;
+  outline: none;
+}
