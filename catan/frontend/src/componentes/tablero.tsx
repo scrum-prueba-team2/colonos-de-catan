@@ -1,10 +1,37 @@
 import type { ObjetivoConstruccion, TipoConstruccion } from './construir';
 import type { DatosTablero } from '../common/tablero';
 import { NOMBRE_PUERTO } from '../common/tablero';
+import { colorDeJugador } from '../common/jugador';
+import pobladoSvg from '../../public/svg/poblado.svg?raw';
+import ciudadSvg from '../../public/svg/ciudad.svg?raw';
 import "./tablero.css"
 
 // Lado del hexagono.
 const S = 60;
+
+// cambia el color de un svg, reemplazando el atributo "color" del primer elemento que lo tenga.
+function cuerpoSvg(svg: string) {
+  return svg.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+}
+
+const CUERPO_POBLADO = cuerpoSvg(pobladoSvg);
+const CUERPO_CIUDAD = cuerpoSvg(ciudadSvg);
+
+function PiezaVertice(
+  { tipo, x, y, lado, color }:
+  { tipo: number; x: number; y: number; lado: number; color: string },
+) {
+  return (
+    <g
+      transform={`translate(${x - lado / 2} ${y - lado / 2}) scale(${lado / 24})`}
+      color={color}
+      stroke="#172A2D"
+      strokeWidth={1.2}
+      pointerEvents="none"
+      dangerouslySetInnerHTML={{ __html: tipo === 2 ? CUERPO_CIUDAD : CUERPO_POBLADO }}
+    />
+  );
+}
 
 //* Funcion para transoformar una coordenada axial a un punto cartesiano
 function centro(h: number, d: number): [number, number] {
@@ -47,6 +74,8 @@ function puntoDeClave(clave: string): [number, number] {
 
 interface Props {
   datos: DatosTablero;
+  // Para pintar cada pieza del color de su dueno.
+  ordenJugadores?: string[];
   tipoConstruccion?: TipoConstruccion | null;
   objetivoSeleccionado?: ObjetivoConstruccion | null;
   onSeleccionarObjetivo?: (objetivo: ObjetivoConstruccion) => void;
@@ -61,7 +90,7 @@ function esElObjetivo(
   return objetivo?.h === h && objetivo.d === d && objetivo.p === p;
 }
 
-function Tablero({ datos, tipoConstruccion = null, objetivoSeleccionado, onSeleccionarObjetivo }: Props) {
+function Tablero({ datos, ordenJugadores = [], tipoConstruccion = null, objetivoSeleccionado, onSeleccionarObjetivo }: Props) {
   
   return (
     <svg
@@ -157,26 +186,36 @@ function Tablero({ datos, tipoConstruccion = null, objetivoSeleccionado, onSelec
           (tipoConstruccion === 'ciudad' && vertice.constuccion !== 0);
         const seleccionado = puedeSeleccionar && esElObjetivo(objetivoSeleccionado, vertice.h, vertice.d, vertice.p);
         const objetivo = { h: vertice.h, d: vertice.d, p: vertice.p };
+        // El circulo sigue siendo el area de clic; la pieza se dibuja encima.
+        const lado = S * 0.4;
         return (
-          <circle
-            key={clave}
-            className={[
-              vertice.constuccion === 0 ? 'tbVertice' : 'tbVertice tbVerticeOcupado',
-              puedeSeleccionar ? 'tbObjetivoConstruccion' : '',
-              seleccionado ? 'tbObjetivoSeleccionado' : '',
-            ].filter(Boolean).join(' ')}
-            cx={x} cy={y} r={S * 0.085}
-            role={puedeSeleccionar ? 'button' : undefined}
-            tabIndex={puedeSeleccionar ? 0 : undefined}
-            aria-label={puedeSeleccionar ? `Construir ${tipoConstruccion} en ${vertice.h}, ${vertice.d}, ${vertice.p}` : undefined}
-            onClick={puedeSeleccionar ? () => onSeleccionarObjetivo?.(objetivo) : undefined}
-            onKeyDown={puedeSeleccionar ? (evento) => {
-              if (evento.key === 'Enter' || evento.key === ' ') {
-                evento.preventDefault();
-                onSeleccionarObjetivo?.(objetivo);
-              }
-            } : undefined}
-          />
+          <g key={clave}>
+            {vertice.constuccion !== 0 && (
+              <PiezaVertice
+                tipo={vertice.constuccion}
+                x={x} y={y} lado={lado}
+                color={colorDeJugador(ordenJugadores, vertice.propietario)}
+              />
+            )}
+            <circle
+              className={[
+                vertice.constuccion === 0 ? 'tbVertice' : 'tbVertice tbVerticeOcupado',
+                puedeSeleccionar ? 'tbObjetivoConstruccion' : '',
+                seleccionado ? 'tbObjetivoSeleccionado' : '',
+              ].filter(Boolean).join(' ')}
+              cx={x} cy={y} r={S * 0.085}
+              role={puedeSeleccionar ? 'button' : undefined}
+              tabIndex={puedeSeleccionar ? 0 : undefined}
+              aria-label={puedeSeleccionar ? `Construir ${tipoConstruccion} en ${vertice.h}, ${vertice.d}, ${vertice.p}` : undefined}
+              onClick={puedeSeleccionar ? () => onSeleccionarObjetivo?.(objetivo) : undefined}
+              onKeyDown={puedeSeleccionar ? (evento) => {
+                if (evento.key === 'Enter' || evento.key === ' ') {
+                  evento.preventDefault();
+                  onSeleccionarObjetivo?.(objetivo);
+                }
+              } : undefined}
+            />
+          </g>
         );
       })}
     </svg>

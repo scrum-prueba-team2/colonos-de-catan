@@ -34,7 +34,7 @@
     stroke: #00000030;
     stroke-width: 1.5;
 }
-.tbVerticeOcupado { fill: #2C4049; }
+.tbVerticeOcupado { fill: none; stroke: none; }
 
 /* Los objetivos aparecen solamente mientras el jugador eligió una pieza.
    El área visible se hace más ancha para que sea fácil seleccionarla. */

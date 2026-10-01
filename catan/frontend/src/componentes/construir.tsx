@@ -31,7 +31,7 @@ const OPCIONES: OpcionConstruccion[] = [
 
 interface Props {
   recursos: Recursos;
-  esMiTurno: boolean;
+  esMiTurno: boolean; tipoPermitido?: TipoConstruccion | null;
   seleccion: TipoConstruccion | null;
   onSeleccionar: (tipo: TipoConstruccion | null) => void;
 }
@@ -45,7 +45,7 @@ function puedePagar(recursos: Recursos, costo: Partial<Recursos>) {
   });
 }
 
-function Construir({ recursos, esMiTurno, seleccion, onSeleccionar }: Props) {
+function Construir({ recursos, esMiTurno, tipoPermitido = null, seleccion, onSeleccionar }: Props) {
   return (
     <section className="cnMarco" aria-labelledby="construir-titulo">
       <div className="cnCabecera">
@@ -55,7 +55,9 @@ function Construir({ recursos, esMiTurno, seleccion, onSeleccionar }: Props) {
 
       <div className="cnRejilla">
         {OPCIONES.map((opcion) => {
-          const habilitada = esMiTurno && puedePagar(recursos, opcion.costo);
+          const habilitada = esMiTurno && (tipoPermitido
+            ? opcion.tipo === tipoPermitido
+            : puedePagar(recursos, opcion.costo));
           const activa = seleccion === opcion.tipo;
 
           return (
@@ -69,7 +71,10 @@ function Construir({ recursos, esMiTurno, seleccion, onSeleccionar }: Props) {
             >
               <span className={`cnIcono cnIcono-${opcion.tipo}`} aria-hidden="true" />
               <span className="cnNombre">{opcion.etiqueta}</span>
-              <span className="cnAyuda">{habilitada ? opcion.ayuda : 'Recursos insuficientes'}</span>
+              <span className="cnAyuda">
+                {habilitada ? opcion.ayuda
+                  : tipoPermitido ? 'No disponible ahora' : 'Recursos insuficientes'}
+              </span>
             </button>
           );
         })}

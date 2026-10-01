@@ -20,7 +20,7 @@ import Construir, {
   type SolicitudConstruccion,
   type TipoConstruccion,
 } from '../componentes/construir';
-import { FASE_JUEGO, FASE_PARTIDA } from '../common/fases';
+import { FASE_JUEGO, FASE_PARTIDA, FASE_PRECONSTRUCCION } from '../common/fases';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
@@ -141,6 +141,15 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       && estadoReal.partida.faseJuego === FASE_JUEGO.ACCIONES,
   );
 
+  // Preconstruccion: el backend solo acepta asentamiento y no cobra recursos.
+  const preconstruyendoAsentamiento = Boolean(
+    sala
+      && esMiTurno
+      && estadoReal?.partida.fase === FASE_PARTIDA.PRECONSTRUCCION
+      && estadoReal.partida.fasePreconstruccion === FASE_PRECONSTRUCCION.ASENTAMIENTO,
+  );
+  const tipoPermitido: TipoConstruccion | null = preconstruyendoAsentamiento ? 'poblado' : null;
+
   function pasarTurno() {
     if (!sala || !puedePasarTurno || pasandoTurno) return;
     setPasandoTurno(true);
@@ -166,8 +175,19 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   function seleccionarObjetivo(objetivo: ObjetivoConstruccion) {
     if (!tipoConstruccion) return;
 
-    const solicitud: SolicitudConstruccion = { tipo: tipoConstruccion, objetivo };
     setObjetivoConstruccion(objetivo);
+
+    // Asentamiento: el mensaje es el mismo en preconstruccion y en juego, y el
+    // JSON que espera CatanRoom es { h, d, p }. El backend valida todo y
+    // confirma por el estado, no con un mensaje de exito.
+    if (sala && tipoConstruccion === 'poblado') {
+      sala.send('msgColocarAsentamiento', objetivo);
+      setTipoConstruccion(null);
+      setEstadoConstruccion('Asentamiento enviado al servidor.');
+      return;
+    }
+
+    const solicitud: SolicitudConstruccion = { tipo: tipoConstruccion, objetivo };
 
     // La validación definitiva (turno, recursos, legalidad y propiedad) vive
     // en CatanRoom. Este callback será conectado por la issue de integración.
@@ -191,7 +211,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
         <div className="construir">
           <Construir
             recursos={jugadores[miSessionId]?.recursos ?? recursosPrueba}
-            esMiTurno={true}
+            esMiTurno={esMiTurno}
+            tipoPermitido={tipoPermitido}
             seleccion={tipoConstruccion}
             onSeleccionar={seleccionarConstruccion}
           />
@@ -216,6 +237,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
         <div className="tablero">
           <Tablero
             datos={datosTablero}
+            ordenJugadores={ordenJugadores}
             tipoConstruccion={tipoConstruccion}
             objetivoSeleccionado={objetivoConstruccion}
             onSeleccionarObjetivo={seleccionarObjetivo}
