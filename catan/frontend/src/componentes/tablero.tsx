@@ -1,5 +1,5 @@
 import type { ObjetivoConstruccion, TipoConstruccion } from './construir';
-import type { DatosTablero } from '../common/tablero';
+import type { Coordenada, DatosTablero } from '../common/tablero';
 import { NOMBRE_PUERTO } from '../common/tablero';
 import { colorDeJugador } from '../common/jugador';
 import "./tablero.css"
@@ -80,6 +80,9 @@ interface Props {
   tipoConstruccion?: TipoConstruccion | null;
   objetivoSeleccionado?: ObjetivoConstruccion | null;
   onSeleccionarObjetivo?: (objetivo: ObjetivoConstruccion) => void;
+  // true cuando el jugador debe elegir a que hexagono mover al ladron.
+  moviendoLadron?: boolean;
+  onSeleccionarHexagonoLadron?: (hexagono: Coordenada) => void;
 }
 
 function esElObjetivo(
@@ -91,8 +94,16 @@ function esElObjetivo(
   return objetivo?.h === h && objetivo.d === d && objetivo.p === p;
 }
 
-function Tablero({ datos, ordenJugadores = [], tipoConstruccion = null, objetivoSeleccionado, onSeleccionarObjetivo }: Props) {
-  
+function Tablero({
+  datos,
+  ordenJugadores = [],
+  tipoConstruccion = null,
+  objetivoSeleccionado,
+  onSeleccionarObjetivo,
+  moviendoLadron = false,
+  onSeleccionarHexagonoLadron,
+}: Props) {
+
   return (
     <svg
       className="tbSvg"
@@ -177,6 +188,32 @@ function Tablero({ datos, ordenJugadores = [], tipoConstruccion = null, objetivo
               </g>
             )}
           </g>
+        );
+      })}
+
+      {/* Mover al ladron: un circulo en el centro de cada hexagono para elegirlo.
+          No se dibuja donde esta el ladron ahora (tablero.ladron), porque el
+          backend no deja dejarlo en el mismo hexagono. */}
+      {moviendoLadron && Object.entries(datos.hexagonos).map(([clave, hex]) => {
+        if (hex.h === datos.ladron.h && hex.d === datos.ladron.d) return null;
+        const [cx, cy] = centro(hex.h, hex.d);
+        const hexagono = { h: hex.h, d: hex.d };
+        return (
+          <circle
+            key={`l${clave}`}
+            className="tbObjetivoLadron"
+            cx={cx} cy={cy} r={S * 0.42}
+            role="button"
+            tabIndex={0}
+            aria-label={`Mover al ladrón a ${hex.h}, ${hex.d}`}
+            onClick={() => onSeleccionarHexagonoLadron?.(hexagono)}
+            onKeyDown={(evento) => {
+              if (evento.key === 'Enter' || evento.key === ' ') {
+                evento.preventDefault();
+                onSeleccionarHexagonoLadron?.(hexagono);
+              }
+            }}
+          />
         );
       })}
 
