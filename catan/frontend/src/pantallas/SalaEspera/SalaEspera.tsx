@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Room } from "@colyseus/sdk";
 import "./SalaEspera.css";
+import Alert from "@mui/material/Alert";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -183,26 +184,31 @@ function SalaEspera({
 
           {esCreador ? (
             <>
-              <button
-                className="sala-espera__iniciar tema-btn tema-btn--bosque tema-btn--ancho"
+              <Button
+                variant="contained"
+                color="success"
+                fullWidth
+                size="large"
                 onClick={onIniciarPartida}
                 disabled={!puedeIniciar}
               >
                 🎲 Iniciar partida
-              </button>
-              <p className="sala-espera__nota">
+              </Button>
+              <small className="text-body-secondary mt-2 mb-2">
                 {puedeIniciar
                   ? "Puedes iniciar ahora o esperar a que se unan más jugadores."
                   : `Se necesitan al menos ${minJugadores} jugadores para iniciar.`}
-              </p>
+              </small>
             </>
           ) : (
-            <p className="sala-espera__nota sala-espera__nota--espera">Esperando a que el anfitrión inicie la partida…</p>
+            <Alert severity="info" className="w-100 mb-2 text-start">
+              Esperando a que el anfitrión inicie la partida…
+            </Alert>
           )}
 
-          <button className="sala-espera__salir" onClick={onSalir}>
+          <Button variant="text" color="error" onClick={onSalir}>
             Salir de la sala
-          </button>
+          </Button>
         </CardContent>
       </Card>
     </div>
