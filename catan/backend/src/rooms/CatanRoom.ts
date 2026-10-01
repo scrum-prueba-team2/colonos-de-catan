@@ -23,6 +23,7 @@ import { intercambiarRecursos } from "../functions/intercambiarRecursos.js";
 import { construirCamino } from "../functions/construirCaminos.js";
 import { jugarAbundancia } from "../functions/jugarAbundancia.js";
 import { jugarMonopolio } from "../functions/jugarMonopolio.js";
+import { siguienteTurnoPreconstruccion } from "../functions/siguienteTurnoPreconstruccion.js";
 
 
 export class CatanRoom extends Room {
@@ -410,6 +411,92 @@ export class CatanRoom extends Room {
 
         //* Verificar si el jugador ha ganado
         verificarVictoria(this.partida, jugador, client.sessionId);
+      }
+
+    },
+    msgColocarCamino: (
+      client: Client,
+      mensaje: { h: number, d: number, p: number }
+    ) => {
+
+      //* Verificar que la partida siga en curso
+      if (this.partida.fase === FasePartida.FINALIZADA) {
+        client.send("error", {
+          mensajeError: "La partida ha finalizado"
+        })
+        return;
+      }
+
+      //* Verificar que sea el turno del jugador
+      if (this.partida.turnoActual !== client.sessionId) {
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        })
+        return;
+      }
+
+      //* Obtener el jugador del state y que exista
+      const jugador = this.jugadores.get(client.sessionId);
+      if (!jugador) return;
+      const { h, d, p } = mensaje;
+
+
+      //! FLUJO EN PRECONSTRUCCION
+      if (this.partida.fase === FasePartida.PRECONSTRUCCION) {
+
+        //* Comprobar que estemos en la fase de colocar camino
+        if (this.partida.fasePreconstruccion !== FasePreconstruccion.CAMINO) {
+          client.send("error", {
+            mensajeError: "Coloca primero un asentamiento"
+          })
+          return;
+        }
+
+        //* Intentar construir el camino
+        const resultado = construirCamino(
+          this.tablero.vertices, this.tablero.aristas, this.partida,
+          h, d, p, jugador, this.banca, client.sessionId
+        )
+
+        //* Si no se pudo construir, se notifica el error
+        if (resultado.error) {
+          client.send("error", {
+            mensajeError: resultado.mensaje
+          })
+          return;
+        }
+
+        //? Ahora le toca al siguiente jugador poner un asentamiento
+        this.partida.fasePreconstruccion = FasePreconstruccion.ASENTAMIENTO;
+        siguienteTurnoPreconstruccion(this.partida);
+      }
+
+      //! FLUJO EN JUEGO
+      if (this.partida.fase === FasePartida.JUEGO) {
+
+        //* Comprobar que estemos en la fase de acciones
+        if (this.partida.faseJuego !== FaseJuego.ACCIONES) {
+          client.send("error", {
+            mensajeError: "Debes lanzar los dados primero"
+          })
+          return;
+        }
+
+        //* Intentar construir el camino
+        const resultado = construirCamino(
+          this.tablero.vertices, this.tablero.aristas, this.partida,
+          h, d, p, jugador, this.banca, client.sessionId
+        )
+
+        //* Si no se pudo construir, se notifica el error
+        if (resultado.error) {
+          client.send("error", {
+            mensajeError: resultado.mensaje
+          })
+          return;
+        }
+
+        return;
       }
 
     },
