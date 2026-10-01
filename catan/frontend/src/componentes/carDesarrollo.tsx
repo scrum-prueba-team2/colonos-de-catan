@@ -12,15 +12,18 @@ const CARTAS: { clave: keyof Cartas; icono: string }[] = [
 
 interface Props {
   miJugador?: Jugador;
+  puedeComprar: boolean;
+  comprando: boolean;
+  onComprar: () => void;
 }
 
-function CarDesarrollo({ miJugador }: Props) {
+function CarDesarrollo({ miJugador, puedeComprar, comprando, onComprar }: Props) {
   return (
-    <Card className="h-100 w-100 overflow-y-auto overflow-x-hidden d-flex flex-column">
+    <Card className="h-100 w-100 overflow-hidden d-flex flex-column">
       <h3 className="text-center fs-6 fw-bold border-bottom mb-0 py-1">Mis cartas</h3>
       {miJugador ? (
         <>
-          <ListGroup variant="flush" className="flex-fill">
+          <ListGroup variant="flush" className="flex-fill overflow-y-auto" style={{ minHeight: 0 }}>
             {CARTAS.map(({ clave, icono }) => {
               const usables = miJugador.cartas_usables[clave];
               const nuevas = miJugador.cartas_inusables[clave];
@@ -45,10 +48,22 @@ function CarDesarrollo({ miJugador }: Props) {
               );
             })}
           </ListGroup>
-          <Button variant="outline-secondary" size="sm" disabled className="m-0 flex-shrink-0">
-            {/* usar este botón para desplegar la descripción y uso de las cartas de desarrollo */}
-            Usar carta
-          </Button>
+          <div className="d-flex flex-shrink-0 gap-1">
+            <Button
+              variant="outline-primary"
+              size="sm"
+              disabled={!puedeComprar || comprando}
+              onClick={onComprar}
+              title="Costo: 1 trigo, 1 lana y 1 mineral"
+              className="flex-fill m-0"
+            >
+              {comprando ? 'Comprando…' : 'Comprar carta'}
+            </Button>
+            <Button variant="outline-secondary" size="sm" disabled className="flex-fill m-0">
+              {/* usar este botón para desplegar la descripción y uso de las cartas de desarrollo */}
+              Usar carta
+            </Button>
+          </div>
         </>
       ) : (
         <p className="text-muted text-center my-auto">sin jugador</p>

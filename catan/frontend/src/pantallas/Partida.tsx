@@ -70,6 +70,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const [pasandoTurno, setPasandoTurno] = useState(false);
   const [descarteEnEspera, setDescarteEnEspera] = useState<number | null>(null);
   const [moviendoLadron, setMoviendoLadron] = useState(false);
+  const [compraEnEspera, setCompraEnEspera] = useState<number | null>(null);
 
   // Todo lo que manda el servidor. null = todavia no llega, o no hay sala.
   const [estadoReal, setEstadoReal] = useState<EstadoCatan | null>(null);
@@ -89,6 +90,16 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
         return !partida || partida.faseJuego !== FASE_JUEGO.DESCARTE || restantes < cantidadAnterior
           ? null
           : cantidadAnterior;
+      });
+      // La compra se confirma cuando el servidor reduce el mazo de la banca.
+      setCompraEnEspera((cartasAnteriores) => {
+        if (cartasAnteriores === null) return null;
+        return !estado
+          || estado.partida.turnoActual !== salaActual.sessionId
+          || estado.partida.faseJuego !== FASE_JUEGO.ACCIONES
+          || estado.banca.cartas.length < cartasAnteriores
+          ? null
+          : cartasAnteriores;
       });
       // El servidor confirma el cambio mediante el estado, no un mensaje nuevo.
       if (!estado
@@ -128,6 +139,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       setPasandoTurno(false);
       setDescarteEnEspera(null);
       setMoviendoLadron(false);
+      setCompraEnEspera(null);
     });
 
     return () => {
@@ -148,6 +160,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const miSessionId = estadoReal ? (sala?.sessionId ?? '') : miSessionIdPrueba;
   const esMiTurno = estadoReal !== null && turnoActual === miSessionId;
   const partidaActual = estadoReal?.partida;
+  const miJugadorReal = estadoReal?.jugadores[miSessionId];
   const descartesPendientes = partidaActual?.jugadoresParaDescartar[miSessionId] ?? 0;
   // El backend procesa primero al jugador pendiente que aparece en ordenJugadores.
   const siguienteDescartador = partidaActual?.ordenJugadores.find(
@@ -179,6 +192,16 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       && estadoReal?.partida.fase === FASE_PARTIDA.JUEGO
       && estadoReal.partida.faseJuego === FASE_JUEGO.ACCIONES,
   );
+  const puedeComprarCarta = Boolean(
+    sala
+      && esMiTurno
+      && partidaActual?.fase === FASE_PARTIDA.JUEGO
+      && partidaActual.faseJuego === FASE_JUEGO.ACCIONES
+      && (estadoReal?.banca.cartas.length ?? 0) > 0
+      && (miJugadorReal?.recursos.trigo ?? 0) >= 1
+      && (miJugadorReal?.recursos.lana ?? 0) >= 1
+      && (miJugadorReal?.recursos.mineral ?? 0) >= 1,
+  );
 
   // Preconstruccion: el backend solo acepta asentamiento y no cobra recursos.
   const preconstruyendoAsentamiento = Boolean(
@@ -194,6 +217,12 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
     setPasandoTurno(true);
     // El backend elige al siguiente jugador. No adelantamos el turno localmente.
     sala.send('msgPasarTurno');
+  }
+
+  function comprarCarta() {
+    if (!sala || !puedeComprarCarta || compraEnEspera !== null) return;
+    setCompraEnEspera(estadoReal?.banca.cartas.length ?? 0);
+    sala.send('msgComprarCarta');
   }
 
   function descartarRecurso(recurso: Recurso) {
@@ -304,7 +333,12 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
           <CarRecursos miJugador={jugadores[miSessionId]} />
         </div>
         <div className="carDesarrollo">
-          <CarDesarrollo miJugador={jugadores[miSessionId]} />
+          <CarDesarrollo
+            miJugador={jugadores[miSessionId]}
+            puedeComprar={puedeComprarCarta}
+            comprando={compraEnEspera !== null}
+            onComprar={comprarCarta}
+          />
         </div>
         <div className="carEspeciales">
           area de cartas especiales 
