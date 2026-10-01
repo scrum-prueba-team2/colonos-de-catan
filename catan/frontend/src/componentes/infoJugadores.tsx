@@ -36,7 +36,7 @@ function InfoJugadores({ jugadores, ordenJugadores, turnoActual, miSessionId }: 
                 {yo && '(Yo)'}{j.nombre}
               </span>
               <span className="fw-bold flex-shrink-0">
-                {j.puntuacion}/{j.puntosParaGanar}
+                {j.puntuacion}/10
               </span>
             </div>
             <div className={`d-flex justify-content-between ${turno ? 'text-white-50' : 'text-muted'}`}>
