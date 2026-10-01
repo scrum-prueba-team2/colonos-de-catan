@@ -5,33 +5,6 @@
   max-width: 560px;
 }
 
-/* ---------- Barra: un tramo de camino por asiento ---------- */
-.sala-espera__barra {
-  width: 100%;
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  gap: 6px;
-  margin-bottom: 22px;
-}
-
-.sala-espera__tramo {
-  height: 10px;
-  border-radius: 999px;
-  background: var(--pergamino-oscuro);
-  box-shadow: inset 0 1px 2px rgba(58, 42, 23, 0.2);
-  transform: skewX(-20deg);
-}
-
-.sala-espera__tramo--lleno {
-  animation: sala-espera-construir 0.4s cubic-bezier(0.2, 0.8, 0.3, 1.4) both;
-}
-
-@keyframes sala-espera-construir {
-  from { transform: skewX(-20deg) scaleX(0); }
-  to { transform: skewX(-20deg) scaleX(1); }
-}
-
 /* ---------- Asientos ---------- */
 .sala-espera__asientos {
   list-style: none;

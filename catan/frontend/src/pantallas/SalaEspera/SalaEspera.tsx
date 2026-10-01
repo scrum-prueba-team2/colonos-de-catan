@@ -93,14 +93,15 @@ function SalaEspera({
             <strong>{jugadores.length}</strong> de {maxJugadores} colonos en la isla
           </p>
 
-          {/* Barra de progreso hecha de tramos de camino, uno por asiento. */}
-          <div className="sala-espera__barra" aria-hidden="true">
+          {/* Barra de progreso de Bootstrap partida en un tramo por asiento.
+              Los tramos ocupados se pintan con el color del jugador. */}
+          <div className="d-flex gap-2 w-100 mb-4" aria-hidden="true">
             {asientos.map((jugador, i) => (
-              <span
-                key={i}
-                className={"sala-espera__tramo" + (jugador ? " sala-espera__tramo--lleno" : "")}
-                style={jugador ? { background: COLORES[i % COLORES.length] } : undefined}
-              />
+              <div key={i} className="progress flex-fill">
+                {jugador && (
+                  <div className="progress-bar w-100" style={{ backgroundColor: COLORES[i % COLORES.length] }} />
+                )}
+              </div>
             ))}
           </div>
 
