@@ -69,8 +69,7 @@ function SalaEspera({
   }
 
   // Un "asiento" por cada cupo de la sala: si hay jugador lo mostramos,
-  // si no, un espacio vacío pulsando para dar la sensación de que se está
-  // esperando activamente.
+  // si no, un asiento vacío que indica que todavía se espera a alguien.
   const asientos = Array.from({ length: maxJugadores }, (_, i) => jugadores[i] ?? null);
 
   return (
