@@ -1,7 +1,5 @@
-import type { CSSProperties } from 'react';
 import type { Jugadores } from '../common/jugador';
 import { totalEnMano, totalRecursos, enRiesgoDeDescarte, colorDeJugador } from '../common/jugador';
-import './infoJugadores.css';
 
 interface Props {
   jugadores: Jugadores;
@@ -11,41 +9,43 @@ interface Props {
 }
 
 function InfoJugadores({ jugadores, ordenJugadores, turnoActual, miSessionId }: Props) {
-  // Si aún no hay orden, se usan los jugadores del mapa.
   const lista = ordenJugadores.length > 0 ? ordenJugadores : Object.keys(jugadores);
 
   return (
-    <div className="ijLista">
-      {lista.map((sessionId) => {
-        const jugador = jugadores[sessionId];
-        if (!jugador) return null;
+    <div className="d-flex gap-1 w-100 h-100">
+      {lista.map((id) => {
+        const j = jugadores[id];
+        if (!j) return null;
 
-                /* El backend no manda color: se asigna por la posicion en el orden de
-           turnos, asi todos ven el mismo color para la misma persona. */
-        const estilo = { '--color-jugador': colorDeJugador(lista, sessionId) } as CSSProperties;
-
-        const clases = ['ijFicha'];
-        if (sessionId === turnoActual) clases.push('ijTurno');
-        if (sessionId === miSessionId) clases.push('ijYo');
+        const color = colorDeJugador(lista, id);
+        const turno = id === turnoActual;
+        const yo = id === miSessionId;
 
         return (
-          <div key={sessionId} className={clases.join(' ')} style={estilo}>
-            {/* Cabecera: nombre y puntuación. */}
-            <div className="ijCabecera">
-              <span className="ijNombre">{sessionId === miSessionId && '(Yo)'}{jugador.nombre}</span>
-              <span className="ijPuntos">{jugador.puntuacion}/{jugador.puntosParaGanar} pts.</span>
-            </div>
-
-            {/* Fila de números: total de cartas y recursos. */}
-            <div className="ijMano">
-              <span title="Cartas en la mano: recursos mas desarrollo">
-                {totalEnMano(jugador)} cartas
+          <div
+            key={id}
+            style={turno
+              ? { backgroundColor: color, borderColor: color, borderLeft: `0.5rem solid ${color}` }
+              : { borderLeft: `0.5rem solid ${color}` }}
+            className={`flex-fill min-w-0 overflow-hidden rounded border py-1 px-2
+                        d-flex flex-column justify-content-center small
+                        ${turno ? 'text-white' : ''}`}
+          >
+            <div className="d-flex align-items-center gap-1 min-w-0">
+              <span className={`flex-grow-1 text-truncate fw-semibold ${yo ? 'fw-bold' : ''}`}>
+                {yo && '(Yo)'}{j.nombre}
               </span>
+              <span className="fw-bold flex-shrink-0">
+                {j.puntuacion}/10
+              </span>
+            </div>
+            <div className={`d-flex justify-content-between ${turno ? 'text-white-50' : 'text-muted'}`}>
+              <span title="Cartas en la mano">{totalEnMano(j)} cartas</span>
               <span
-                title="De esas cartas, cuantas son de recurso"
-                className={enRiesgoDeDescarte(jugador) ? 'ijRiesgo' : undefined}
+                title="De esas, cuántas son de recurso"
+                className={enRiesgoDeDescarte(j) ? 'text-warning fw-bold' : ''}
               >
-                {totalRecursos(jugador)} recursos
+                {totalRecursos(j)} rec.
               </span>
             </div>
           </div>
