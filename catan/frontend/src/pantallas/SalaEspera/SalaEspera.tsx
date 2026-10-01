@@ -3,6 +3,8 @@ import type { Room } from "@colyseus/sdk";
 import "./SalaEspera.css";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import Typography from "@mui/material/Typography";
 import { COLORES } from "../../common/jugador";
 import type { InfoSala } from "../sesionGuardada";
 
@@ -72,17 +74,22 @@ function SalaEspera({
     <div className="bg-info-subtle min-vh-100 d-flex align-items-center justify-content-center px-3 py-4">
       <Card variant="outlined" className="w-100 sala-espera__card">
         <CardContent className="d-flex flex-column align-items-center text-center p-4">
-          <div className="sala-espera__superior">
-            <span className="tema-insignia tema-insignia--marca">⏳ Sala de espera</span>
+          <div className="d-flex flex-wrap justify-content-center gap-2 mb-3">
+            <Chip label="⏳ Sala de espera" color="primary" variant="outlined" size="small" />
             {infoSala && (
-              <span className={"tema-insignia tema-insignia--" + (infoSala.privada ? "privada" : "publica")}>
-                {infoSala.privada ? "🔒 Privada" : "🌍 Pública"}
-              </span>
+              <Chip
+                label={infoSala.privada ? "🔒 Privada" : "🌍 Pública"}
+                color={infoSala.privada ? "error" : "success"}
+                variant="outlined"
+                size="small"
+              />
             )}
           </div>
 
-          <h1>{infoSala?.alias || "Esperando jugadores"}</h1>
-          <p className="sala-espera__contador">
+          <Typography variant="h4" component="h1" className="text-break">
+            {infoSala?.alias || "Esperando jugadores"}
+          </Typography>
+          <p className="text-body-secondary mb-3">
             <strong>{jugadores.length}</strong> de {maxJugadores} colonos en la isla
           </p>
 

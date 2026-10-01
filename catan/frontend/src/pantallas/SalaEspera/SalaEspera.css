@@ -5,25 +5,6 @@
   max-width: 560px;
 }
 
-.sala-espera__superior {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.sala-espera__card h1 {
-  font-size: clamp(1.6rem, 5vw, 2rem);
-  margin: 0 0 2px;
-  overflow-wrap: anywhere;
-}
-
-.sala-espera__contador {
-  color: var(--tinta-suave);
-  margin: 0 0 16px;
-}
-
 /* ---------- Barra: un tramo de camino por asiento ---------- */
 .sala-espera__barra {
   width: 100%;
