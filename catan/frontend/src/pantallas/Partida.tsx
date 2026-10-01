@@ -21,9 +21,11 @@ import Construir, {
   type TipoConstruccion,
 } from '../componentes/construir';
 import { FASE_JUEGO, FASE_PARTIDA } from '../common/fases';
+import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
 import "./Partida.css"
+import InfoTurno from '../componentes/infoTurno';
 
 const recursosPrueba: Recursos = {
   madera: 2,
@@ -63,6 +65,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const [estadoConstruccion, setEstadoConstruccion] = useState('');
   const [resultadoDados, setResultadoDados] = useState<ResultadoDados | null>(null);
   const [lanzandoDados, setLanzandoDados] = useState(false);
+  const [pasandoTurno, setPasandoTurno] = useState(false);
 
   // Todo lo que manda el servidor. null = todavia no llega, o no hay sala.
   const [estadoReal, setEstadoReal] = useState<EstadoCatan | null>(null);
@@ -72,7 +75,15 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
     const salaActual = sala;
 
     function actualizarEstado() {
-      setEstadoReal(leerEstado(salaActual));
+      const estado = leerEstado(salaActual);
+      setEstadoReal(estado);
+      // El servidor confirma el cambio mediante el estado, no un mensaje nuevo.
+      if (!estado
+        || estado.partida.turnoActual !== salaActual.sessionId
+        || estado.partida.fase !== FASE_PARTIDA.JUEGO
+        || estado.partida.faseJuego !== FASE_JUEGO.ACCIONES) {
+        setPasandoTurno(false);
+      }
     }
 
     actualizarEstado();
@@ -94,9 +105,10 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
 
     // CatanRoom responde "error" al cliente si una validación falla. El
     // navegador ya muestra ese mensaje desde Navegacion; aquí solo liberamos
-    // el botón para que la interfaz no quede bloqueada tras el rechazo.
+    // los botones para que la interfaz no quede bloqueada tras el rechazo.
     const dejarDeEscucharErrores = sala.onMessage('error', () => {
       setLanzandoDados(false);
+      setPasandoTurno(false);
     });
 
     return () => {
@@ -122,6 +134,19 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       && estadoReal?.partida.fase === FASE_PARTIDA.JUEGO
       && estadoReal.partida.faseJuego === FASE_JUEGO.DADOS,
   );
+  const puedePasarTurno = Boolean(
+    sala
+      && esMiTurno
+      && estadoReal?.partida.fase === FASE_PARTIDA.JUEGO
+      && estadoReal.partida.faseJuego === FASE_JUEGO.ACCIONES,
+  );
+
+  function pasarTurno() {
+    if (!sala || !puedePasarTurno || pasandoTurno) return;
+    setPasandoTurno(true);
+    // El backend elige al siguiente jugador. No adelantamos el turno localmente.
+    sala.send('msgPasarTurno');
+  }
 
   function lanzarDados() {
     // El backend vuelve a validar turno y fase; esta condición solo evita un
@@ -185,7 +210,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
           />
         </div>
         <div className="infoPartida">
-            area de informacion de partida
+          {/*INFORMACION DE LA PARTIDA*/}
+            <InfoTurno sessionIdTurno={turnoActual} jugadores={jugadores} />
         </div>
         <div className="tablero">
           <Tablero
@@ -216,7 +242,15 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
           />
         </div>
         <div className="finTurno">
-          area de finaliszar turno
+          <Button
+            type="button"
+            variant="contained"
+            fullWidth
+            disabled={!puedePasarTurno || pasandoTurno}
+            onClick={pasarTurno}
+          >
+            {pasandoTurno ? 'Pasando turno…' : 'Pasar turno'}
+          </Button>
         </div>
         <div className="existencias">
           <Existencias

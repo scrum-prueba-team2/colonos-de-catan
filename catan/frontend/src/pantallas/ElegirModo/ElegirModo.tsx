@@ -1,5 +1,29 @@
 import "./ElegirModo.css";
-import Decoracion from "../Decoracion/Decoracion";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardActionArea from "@mui/material/CardActionArea";
+import CardContent from "@mui/material/CardContent";
+import Link from "@mui/material/Link";
+import Typography from "@mui/material/Typography";
+
+// Las dos opciones de la pantalla. El borde de arriba usa colores del tema
+// de MUI: rojo para crear (ladrillo) y celeste para unirse (mar).
+const OPCIONES = [
+  {
+    id: "crear",
+    titulo: "Crear partida",
+    detalle: "Abre una sala nueva, pública o privada, y espera a que se unan los demás jugadores.",
+    icono: "/svg/ciudad.svg",
+    colorBorde: "error.main",
+  },
+  {
+    id: "unirse",
+    titulo: "Unirse a partida",
+    detalle: "Mira las salas disponibles o entra con el identificador que te compartieron.",
+    icono: "/svg/carretera.svg",
+    colorBorde: "info.main",
+  },
+] as const;
 
 interface ElegirModoProps {
   nombreJugador?: string;
@@ -11,51 +35,51 @@ interface ElegirModoProps {
 
 function ElegirModo({ nombreJugador, onCrear, onUnirse, onVolver, onCambiarNombre }: ElegirModoProps) {
   return (
-    <div className="elegir tema-fondo">
-      <Decoracion />
-
-      <div className="elegir__contenido">
-        <button className="tema-volver" onClick={onVolver}>
+    <div className="bg-info-subtle min-vh-100 px-3 py-4">
+      <div className="mx-auto elegir__contenido">
+        <Button variant="text" onClick={onVolver}>
           ← Volver
-        </button>
+        </Button>
 
-        <header className="elegir__header tema-aparecer">
+        <header className="mt-4 mb-4">
           {nombreJugador && (
-            <p className="elegir__saludo">
+            <p className="d-flex flex-wrap align-items-baseline gap-2 mb-1 fs-5">
               <span>
                 ¡Hola, <strong>{nombreJugador}</strong>!
               </span>
               {onCambiarNombre && (
-                <button className="elegir__cambiar" onClick={onCambiarNombre}>
+                <Link component="button" variant="body2" onClick={onCambiarNombre}>
                   cambiar nombre
-                </button>
+                </Link>
               )}
             </p>
           )}
-          <h1>¿Qué quieres hacer?</h1>
-          <p>Puedes empezar una partida nueva o entrar a una que ya esté abierta.</p>
+          <Typography variant="h4" component="h1" gutterBottom>
+            ¿Qué quieres hacer?
+          </Typography>
+          <p className="mb-0 text-body-secondary">
+            Puedes empezar una partida nueva o entrar a una que ya esté abierta.
+          </p>
         </header>
 
-        <div className="elegir__opciones">
-          <button className="elegir__opcion elegir__opcion--crear tema-pergamino" onClick={onCrear}>
-            <span className="elegir__opcion-icono" aria-hidden="true">
-              <img src="/svg/ciudad.svg" alt="" />
-            </span>
-            <span className="elegir__opcion-titulo">Crear partida</span>
-            <span className="elegir__opcion-detalle">
-              Abre una sala nueva, pública o privada, y espera a que se unan los demás jugadores.
-            </span>
-          </button>
-
-          <button className="elegir__opcion elegir__opcion--unirse tema-pergamino" onClick={onUnirse}>
-            <span className="elegir__opcion-icono" aria-hidden="true">
-              <img src="/svg/carretera.svg" alt="" />
-            </span>
-            <span className="elegir__opcion-titulo">Unirse a partida</span>
-            <span className="elegir__opcion-detalle">
-              Mira las salas disponibles o entra con el identificador que te compartieron.
-            </span>
-          </button>
+        <div className="row g-3">
+          {OPCIONES.map((opcion) => (
+            <div className="col-12 col-sm-6" key={opcion.id}>
+              <Card variant="outlined" className="h-100" sx={{ borderTop: 6, borderTopColor: opcion.colorBorde }}>
+                <CardActionArea className="h-100" onClick={opcion.id === "crear" ? onCrear : onUnirse}>
+                  <CardContent className="d-flex flex-column gap-2">
+                    <img src={opcion.icono} alt="" aria-hidden="true" width={40} height={40} />
+                    <Typography variant="h6" component="span">
+                      {opcion.titulo}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {opcion.detalle}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </div>
+          ))}
         </div>
       </div>
     </div>

@@ -31,7 +31,5 @@ export class CatanState extends Schema{
     generarVertices(this.tablero.vertices);
     generarAristas(this.tablero.aristas);
     generarPuertos(this.tablero.puertos);
-    generarCartasBanca(this.banca.cartas);
-    generarRecursosBanca(this.banca.recursos);
   }
 };
