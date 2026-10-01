@@ -9,6 +9,7 @@ Pantallas migradas:
 2. [Ingresar nombre](#2-ingresar-nombre)
 3. [Elegir modo](#3-elegir-modo)
 4. [Crear sala](#4-crear-sala)
+5. [Unirse a partida (Lobby)](#5-unirse-a-partida-lobby)
 
 ## Librerías instaladas
 
@@ -23,7 +24,7 @@ Bootstrap se importa una vez en `src/main.tsx` (`bootstrap/dist/css/bootstrap.mi
 antes del CSS propio, para que el CSS propio pueda ajustarlo. Solo se usan sus clases CSS,
 no su JavaScript.
 
-En las pantallas de este documento (Home, Ingresar nombre, Elegir modo y Crear sala) no se usa
+En las pantallas de este documento (Home, Ingresar nombre, Elegir modo, Crear sala y Lobby) no se usa
 `react-bootstrap`: los componentes salen de MUI y Bootstrap se usa solo por sus clases.
 Así cada pantalla usa una sola librería de componentes.
 
@@ -209,6 +210,72 @@ compara el código tal cual se escribió.
 Una sola regla:
 
 - `.crear-sala__contenido`: ancho máximo (480px) de la columna con el botón Volver y la tarjeta
+
+---
+
+## 5. Unirse a partida (Lobby)
+
+Archivo: `src/pantallas/Lobby/Lobby.tsx`
+
+Es la pantalla "Puerto de partidas", la que se abre al elegir "Unirse a partida".
+
+Se quitaron la animación de aparecer del encabezado, de cada sala y del diálogo, el
+movimiento de las salas al pasar el mouse, el punto que rebotaba junto a "En vivo", los
+hexágonos de los cupos, el hexágono del candado sobre el diálogo, el fondo del diálogo hecho
+a mano y los recursos flotantes de fondo (`Decoracion`).
+
+La lógica no cambió: misma conexión a la `LobbyRoom` (mensajes `rooms`, `+` y `-`), mismo
+filtro (solo salas `EN LOBBY` con lugar), al hacer clic en una sala se copia su identificador
+al campo manual, las salas privadas piden el código antes de entrar, una sala escrita a mano
+que resulta privada abre el diálogo del código, y los botones se desactivan mientras se está
+entrando a una sala.
+
+El diálogo del código ahora es un `Dialog` de MUI, que ya se cierra con Escape y al hacer clic
+fuera. Por eso se borró el `useEffect` que escuchaba la tecla Escape.
+
+### Bootstrap usado
+
+- **Grid:** `row`, `g-3`, `col-12`, `col-md-6` (una sala por fila en celular, dos en pantallas más anchas)
+- **Layout / flex:** `d-flex`, `flex-column`, `flex-sm-row`, `align-items-start`,
+  `align-items-center`, `align-items-sm-center`, `justify-content-between`,
+  `justify-content-center`, `flex-grow-1`, `gap-1`, `gap-2`, `gap-3`, `w-100`, `h-100`
+- **Espaciados:** `px-3`, `py-4`, `px-4`, `pb-4`, `mt-2`, `mt-4`, `mb-0`, `mb-2`, `mb-3`, `mb-4`, `mx-auto`
+- **Texto:** `text-center`, `text-truncate`, `fw-bold`, `fw-semibold`, `text-body-secondary`
+- **Otros:** `bg-info-subtle`, `min-vh-100`, `list-unstyled`, `rounded`, `d-block`
+
+### Componentes de MUI usados
+
+| Componente | Dónde |
+|---|---|
+| `Button` (`variant="text"`) | Botón "← Volver" |
+| `Typography` | Título "Puerto de partidas", "Salas disponibles" y nombre de cada sala |
+| `Card` + `CardContent` | Formulario del identificador (`CardContent` hace de `<form>`), cada sala y el mensaje de "Buscando salas" / "No hay salas" |
+| `TextField` | Campo del identificador y campo del código de acceso del diálogo |
+| `Button` (`variant="contained"`) | "Unirse" (manual y de cada sala), "Entrar" y "Crear nueva sala" |
+| `Button` (`variant="outlined"`) | "Cancelar" del diálogo |
+| `Alert` (`severity="error"`) | Error al unirse y error de conexión con el servidor |
+| `Chip` | Etiqueta "En vivo" y etiqueta "Pública" / "Privada" de cada sala |
+| `CircularProgress` | Mientras se buscan salas |
+| `LinearProgress` | Cupos ocupados de cada sala (antes era un hexágono por asiento) |
+| `Dialog` + `DialogTitle` + `DialogContent` + `DialogActions` | Diálogo para escribir el código de una sala privada |
+
+La franja de color a la izquierda de cada sala se hace con la prop `sx` de MUI
+(`borderLeft: 6` y `borderLeftColor`): `success.main` (verde) para las públicas y `error.main`
+(rojo) para las privadas. La sala seleccionada se marca con un contorno `info.main`, también
+con `sx`. Los botones de las salas privadas usan `color="error"` (rojo).
+
+Antes se usaban las clases `tema-etiqueta`, `tema-input`, `tema-ayuda`, `tema-error`,
+`tema-aviso`, `tema-insignia`, `tema-btn` y `tema-pergamino` de `tema.css`. Ahora todo eso lo
+resuelve MUI.
+
+La letra monoespaciada del identificador y del código se hace con la prop `sx` del `TextField`,
+igual que en Crear sala.
+
+### CSS propio que queda (`Lobby.css`)
+
+Una sola regla:
+
+- `.lobby__contenido`: ancho máximo (900px) del contenido
 
 ---
 

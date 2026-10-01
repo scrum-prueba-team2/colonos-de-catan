@@ -1,8 +1,21 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { RoomAvailable } from "@colyseus/sdk";
 import "./Lobby.css";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import CircularProgress from "@mui/material/CircularProgress";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import LinearProgress from "@mui/material/LinearProgress";
+import TextField from "@mui/material/TextField";
+import type { Theme } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
 import { client } from "../colyseusClient";
-import Decoracion from "../Decoracion/Decoracion";
 import type { InfoSala } from "../sesionGuardada";
 import { ERROR_CODIGO_INCORRECTO, LARGO_MAXIMO_CODIGO, validarCodigoAcceso } from "../validacionSala";
 
@@ -114,16 +127,6 @@ function Lobby({ onCrearSala, onUnirseASala, onVolver }: LobbyProps) {
     };
   }, []);
 
-  // Escape cierra el diálogo del código.
-  useEffect(() => {
-    if (!salaPorCodigo) return;
-    function alPresionarTecla(e: KeyboardEvent) {
-      if (e.key === "Escape") cerrarDialogo();
-    }
-    window.addEventListener("keydown", alPresionarTecla);
-    return () => window.removeEventListener("keydown", alPresionarTecla);
-  }, [salaPorCodigo]);
-
   const todasLasSalas = listado.map(salaDesdeListado);
 
   // Solo mostramos salas que todavía esperan jugadores.
@@ -202,153 +205,175 @@ function Lobby({ onCrearSala, onUnirseASala, onVolver }: LobbyProps) {
   }
 
   return (
-    <div className="lobby tema-fondo">
-      <Decoracion />
-
-      <div className="lobby__contenido">
+    <div className="bg-info-subtle min-vh-100 px-3 py-4">
+      <div className="mx-auto d-flex flex-column align-items-start lobby__contenido">
         {onVolver && (
-          <button className="tema-volver" onClick={onVolver}>
+          <Button variant="text" onClick={onVolver}>
             ← Volver
-          </button>
+          </Button>
         )}
 
-        <header className="lobby__header tema-aparecer">
-          <h1>Puerto de partidas</h1>
-          <p>Elige una sala para zarpar, o funda la tuya.</p>
+        <header className="mt-4 mb-4">
+          <Typography variant="h4" component="h1" gutterBottom>
+            Puerto de partidas
+          </Typography>
+          <p className="mb-0 text-body-secondary">Elige una sala para zarpar, o funda la tuya.</p>
         </header>
 
-        <form
-          className="lobby__manual tema-pergamino"
-          onSubmit={(e) => {
-            e.preventDefault();
-            unirseManual();
-          }}
-        >
-          <label className="tema-etiqueta lobby__manual-etiqueta" htmlFor="id-sala">
-            ¿Te pasaron el identificador de una sala?
-          </label>
-          <div className="lobby__manual-fila">
-            <input
-              id="id-sala"
-              className="tema-input lobby__manual-input"
-              type="text"
-              placeholder="Identificador de sala"
-              value={idInput}
-              autoComplete="off"
-              spellCheck={false}
-              onChange={(e) => {
-                setIdInput(e.target.value);
-                setSalaSeleccionada(null);
-              }}
-            />
-            <button type="submit" className="tema-btn" disabled={!idInput.trim() || uniendo !== null}>
-              Unirse
-            </button>
-          </div>
-        </form>
+        <Card variant="outlined" className="w-100 mb-3">
+          <CardContent
+            component="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              unirseManual();
+            }}
+          >
+            <label className="d-block fw-semibold mb-2" htmlFor="id-sala">
+              ¿Te pasaron el identificador de una sala?
+            </label>
+            <div className="d-flex flex-column flex-sm-row gap-2">
+              <TextField
+                id="id-sala"
+                placeholder="Identificador de sala"
+                size="small"
+                className="flex-grow-1"
+                autoComplete="off"
+                value={idInput}
+                onChange={(e) => {
+                  setIdInput(e.target.value);
+                  setSalaSeleccionada(null);
+                }}
+                slotProps={{ htmlInput: { spellCheck: false } }}
+                sx={{ "& .MuiInputBase-input": { fontFamily: "monospace" } }}
+              />
+              <Button type="submit" variant="contained" disabled={!idInput.trim() || uniendo !== null}>
+                Unirse
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {errorGeneral && (
-          <p className="tema-aviso lobby__aviso" role="alert">
-            ⚠️ {errorGeneral}
-          </p>
+          <Alert severity="error" className="w-100 mb-3">
+            {errorGeneral}
+          </Alert>
         )}
 
-        <section className="lobby__lista">
-          <div className="lobby__lista-cabecera">
-            <h2>Salas disponibles</h2>
-            {conexion === "conectado" && (
-              <span className="lobby__en-vivo">
-                <span className="lobby__en-vivo-punto" aria-hidden="true" /> En vivo
-              </span>
-            )}
+        <section className="w-100 mt-2">
+          <div className="d-flex align-items-center justify-content-between mb-3">
+            <Typography variant="h5" component="h2">
+              Salas disponibles
+            </Typography>
+            {conexion === "conectado" && <Chip label="● En vivo" color="success" variant="outlined" size="small" />}
           </div>
 
           {conexion === "conectando" ? (
-            <p className="lobby__vacio tema-pergamino">⛵ Buscando salas…</p>
+            <Card variant="outlined" className="mb-4">
+              <CardContent className="d-flex align-items-center justify-content-center gap-2 text-body-secondary">
+                <CircularProgress size={20} /> Buscando salas…
+              </CardContent>
+            </Card>
           ) : conexion === "error" ? (
-            <p className="lobby__vacio tema-pergamino">
-              🌊 No se pudo conectar con el servidor. Revisa que el backend esté encendido.
-            </p>
+            <Alert severity="error" className="mb-4">
+              No se pudo conectar con el servidor. Revisa que el backend esté encendido.
+            </Alert>
           ) : salas.length === 0 ? (
-            <p className="lobby__vacio tema-pergamino">🏝️ No hay salas abiertas. ¡Crea una para empezar a jugar!</p>
+            <Card variant="outlined" className="mb-4">
+              <CardContent className="text-center fw-semibold text-body-secondary">
+                🏝️ No hay salas abiertas. ¡Crea una para empezar a jugar!
+              </CardContent>
+            </Card>
           ) : (
-            <ul>
-              {salas.map((sala, i) => (
-                <li
-                  key={sala.id}
-                  style={{ animationDelay: `${i * 0.05}s` }}
-                  className={
-                    "lobby__sala tema-pergamino lobby__sala--" +
-                    sala.tipo +
-                    (salaSeleccionada === sala.id ? " lobby__sala--seleccionada" : "")
-                  }
-                  onClick={() => seleccionarSala(sala)}
-                >
-                  <div className="lobby__sala-info">
-                    <div className="lobby__sala-nombre-fila">
-                      <span className="lobby__sala-nombre">{sala.nombre}</span>
-                      <span className={"tema-insignia tema-insignia--" + sala.tipo}>
-                        {sala.tipo === "publica" ? "🌍 Pública" : "🔒 Privada"}
-                      </span>
-                    </div>
-                    <span className="lobby__sala-detalle">
-                      {sala.anfitrion ? `Anfitrión: ${sala.anfitrion}` : "Sin anfitrión"}
-                    </span>
-                    <span
-                      className="lobby__cupos"
-                      aria-label={`${sala.jugadores} de ${sala.maxJugadores} jugadores`}
-                    >
-                      {Array.from({ length: sala.maxJugadores }, (_, n) => (
-                        <span
-                          key={n}
-                          className={"lobby__cupo" + (n < sala.jugadores ? " lobby__cupo--lleno" : "")}
-                          aria-hidden="true"
-                        />
-                      ))}
-                      <span className="lobby__cupos-texto" aria-hidden="true">
-                        {sala.jugadores}/{sala.maxJugadores}
-                      </span>
-                    </span>
-                  </div>
-
-                  <button
-                    className={"tema-btn tema-btn--chico" + (sala.tipo === "privada" ? " tema-btn--ladrillo" : "")}
-                    disabled={uniendo !== null}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      intentarUnirse(sala.id);
+            <ul className="row g-3 list-unstyled mb-4">
+              {salas.map((sala) => (
+                <li key={sala.id} className="col-12 col-md-6">
+                  {/* Franja de color a la izquierda: verde si es pública, roja si es privada.
+                      La sala seleccionada se marca con un contorno celeste. */}
+                  <Card
+                    variant="outlined"
+                    className="h-100"
+                    onClick={() => seleccionarSala(sala)}
+                    sx={{
+                      cursor: "pointer",
+                      borderLeft: 6,
+                      borderLeftColor: sala.tipo === "publica" ? "success.main" : "error.main",
+                      outline: salaSeleccionada === sala.id ? 3 : 0,
+                      outlineStyle: "solid",
+                      outlineColor: "info.main",
                     }}
                   >
-                    {uniendo === sala.id ? "Entrando…" : sala.tipo === "privada" ? "🔑 Unirse" : "Unirse"}
-                  </button>
+                    <CardContent className="d-flex flex-column flex-sm-row align-items-sm-center gap-3">
+                      <div className="d-flex flex-column gap-1 flex-grow-1 text-truncate">
+                        <div className="d-flex align-items-center gap-2">
+                          <Typography variant="h6" component="span" noWrap>
+                            {sala.nombre}
+                          </Typography>
+                          <Chip
+                            label={sala.tipo === "publica" ? "🌍 Pública" : "🔒 Privada"}
+                            color={sala.tipo === "publica" ? "success" : "error"}
+                            variant="outlined"
+                            size="small"
+                          />
+                        </div>
+                        <small className="text-body-secondary">
+                          {sala.anfitrion ? `Anfitrión: ${sala.anfitrion}` : "Sin anfitrión"}
+                        </small>
+                        <div
+                          className="d-flex align-items-center gap-2"
+                          aria-label={`${sala.jugadores} de ${sala.maxJugadores} jugadores`}
+                        >
+                          <LinearProgress
+                            variant="determinate"
+                            color="info"
+                            value={(sala.jugadores / sala.maxJugadores) * 100}
+                            className="flex-grow-1 rounded"
+                            aria-hidden="true"
+                          />
+                          <small className="fw-bold text-body-secondary" aria-hidden="true">
+                            {sala.jugadores}/{sala.maxJugadores}
+                          </small>
+                        </div>
+                      </div>
+
+                      <Button
+                        variant="contained"
+                        color={sala.tipo === "privada" ? "error" : "primary"}
+                        disabled={uniendo !== null}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          intentarUnirse(sala.id);
+                        }}
+                      >
+                        {uniendo === sala.id ? "Entrando…" : sala.tipo === "privada" ? "🔑 Unirse" : "Unirse"}
+                      </Button>
+                    </CardContent>
+                  </Card>
                 </li>
               ))}
             </ul>
           )}
         </section>
 
-        <button className="lobby__btn-crear tema-btn tema-btn--ladrillo tema-btn--ancho" onClick={onCrearSala}>
+        <Button variant="contained" color="error" fullWidth size="large" onClick={onCrearSala}>
           🏗️ Crear nueva sala
-        </button>
+        </Button>
       </div>
 
-      {salaPorCodigo && (
-        <div className="lobby__dialogo-fondo" onClick={cerrarDialogo}>
-          <form
-            className="lobby__dialogo tema-pergamino"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="dialogo-codigo-titulo"
-            onClick={(e) => e.stopPropagation()}
-            onSubmit={enviarCodigo}
-            noValidate
-          >
-            <span className="lobby__dialogo-candado" aria-hidden="true">
-              🔒
-            </span>
-            <h2 id="dialogo-codigo-titulo">Sala privada</h2>
-            <p>
-              {salaPorCodigo.nombre ? (
+      {/* Dialog ya cierra con Escape y al hacer clic fuera (llama a onClose). */}
+      <Dialog
+        open={salaPorCodigo !== null}
+        onClose={cerrarDialogo}
+        aria-labelledby="dialogo-codigo-titulo"
+        fullWidth
+        maxWidth="xs"
+      >
+        <form onSubmit={enviarCodigo} noValidate>
+          <DialogTitle id="dialogo-codigo-titulo" className="text-center">
+            🔒 Sala privada
+          </DialogTitle>
+          <DialogContent>
+            <p className="text-center text-body-secondary">
+              {salaPorCodigo?.nombre ? (
                 <>
                   Para entrar a <strong>{salaPorCodigo.nombre}</strong> necesitas su código de acceso.
                 </>
@@ -357,43 +382,48 @@ function Lobby({ onCrearSala, onUnirseASala, onVolver }: LobbyProps) {
               )}
             </p>
 
-            <label className="tema-etiqueta" htmlFor="codigo-acceso">
-              Código de acceso
-            </label>
-            <input
+            <TextField
               id="codigo-acceso"
-              className={"tema-input lobby__dialogo-codigo" + (errorCodigo ? " tema-input--error" : "")}
-              type="text"
+              label="Código de acceso"
               placeholder="Ej. OVEJA7"
-              value={codigoAcceso}
-              maxLength={LARGO_MAXIMO_CODIGO}
+              fullWidth
               autoFocus
               autoComplete="off"
-              spellCheck={false}
-              aria-invalid={Boolean(errorCodigo)}
-              aria-describedby="codigo-acceso-ayuda"
+              margin="dense"
+              value={codigoAcceso}
               onChange={(e) => {
                 setCodigoAcceso(e.target.value.replace(/\s/g, ""));
                 setErrorCodigo(null);
               }}
+              error={Boolean(errorCodigo)}
+              helperText={errorCodigo ?? "Pídeselo al anfitrión. Distingue mayúsculas."}
+              slotProps={{ htmlInput: { maxLength: LARGO_MAXIMO_CODIGO, spellCheck: false } }}
+              sx={{
+                "& .MuiInputBase-input": { fontFamily: "monospace", fontSize: "1.2rem", letterSpacing: "0.25em" },
+                "& .MuiInputBase-input::placeholder": {
+                  fontFamily: (theme: Theme) => theme.typography.fontFamily,
+                  fontSize: "1rem",
+                  letterSpacing: "normal",
+                },
+              }}
             />
-            <span className="tema-ayuda" id="codigo-acceso-ayuda">
-              <span className={errorCodigo ? "tema-error" : ""}>
-                {errorCodigo ?? "Pídeselo al anfitrión. Distingue mayúsculas."}
-              </span>
-            </span>
-
-            <div className="lobby__dialogo-acciones">
-              <button type="button" className="tema-btn tema-btn--pergamino" onClick={cerrarDialogo}>
-                Cancelar
-              </button>
-              <button type="submit" className="tema-btn tema-btn--ladrillo" disabled={!codigoAcceso || uniendo !== null}>
-                {uniendo ? "Entrando…" : "Entrar"}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+          </DialogContent>
+          <DialogActions className="px-4 pb-4">
+            <Button variant="outlined" fullWidth onClick={cerrarDialogo}>
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="error"
+              fullWidth
+              disabled={!codigoAcceso || uniendo !== null}
+            >
+              {uniendo ? "Entrando…" : "Entrar"}
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
     </div>
   );
 }
