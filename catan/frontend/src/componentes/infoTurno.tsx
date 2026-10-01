@@ -1,5 +1,4 @@
 import type { CSSProperties } from "@mui/material";
-import './infoJugadores.css'
 import type { Jugadores } from "../common/jugador";
 
 interface Props {
