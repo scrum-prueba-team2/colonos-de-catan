@@ -10,10 +10,11 @@ import Existencias from '../componentes/existencias';
 import { tableroPrueba } from '../datos/tableroPrueba'
 import TablaCostes from '../componentes/tablaCostes';
 import Tablero from '../componentes/tablero';
-import type { Recursos } from '../common/jugador';
+import type { Recurso, Recursos } from '../common/jugador';
 import type { EstadoCatan } from '../common/estado';
 import CarRecursos from '../componentes/carRecursos';
 import CarDesarrollo from '../componentes/carDesarrollo';
+import DescartarRecursos from '../componentes/descartarRecursos';
 import TirarDados, { type ResultadoDados } from '../componentes/tirarDados';
 import Construir, {
   type ObjetivoConstruccion,
@@ -66,6 +67,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const [resultadoDados, setResultadoDados] = useState<ResultadoDados | null>(null);
   const [lanzandoDados, setLanzandoDados] = useState(false);
   const [pasandoTurno, setPasandoTurno] = useState(false);
+  const [descarteEnEspera, setDescarteEnEspera] = useState<number | null>(null);
 
   // Todo lo que manda el servidor. null = todavia no llega, o no hay sala.
   const [estadoReal, setEstadoReal] = useState<EstadoCatan | null>(null);
@@ -77,6 +79,15 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
     function actualizarEstado() {
       const estado = leerEstado(salaActual);
       setEstadoReal(estado);
+      // Cada descarte aceptado reduce la cuenta publicada por el servidor.
+      setDescarteEnEspera((cantidadAnterior) => {
+        if (cantidadAnterior === null) return null;
+        const partida = estado?.partida;
+        const restantes = partida?.jugadoresParaDescartar[salaActual.sessionId] ?? 0;
+        return !partida || partida.faseJuego !== FASE_JUEGO.DESCARTE || restantes < cantidadAnterior
+          ? null
+          : cantidadAnterior;
+      });
       // El servidor confirma el cambio mediante el estado, no un mensaje nuevo.
       if (!estado
         || estado.partida.turnoActual !== salaActual.sessionId
@@ -109,6 +120,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
     const dejarDeEscucharErrores = sala.onMessage('error', () => {
       setLanzandoDados(false);
       setPasandoTurno(false);
+      setDescarteEnEspera(null);
     });
 
     return () => {
@@ -128,6 +140,19 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const banca = estadoReal?.banca ?? bancaPrueba;
   const miSessionId = estadoReal ? (sala?.sessionId ?? '') : miSessionIdPrueba;
   const esMiTurno = estadoReal !== null && turnoActual === miSessionId;
+  const partidaActual = estadoReal?.partida;
+  const descartesPendientes = partidaActual?.jugadoresParaDescartar[miSessionId] ?? 0;
+  // El backend procesa primero al jugador pendiente que aparece en ordenJugadores.
+  const siguienteDescartador = partidaActual?.ordenJugadores.find(
+    (id) => (partidaActual.jugadoresParaDescartar[id] ?? 0) > 0,
+  );
+  const esSuTurnoDeDescartar = Boolean(
+    sala
+      && partidaActual?.fase === FASE_PARTIDA.JUEGO
+      && partidaActual.faseJuego === FASE_JUEGO.DESCARTE
+      && descartesPendientes > 0
+      && siguienteDescartador === miSessionId,
+  );
   const puedeLanzarDados = Boolean(
     sala
       && esMiTurno
@@ -146,6 +171,13 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
     setPasandoTurno(true);
     // El backend elige al siguiente jugador. No adelantamos el turno localmente.
     sala.send('msgPasarTurno');
+  }
+
+  function descartarRecurso(recurso: Recurso) {
+    const disponibles = estadoReal?.jugadores[miSessionId]?.recursos[recurso] ?? 0;
+    if (!sala || !esSuTurnoDeDescartar || descarteEnEspera !== null || disponibles < 1) return;
+    setDescarteEnEspera(descartesPendientes);
+    sala.send('msgDescartarRecursos', { recurso });
   }
 
   function lanzarDados() {
@@ -258,6 +290,13 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             miJugador={jugadores[miSessionId]}
           />
         </div>
+        <DescartarRecursos
+          pendientes={descartesPendientes}
+          recursos={estadoReal?.jugadores[miSessionId]?.recursos}
+          esSuTurnoDeDescartar={esSuTurnoDeDescartar}
+          enviando={descarteEnEspera !== null}
+          onDescartar={descartarRecurso}
+        />
     </div>
   );
 }
