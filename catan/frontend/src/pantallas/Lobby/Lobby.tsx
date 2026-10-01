@@ -7,8 +7,13 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
 import LinearProgress from "@mui/material/LinearProgress";
 import TextField from "@mui/material/TextField";
+import type { Theme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import { client } from "../colyseusClient";
 import type { InfoSala } from "../sesionGuardada";
@@ -121,16 +126,6 @@ function Lobby({ onCrearSala, onUnirseASala, onVolver }: LobbyProps) {
       salaLobby?.leave();
     };
   }, []);
-
-  // Escape cierra el diálogo del código.
-  useEffect(() => {
-    if (!salaPorCodigo) return;
-    function alPresionarTecla(e: KeyboardEvent) {
-      if (e.key === "Escape") cerrarDialogo();
-    }
-    window.addEventListener("keydown", alPresionarTecla);
-    return () => window.removeEventListener("keydown", alPresionarTecla);
-  }, [salaPorCodigo]);
 
   const todasLasSalas = listado.map(salaDesdeListado);
 
@@ -359,28 +354,26 @@ function Lobby({ onCrearSala, onUnirseASala, onVolver }: LobbyProps) {
           )}
         </section>
 
-        <button className="lobby__btn-crear tema-btn tema-btn--ladrillo tema-btn--ancho" onClick={onCrearSala}>
+        <Button variant="contained" color="error" fullWidth size="large" onClick={onCrearSala}>
           🏗️ Crear nueva sala
-        </button>
+        </Button>
       </div>
 
-      {salaPorCodigo && (
-        <div className="lobby__dialogo-fondo" onClick={cerrarDialogo}>
-          <form
-            className="lobby__dialogo tema-pergamino"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="dialogo-codigo-titulo"
-            onClick={(e) => e.stopPropagation()}
-            onSubmit={enviarCodigo}
-            noValidate
-          >
-            <span className="lobby__dialogo-candado" aria-hidden="true">
-              🔒
-            </span>
-            <h2 id="dialogo-codigo-titulo">Sala privada</h2>
-            <p>
-              {salaPorCodigo.nombre ? (
+      {/* Dialog ya cierra con Escape y al hacer clic fuera (llama a onClose). */}
+      <Dialog
+        open={salaPorCodigo !== null}
+        onClose={cerrarDialogo}
+        aria-labelledby="dialogo-codigo-titulo"
+        fullWidth
+        maxWidth="xs"
+      >
+        <form onSubmit={enviarCodigo} noValidate>
+          <DialogTitle id="dialogo-codigo-titulo" className="text-center">
+            🔒 Sala privada
+          </DialogTitle>
+          <DialogContent>
+            <p className="text-center text-body-secondary">
+              {salaPorCodigo?.nombre ? (
                 <>
                   Para entrar a <strong>{salaPorCodigo.nombre}</strong> necesitas su código de acceso.
                 </>
@@ -389,43 +382,48 @@ function Lobby({ onCrearSala, onUnirseASala, onVolver }: LobbyProps) {
               )}
             </p>
 
-            <label className="tema-etiqueta" htmlFor="codigo-acceso">
-              Código de acceso
-            </label>
-            <input
+            <TextField
               id="codigo-acceso"
-              className={"tema-input lobby__dialogo-codigo" + (errorCodigo ? " tema-input--error" : "")}
-              type="text"
+              label="Código de acceso"
               placeholder="Ej. OVEJA7"
-              value={codigoAcceso}
-              maxLength={LARGO_MAXIMO_CODIGO}
+              fullWidth
               autoFocus
               autoComplete="off"
-              spellCheck={false}
-              aria-invalid={Boolean(errorCodigo)}
-              aria-describedby="codigo-acceso-ayuda"
+              margin="dense"
+              value={codigoAcceso}
               onChange={(e) => {
                 setCodigoAcceso(e.target.value.replace(/\s/g, ""));
                 setErrorCodigo(null);
               }}
+              error={Boolean(errorCodigo)}
+              helperText={errorCodigo ?? "Pídeselo al anfitrión. Distingue mayúsculas."}
+              slotProps={{ htmlInput: { maxLength: LARGO_MAXIMO_CODIGO, spellCheck: false } }}
+              sx={{
+                "& .MuiInputBase-input": { fontFamily: "monospace", fontSize: "1.2rem", letterSpacing: "0.25em" },
+                "& .MuiInputBase-input::placeholder": {
+                  fontFamily: (theme: Theme) => theme.typography.fontFamily,
+                  fontSize: "1rem",
+                  letterSpacing: "normal",
+                },
+              }}
             />
-            <span className="tema-ayuda" id="codigo-acceso-ayuda">
-              <span className={errorCodigo ? "tema-error" : ""}>
-                {errorCodigo ?? "Pídeselo al anfitrión. Distingue mayúsculas."}
-              </span>
-            </span>
-
-            <div className="lobby__dialogo-acciones">
-              <button type="button" className="tema-btn tema-btn--pergamino" onClick={cerrarDialogo}>
-                Cancelar
-              </button>
-              <button type="submit" className="tema-btn tema-btn--ladrillo" disabled={!codigoAcceso || uniendo !== null}>
-                {uniendo ? "Entrando…" : "Entrar"}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+          </DialogContent>
+          <DialogActions className="px-4 pb-4">
+            <Button variant="outlined" fullWidth onClick={cerrarDialogo}>
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="error"
+              fullWidth
+              disabled={!codigoAcceso || uniendo !== null}
+            >
+              {uniendo ? "Entrando…" : "Entrar"}
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
     </div>
   );
 }
