@@ -10,6 +10,7 @@ Pantallas migradas:
 3. [Elegir modo](#3-elegir-modo)
 4. [Crear sala](#4-crear-sala)
 5. [Unirse a partida (Lobby)](#5-unirse-a-partida-lobby)
+6. [Sala de espera](#6-sala-de-espera)
 
 ## Librerías instaladas
 
@@ -24,7 +25,7 @@ Bootstrap se importa una vez en `src/main.tsx` (`bootstrap/dist/css/bootstrap.mi
 antes del CSS propio, para que el CSS propio pueda ajustarlo. Solo se usan sus clases CSS,
 no su JavaScript.
 
-En las pantallas de este documento (Home, Ingresar nombre, Elegir modo, Crear sala y Lobby) no se usa
+En las pantallas de este documento (Home, Ingresar nombre, Elegir modo, Crear sala, Lobby y Sala de espera) no se usa
 `react-bootstrap`: los componentes salen de MUI y Bootstrap se usa solo por sus clases.
 Así cada pantalla usa una sola librería de componentes.
 
@@ -276,6 +277,66 @@ igual que en Crear sala.
 Una sola regla:
 
 - `.lobby__contenido`: ancho máximo (900px) del contenido
+
+---
+
+## 6. Sala de espera
+
+Archivo: `src/pantallas/SalaEspera/SalaEspera.tsx`
+
+Es la pantalla a la que se llega después de crear una sala o de unirse a una, mientras se
+espera a que el anfitrión inicie la partida.
+
+Se quitaron la animación de aparecer de la tarjeta y de cada asiento, el rebote de la ficha al
+llegar un jugador, el pulso de los asientos vacíos, los tramos de camino inclinados y animados
+de la barra, los avatares hexagonales, la etiqueta "Tú" girada en la esquina y los recursos
+flotantes de fondo (`Decoracion`).
+
+La lógica no cambió: un asiento por cada cupo de la sala (ocupado o vacío), cada jugador
+mantiene su color de `COLORES`, el botón Copiar muestra "¡Copiado!" durante 2 segundos, el
+código de acceso solo aparece si la sala es privada y se conoce el código, solo el anfitrión
+ve el botón "Iniciar partida" y este se activa cuando se llega al mínimo de jugadores.
+
+### Bootstrap usado
+
+- **Grid:** `row`, `g-3`, `col-6`, `col-sm-3` (dos asientos por fila en celular, cuatro en pantallas más anchas)
+- **Layout / flex:** `d-flex`, `flex-column`, `flex-sm-row`, `flex-wrap`, `flex-fill`,
+  `flex-grow-1`, `align-items-center`, `align-items-sm-center`, `justify-content-center`,
+  `gap-2`, `w-100`, `h-100`, `mw-100`
+- **Espaciados:** `px-3`, `py-4`, `p-3`, `p-4`, `mt-2`, `mb-0`, `mb-2`, `mb-3`, `mb-4`
+- **Texto:** `text-center`, `text-start`, `text-break`, `text-truncate`, `text-nowrap`,
+  `fw-bold`, `fs-5`, `small`, `text-body`, `text-body-secondary`
+- **Barra de progreso:** `progress` y `progress-bar` (una barra por asiento, pintada con el color del jugador)
+- **Fondos y bordes:** `bg-info-subtle`, `bg-body-tertiary`, `bg-danger-subtle`, `border`,
+  `border-danger-subtle`, `rounded`
+- **Otros:** `min-vh-100`, `list-unstyled`
+
+### Componentes de MUI usados
+
+| Componente | Dónde |
+|---|---|
+| `Card` + `CardContent` | Tarjeta principal y cada asiento |
+| `Chip` | Etiquetas "Sala de espera" y "Pública" / "Privada", y "Tú" en el asiento propio |
+| `Typography` | Nombre de la sala y etiquetas "Identificador de sala" / "Código de acceso" (`variant="overline"`) |
+| `Avatar` | Iniciales de cada jugador sobre su color, y "?" en los asientos vacíos |
+| `Button` (`variant="outlined"`) | Botones "Copiar" del identificador y del código |
+| `Button` (`variant="contained"`, `color="success"`) | Botón "Iniciar partida" |
+| `Alert` (`severity="info"`) | "Esperando a que el anfitrión inicie la partida…" (los que no son anfitrión) |
+| `Button` (`variant="text"`, `color="error"`) | Botón "Salir de la sala" |
+
+El color de cada jugador (de `COLORES`) se pasa al `Avatar` con la prop `sx` (`bgcolor`) y a la
+barra con `style`, porque depende del jugador y no hay una clase para cada color. El borde
+punteado de los asientos vacíos se hace con `sx` (`borderStyle: "dashed"`), porque Bootstrap
+no tiene una clase para eso.
+
+Antes se usaban las clases `tema-insignia`, `tema-hex`, `tema-btn` y `tema-pergamino` de
+`tema.css`. Ahora todo eso lo resuelven MUI y Bootstrap.
+
+### CSS propio que queda (`SalaEspera.css`)
+
+Una sola regla:
+
+- `.sala-espera__card`: ancho máximo (560px) de la tarjeta
 
 ---
 
