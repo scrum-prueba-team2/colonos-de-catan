@@ -1,8 +1,9 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { RoomAvailable } from "@colyseus/sdk";
 import "./Lobby.css";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 import { client } from "../colyseusClient";
-import Decoracion from "../Decoracion/Decoracion";
 import type { InfoSala } from "../sesionGuardada";
 import { ERROR_CODIGO_INCORRECTO, LARGO_MAXIMO_CODIGO, validarCodigoAcceso } from "../validacionSala";
 
@@ -202,19 +203,19 @@ function Lobby({ onCrearSala, onUnirseASala, onVolver }: LobbyProps) {
   }
 
   return (
-    <div className="lobby tema-fondo">
-      <Decoracion />
-
-      <div className="lobby__contenido">
+    <div className="bg-info-subtle min-vh-100 px-3 py-4">
+      <div className="mx-auto d-flex flex-column align-items-start lobby__contenido">
         {onVolver && (
-          <button className="tema-volver" onClick={onVolver}>
+          <Button variant="text" onClick={onVolver}>
             ← Volver
-          </button>
+          </Button>
         )}
 
-        <header className="lobby__header tema-aparecer">
-          <h1>Puerto de partidas</h1>
-          <p>Elige una sala para zarpar, o funda la tuya.</p>
+        <header className="mt-4 mb-4">
+          <Typography variant="h4" component="h1" gutterBottom>
+            Puerto de partidas
+          </Typography>
+          <p className="mb-0 text-body-secondary">Elige una sala para zarpar, o funda la tuya.</p>
         </header>
 
         <form

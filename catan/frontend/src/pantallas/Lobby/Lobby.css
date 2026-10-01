@@ -1,34 +1,8 @@
 /* ==========================================
    LOBBY ("Puerto de partidas")
    ========================================== */
-.lobby {
-  padding: 28px 20px 56px;
-}
-
 .lobby__contenido {
-  position: relative;
-  z-index: 1;
   max-width: 900px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.lobby__header {
-  margin: 24px 0 20px;
-}
-
-.lobby__header h1 {
-  font-size: clamp(1.8rem, 5vw, 2.4rem);
-  margin: 0 0 4px;
-  color: var(--pizarra);
-}
-
-.lobby__header p {
-  margin: 0;
-  font-size: 1.05rem;
-  color: var(--pizarra);
 }
 
 /* ---------- Entrar con identificador ---------- */
@@ -272,10 +246,6 @@
 }
 
 @media (max-width: 480px) {
-  .lobby {
-    padding: 20px 14px 44px;
-  }
-
   .lobby__manual-fila {
     flex-direction: column;
   }
