@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Room } from "@colyseus/sdk";
 import "./SalaEspera.css";
+import Avatar from "@mui/material/Avatar";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
@@ -105,29 +106,37 @@ function SalaEspera({
             ))}
           </div>
 
-          <ul className="sala-espera__asientos">
-            {asientos.map((jugador, i) =>
-              jugador ? (
-                <li key={jugador.sessionId} className="sala-espera__asiento sala-espera__asiento--ocupado">
-                  <span
-                    className="tema-hex sala-espera__avatar"
-                    style={{ background: COLORES[i % COLORES.length] }}
-                  >
-                    {iniciales(jugador.nombre || jugador.sessionId)}
-                  </span>
-                  <span className="sala-espera__asiento-nombre" title={jugador.nombre}>
-                    {jugador.nombre}
-                  </span>
-                  {jugador.esUsuarioActual && <span className="sala-espera__tu">Tú</span>}
-                </li>
-              ) : (
-                <li key={`vacio-${i}`} className="sala-espera__asiento sala-espera__asiento--vacio">
-                  <span className="tema-hex sala-espera__avatar sala-espera__avatar--vacio">?</span>
-                  <span className="sala-espera__asiento-nombre">Esperando…</span>
-                </li>
-              )
-            )}
-          </ul>
+          <div className="w-100 mb-4">
+            <ul className="row g-3 list-unstyled mb-0">
+              {asientos.map((jugador, i) =>
+                jugador ? (
+                  <li key={jugador.sessionId} className="col-6 col-sm-3">
+                    <Card variant="outlined" className="h-100">
+                      <CardContent className="d-flex flex-column align-items-center gap-2 p-3">
+                        <Avatar sx={{ bgcolor: COLORES[i % COLORES.length], width: 52, height: 52 }}>
+                          {iniciales(jugador.nombre || jugador.sessionId)}
+                        </Avatar>
+                        <span className="fw-bold small text-truncate mw-100" title={jugador.nombre}>
+                          {jugador.nombre}
+                        </span>
+                        {jugador.esUsuarioActual && <Chip label="Tú" color="info" size="small" />}
+                      </CardContent>
+                    </Card>
+                  </li>
+                ) : (
+                  <li key={`vacio-${i}`} className="col-6 col-sm-3">
+                    {/* Asiento libre: borde punteado y un "?" en lugar de las iniciales. */}
+                    <Card variant="outlined" className="h-100" sx={{ borderStyle: "dashed" }}>
+                      <CardContent className="d-flex flex-column align-items-center gap-2 p-3">
+                        <Avatar sx={{ width: 52, height: 52 }}>?</Avatar>
+                        <span className="small text-body-secondary">Esperando…</span>
+                      </CardContent>
+                    </Card>
+                  </li>
+                )
+              )}
+            </ul>
+          </div>
 
           <div className="sala-espera__compartir">
             <div className="sala-espera__dato">
