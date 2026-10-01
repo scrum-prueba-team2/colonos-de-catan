@@ -12,6 +12,7 @@ import TablaCostes from '../componentes/tablaCostes';
 import Tablero from '../componentes/tablero';
 import type { Recurso, Recursos } from '../common/jugador';
 import type { EstadoCatan } from '../common/estado';
+import type { Coordenada } from '../common/tablero';
 import CarRecursos from '../componentes/carRecursos';
 import CarDesarrollo from '../componentes/carDesarrollo';
 import DescartarRecursos from '../componentes/descartarRecursos';
@@ -68,6 +69,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const [lanzandoDados, setLanzandoDados] = useState(false);
   const [pasandoTurno, setPasandoTurno] = useState(false);
   const [descarteEnEspera, setDescarteEnEspera] = useState<number | null>(null);
+  const [moviendoLadron, setMoviendoLadron] = useState(false);
 
   // Todo lo que manda el servidor. null = todavia no llega, o no hay sala.
   const [estadoReal, setEstadoReal] = useState<EstadoCatan | null>(null);
@@ -95,6 +97,10 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
         || estado.partida.faseJuego !== FASE_JUEGO.ACCIONES) {
         setPasandoTurno(false);
       }
+      // Al mover al ladron el backend cambia la fase (Acciones o Robo).
+      if (!estado || estado.partida.faseJuego !== FASE_JUEGO.LADRON) {
+        setMoviendoLadron(false);
+      }
     }
 
     actualizarEstado();
@@ -121,6 +127,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       setLanzandoDados(false);
       setPasandoTurno(false);
       setDescarteEnEspera(null);
+      setMoviendoLadron(false);
     });
 
     return () => {
@@ -159,6 +166,13 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       && estadoReal?.partida.fase === FASE_PARTIDA.JUEGO
       && estadoReal.partida.faseJuego === FASE_JUEGO.DADOS,
   );
+  // Se llega aqui tras sacar 7 o despues de que todos terminen de descartar.
+  const puedeMoverLadron = Boolean(
+    sala
+      && esMiTurno
+      && estadoReal?.partida.fase === FASE_PARTIDA.JUEGO
+      && estadoReal.partida.faseJuego === FASE_JUEGO.LADRON,
+  );
   const puedePasarTurno = Boolean(
     sala
       && esMiTurno
@@ -195,6 +209,15 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
     if (!sala || !puedeLanzarDados || lanzandoDados) return;
     setLanzandoDados(true);
     sala.send('msgLanzarDados');
+  }
+
+  function moverLadron(hexagono: Coordenada) {
+    // El backend valida turno, fase y que no sea el mismo hexagono, y luego
+    // cambia la fase a Acciones o a Robo. Mientras responde, se ocultan los
+    // circulos para no mandar dos veces el mensaje.
+    if (!sala || !puedeMoverLadron || moviendoLadron) return;
+    setMoviendoLadron(true);
+    sala.send('msgMoverLadron', { h: hexagono.h, d: hexagono.d });
   }
 
   function seleccionarConstruccion(tipo: TipoConstruccion | null) {
@@ -273,6 +296,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             tipoConstruccion={tipoConstruccion}
             objetivoSeleccionado={objetivoConstruccion}
             onSeleccionarObjetivo={seleccionarObjetivo}
+            moviendoLadron={puedeMoverLadron && !moviendoLadron}
+            onSeleccionarHexagonoLadron={moverLadron}
           />
         </div>
         <div className="carRecursos">
