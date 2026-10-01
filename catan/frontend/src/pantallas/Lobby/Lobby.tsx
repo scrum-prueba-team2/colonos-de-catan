@@ -7,6 +7,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
+import LinearProgress from "@mui/material/LinearProgress";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { client } from "../colyseusClient";
@@ -263,7 +264,7 @@ function Lobby({ onCrearSala, onUnirseASala, onVolver }: LobbyProps) {
           </Alert>
         )}
 
-        <section className="lobby__lista w-100 mt-2">
+        <section className="w-100 mt-2">
           <div className="d-flex align-items-center justify-content-between mb-3">
             <Typography variant="h5" component="h2">
               Salas disponibles
@@ -288,55 +289,70 @@ function Lobby({ onCrearSala, onUnirseASala, onVolver }: LobbyProps) {
               </CardContent>
             </Card>
           ) : (
-            <ul>
-              {salas.map((sala, i) => (
-                <li
-                  key={sala.id}
-                  style={{ animationDelay: `${i * 0.05}s` }}
-                  className={
-                    "lobby__sala tema-pergamino lobby__sala--" +
-                    sala.tipo +
-                    (salaSeleccionada === sala.id ? " lobby__sala--seleccionada" : "")
-                  }
-                  onClick={() => seleccionarSala(sala)}
-                >
-                  <div className="lobby__sala-info">
-                    <div className="lobby__sala-nombre-fila">
-                      <span className="lobby__sala-nombre">{sala.nombre}</span>
-                      <span className={"tema-insignia tema-insignia--" + sala.tipo}>
-                        {sala.tipo === "publica" ? "🌍 Pública" : "🔒 Privada"}
-                      </span>
-                    </div>
-                    <span className="lobby__sala-detalle">
-                      {sala.anfitrion ? `Anfitrión: ${sala.anfitrion}` : "Sin anfitrión"}
-                    </span>
-                    <span
-                      className="lobby__cupos"
-                      aria-label={`${sala.jugadores} de ${sala.maxJugadores} jugadores`}
-                    >
-                      {Array.from({ length: sala.maxJugadores }, (_, n) => (
-                        <span
-                          key={n}
-                          className={"lobby__cupo" + (n < sala.jugadores ? " lobby__cupo--lleno" : "")}
-                          aria-hidden="true"
-                        />
-                      ))}
-                      <span className="lobby__cupos-texto" aria-hidden="true">
-                        {sala.jugadores}/{sala.maxJugadores}
-                      </span>
-                    </span>
-                  </div>
-
-                  <button
-                    className={"tema-btn tema-btn--chico" + (sala.tipo === "privada" ? " tema-btn--ladrillo" : "")}
-                    disabled={uniendo !== null}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      intentarUnirse(sala.id);
+            <ul className="row g-3 list-unstyled mb-4">
+              {salas.map((sala) => (
+                <li key={sala.id} className="col-12 col-md-6">
+                  {/* Franja de color a la izquierda: verde si es pública, roja si es privada.
+                      La sala seleccionada se marca con un contorno celeste. */}
+                  <Card
+                    variant="outlined"
+                    className="h-100"
+                    onClick={() => seleccionarSala(sala)}
+                    sx={{
+                      cursor: "pointer",
+                      borderLeft: 6,
+                      borderLeftColor: sala.tipo === "publica" ? "success.main" : "error.main",
+                      outline: salaSeleccionada === sala.id ? 3 : 0,
+                      outlineStyle: "solid",
+                      outlineColor: "info.main",
                     }}
                   >
-                    {uniendo === sala.id ? "Entrando…" : sala.tipo === "privada" ? "🔑 Unirse" : "Unirse"}
-                  </button>
+                    <CardContent className="d-flex flex-column flex-sm-row align-items-sm-center gap-3">
+                      <div className="d-flex flex-column gap-1 flex-grow-1 text-truncate">
+                        <div className="d-flex align-items-center gap-2">
+                          <Typography variant="h6" component="span" noWrap>
+                            {sala.nombre}
+                          </Typography>
+                          <Chip
+                            label={sala.tipo === "publica" ? "🌍 Pública" : "🔒 Privada"}
+                            color={sala.tipo === "publica" ? "success" : "error"}
+                            variant="outlined"
+                            size="small"
+                          />
+                        </div>
+                        <small className="text-body-secondary">
+                          {sala.anfitrion ? `Anfitrión: ${sala.anfitrion}` : "Sin anfitrión"}
+                        </small>
+                        <div
+                          className="d-flex align-items-center gap-2"
+                          aria-label={`${sala.jugadores} de ${sala.maxJugadores} jugadores`}
+                        >
+                          <LinearProgress
+                            variant="determinate"
+                            color="info"
+                            value={(sala.jugadores / sala.maxJugadores) * 100}
+                            className="flex-grow-1 rounded"
+                            aria-hidden="true"
+                          />
+                          <small className="fw-bold text-body-secondary" aria-hidden="true">
+                            {sala.jugadores}/{sala.maxJugadores}
+                          </small>
+                        </div>
+                      </div>
+
+                      <Button
+                        variant="contained"
+                        color={sala.tipo === "privada" ? "error" : "primary"}
+                        disabled={uniendo !== null}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          intentarUnirse(sala.id);
+                        }}
+                      >
+                        {uniendo === sala.id ? "Entrando…" : sala.tipo === "privada" ? "🔑 Unirse" : "Unirse"}
+                      </Button>
+                    </CardContent>
+                  </Card>
                 </li>
               ))}
             </ul>
