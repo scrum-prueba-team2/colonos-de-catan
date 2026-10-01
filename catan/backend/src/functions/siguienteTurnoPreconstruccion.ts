@@ -7,7 +7,7 @@ export function siguienteTurnoPreconstruccion(partida: Partida) {
     // * Indice del último jugador en la partida
     const ultimoIndice = partida.ordenJugadores.length - 1;
 
-    if(partida.direccionPreconstruccion === 0) {
+    if(partida.direccionPreconstruccion === 1) {
 
         if(indiceActual === ultimoIndice){
             // * Si llegamos al último vamos de regreso

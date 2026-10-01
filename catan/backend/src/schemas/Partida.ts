@@ -7,7 +7,7 @@ export class Partida extends Schema {
   @type("string") creador: string;
   @type("uint8") fase: FasePartida;
   @type("uint8") fasePreconstruccion: FasePreconstruccion;
-  @type("uint8") direccionPreconstruccion: number;
+  @type("int8") direccionPreconstruccion: number;
   @type("uint8") faseJuego: FaseJuego;
   @type("string") turnoActual: string;
   @type(["string"]) ordenJugadores = new ArraySchema<string>();

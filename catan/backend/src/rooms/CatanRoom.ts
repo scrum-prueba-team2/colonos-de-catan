@@ -469,6 +469,7 @@ export class CatanRoom extends Room {
         //? Ahora le toca al siguiente jugador poner un asentamiento
         this.partida.fasePreconstruccion = FasePreconstruccion.ASENTAMIENTO;
         siguienteTurnoPreconstruccion(this.partida);
+        return;
       }
 
       //! FLUJO EN JUEGO
@@ -495,10 +496,8 @@ export class CatanRoom extends Room {
           })
           return;
         }
-
         return;
       }
-
     },
     msgDescartarRecursos: (
       client: Client,
