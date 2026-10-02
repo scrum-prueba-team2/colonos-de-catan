@@ -41,7 +41,7 @@ export function moverLadron(
     tablero.ladron.d = d;
 
     //* Colocar el ladron en el nuevo hexagono
-    tablero.hexagonos.get(`${tablero.ladron.h},${tablero.ladron.d}`).setEsLadron(false);
+    tablero.hexagonos.get(`${tablero.ladron.h},${tablero.ladron.d}`).setEsLadron(true);
 
     //* Obtener vertices que rodean al nuevo hexagono
     const vertices = verticesDelHexagono(tablero.vertices, hexagono);
