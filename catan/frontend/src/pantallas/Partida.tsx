@@ -28,6 +28,7 @@ import Typography from '@mui/material/Typography';
 
 import "./Partida.css"
 import InfoTurno from '../componentes/infoTurno';
+import ElegirRobo from '../componentes/ElegirRobo';
 
 const recursosPrueba: Recursos = {
   madera: 2,
@@ -77,7 +78,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const [descarteEnEspera, setDescarteEnEspera] = useState<number | null>(null);
   const [moviendoLadron, setMoviendoLadron] = useState(false);
   const [compraEnEspera, setCompraEnEspera] = useState<number | null>(null);
-
+  const [robando, setRobando] = useState(false);
   // Todo lo que manda el servidor. null = todavia no llega, o no hay sala.
   const [estadoReal, setEstadoReal] = useState<EstadoCatan | null>(null);
 
@@ -118,6 +119,11 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       if (!estado || estado.partida.faseJuego !== FASE_JUEGO.LADRON) {
         setMoviendoLadron(false);
       }
+
+      if(!estado || estado.partida.faseJuego !== FASE_JUEGO.ROBO){
+        setRobando(false);
+      }
+
     }
 
     actualizarEstado();
@@ -146,6 +152,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       setDescarteEnEspera(null);
       setMoviendoLadron(false);
       setCompraEnEspera(null);
+      setRobando(false);
     });
 
     return () => {
@@ -192,6 +199,14 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       && estadoReal?.partida.fase === FASE_PARTIDA.JUEGO
       && estadoReal.partida.faseJuego === FASE_JUEGO.LADRON,
   );
+
+  const puedeRobar = Boolean(
+    sala
+    && esMiTurno
+    && estadoReal?.partida.fase === FASE_PARTIDA.JUEGO
+    && estadoReal.partida.faseJuego === FASE_JUEGO.ROBO
+  );
+
   const puedePasarTurno = Boolean(
     sala
       && esMiTurno
@@ -255,6 +270,13 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
     if (!sala || !puedeMoverLadron || moviendoLadron) return;
     setMoviendoLadron(true);
     sala.send('msgMoverLadron', { h: hexagono.h, d: hexagono.d });
+  }
+
+  function robarJugador(jugadorRobado: string) {
+    // El backend valida que este en jugadoresParaRobar, roba y pasa a Acciones.
+    if (!sala || !puedeRobar || robando) return;
+    setRobando(true);
+    sala.send('msgRobarJugador', { jugadorRobado });
   }
 
   function seleccionarConstruccion(tipo: TipoConstruccion | null) {
@@ -386,6 +408,14 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
           enviando={descarteEnEspera !== null}
           onDescartar={descartarRecurso}
         />
+          <ElegirRobo
+          abierto={puedeRobar}
+          jugadoresParaRobar={partidaActual?.jugadoresParaRobar ?? []}
+          jugadores={jugadores}
+          enviando={robando}
+          onRobar={robarJugador}
+        />
+
     </div>
   );
 }
