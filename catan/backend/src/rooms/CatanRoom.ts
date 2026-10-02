@@ -366,7 +366,7 @@ export class CatanRoom extends Room {
 
         if (resultado.error) {
           client.send("error", {
-            mensaje: resultado.mensaje
+            mensajeError: resultado.mensaje
           })
           return;
         }

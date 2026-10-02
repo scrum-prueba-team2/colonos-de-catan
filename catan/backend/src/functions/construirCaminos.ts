@@ -50,7 +50,7 @@ export function construirCamino(
         if(!comprobarCaminoPreconstruccion(h, d, p, jugador)){
             return {
                 error: true,
-                mensaje: "El camino debe colocar con tu asentamiento"
+                mensaje: "El camino debe conectar con el último asentamiento"
             };
         }
     } else {
@@ -59,7 +59,7 @@ export function construirCamino(
             if(!comprobarMateriales(jugador, partida)){
                 return {
                     error: true,
-                    mensaje: "No tienes los materiales suficientes"
+                    mensaje: "No tienes los recursos suficientes"
                 }
             }
         }
@@ -67,7 +67,7 @@ export function construirCamino(
         if(!comprobarCaminoJuego(vertices, aristas, h, d, p, sessionId)){
             return {
                 error: true,
-                mensaje: "El camino debe conectar con tus construcciones"
+                mensaje: "El camino debe conectar con alguna construccion tuya"
             }
         }
         if(partida.faseJuego !== FaseJuego.CARRETERAS){

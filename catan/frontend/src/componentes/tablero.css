@@ -22,11 +22,11 @@
 
 /*  Aristas (caminos) */
 .tbArista {
-    stroke: #00000018;
     stroke-width: 6;
     stroke-linecap: round;
 }
-.tbAristaOcupada { stroke: #2C4049; stroke-width: 9; }
+.tbAristaOcupada { stroke-width: 6; }
+.tbAristaBorde { stroke: #172A2D; stroke-width: 8; }
 
 /*  Vértices (poblados / ciudades)  */
 .tbVertice {

@@ -17,7 +17,7 @@ export class Hexagono extends Schema {
         this.esLadron = this.terreno === Terreno.DESIERTO;
     }
 
-    setEsLadro(value: boolean){
+    setEsLadron(value: boolean){
         this.esLadron = value;
     }
 }
