@@ -33,9 +33,15 @@ export function moverLadron(
         };
     }
 
+    //* Quitar el ladron del hexagono anterior
+    tablero.hexagonos.get(`${tablero.ladron.h},${tablero.ladron.d}`).setEsLadron(false);
+
     //* Actualizar la posicion del ladron
     tablero.ladron.h = h;
     tablero.ladron.d = d;
+
+    //* Colocar el ladron en el nuevo hexagono
+    tablero.hexagonos.get(`${tablero.ladron.h},${tablero.ladron.d}`).setEsLadron(false);
 
     //* Obtener vertices que rodean al nuevo hexagono
     const vertices = verticesDelHexagono(tablero.vertices, hexagono);
