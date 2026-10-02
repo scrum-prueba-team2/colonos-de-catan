@@ -103,7 +103,7 @@ export function construirAsentamiento(
     )
 
     //* Incremento de puntuacion
-    jugador.puntuacion =+ 1;
+    jugador.puntuacion += 1;
     jugador.puntosParaGanar -= 1;
 
     //* Guardando la posicion de el ultimo asentamiento (El recien construido)
