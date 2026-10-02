@@ -1173,6 +1173,53 @@ export class CatanRoom extends Room {
 
       //* Marcar que ya se utilizo una carta en este turno
       this.partida.cartaJugable = false;
+    },
+    msgRobarJugador: (
+      client: Client,
+      mensaje: { jugadorRobado: string}
+    ) => {
+      //* Verificar que la partida siga en curso
+      if (this.partida.fase === FasePartida.FINALIZADA) {
+        client.send("error", {
+          mensajeError: "La partida ha finalizado"
+        })
+        return;
+      }
+
+      //* Verificar que sea el turno del jugador
+      if (this.partida.turnoActual !== client.sessionId) {
+        client.send("error", {
+          mensajeError: "No es tu turno"
+        })
+        return;
+      }
+
+      //* Verificar que estemos en la fase de robar
+      if (this.partida.faseJuego !== FaseJuego.ROBO) {
+        client.send("error", {
+          mensajeError: "No es la fase de robar"
+        })
+        return;
+      }
+
+
+      //* Verificar que el jugador elegido este en la lista de robo
+      if(!this.partida.jugadoresParaRobar.includes(mensaje.jugadorRobado)){
+        client.send("error", {
+          mensajeError: "El jugador elegido no esta en la lista de robo"
+        })
+        return;
+      }
+
+      //* Robar un recurso al azar al jugador elegido
+
+      robarJugador(this.jugadores.get(client.sessionId), this.jugadores.get(mensaje.jugadorRobado));
+
+
+      //* Limpiar Lista y volver a acciones
+      this.partida.jugadoresParaRobar.clear();
+      this.partida.faseJuego = FaseJuego.ACCIONES;
+
     }
   };
 
