@@ -37,6 +37,12 @@ const recursosPrueba: Recursos = {
   mineral: 3,
 };
 
+//Mensajes de construccion
+const MENSAJE_CONSTRUIR: Partial<Record<TipoConstruccion, string>> = {
+  poblado: 'msgColocarAsentamiento',
+  camino: 'msgColocarCamino',
+};
+
 /* room.state es un Schema de Colyseus: toJSON() lo vuelve objeto plano. Las
    claves son las mismas que en common/ (h, d, p, terreno, constuccion, nombre,
    recursos, cartas_usables...), asi que no hay nada que traducir.
@@ -203,14 +209,16 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       && (miJugadorReal?.recursos.mineral ?? 0) >= 1,
   );
 
-  // Preconstruccion: el backend solo acepta asentamiento y no cobra recursos.
-  const preconstruyendoAsentamiento = Boolean(
-    sala
-      && esMiTurno
-      && estadoReal?.partida.fase === FASE_PARTIDA.PRECONSTRUCCION
-      && estadoReal.partida.fasePreconstruccion === FASE_PRECONSTRUCCION.ASENTAMIENTO,
+  /* Preconstruccion: el backend solo acepta la pieza de la subfase en curso y
+     no cobra recursos.*/
+  const enPreconstruccion = Boolean(
+    sala && esMiTurno && estadoReal?.partida.fase === FASE_PARTIDA.PRECONSTRUCCION,
   );
-  const tipoPermitido: TipoConstruccion | null = preconstruyendoAsentamiento ? 'poblado' : null;
+  const tipoPermitido: TipoConstruccion | null = !enPreconstruccion
+    ? null
+    : estadoReal?.partida.fasePreconstruccion === FASE_PRECONSTRUCCION.CAMINO
+      ? 'camino'
+      : 'poblado';
 
   function pasarTurno() {
     if (!sala || !puedePasarTurno || pasandoTurno) return;
@@ -261,13 +269,13 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
 
     setObjetivoConstruccion(objetivo);
 
-    // Asentamiento: el mensaje es el mismo en preconstruccion y en juego, y el
-    // JSON que espera CatanRoom es { h, d, p }. El backend valida todo y
-    // confirma por el estado, no con un mensaje de exito.
-    if (sala && tipoConstruccion === 'poblado') {
-      sala.send('msgColocarAsentamiento', objetivo);
+    // El backend valida turno, fase, recursos y posicion, y confirma por el
+    // estado: no manda ningun mensaje de exito.
+    const mensaje = MENSAJE_CONSTRUIR[tipoConstruccion];
+    if (sala && mensaje) {
+      sala.send(mensaje, objetivo);
       setTipoConstruccion(null);
-      setEstadoConstruccion('Asentamiento enviado al servidor.');
+      setEstadoConstruccion(`Enviado al servidor: ${tipoConstruccion}.`);
       return;
     }
 

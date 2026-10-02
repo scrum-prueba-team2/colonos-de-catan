@@ -142,6 +142,17 @@ function Tablero({
 
       {/* aristas: los caminos */}
       {Object.entries(datos.aristas).map(([clave, arista]) => {
+        if (arista.propietario === '') return null;
+        const [a, b] = segmentoArista(arista.h, arista.d, arista.p);
+        return (
+          <line
+            key={`borde${clave}`}
+            className="tbArista tbAristaBorde"
+            x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]}
+          />
+        );
+      })}
+      {Object.entries(datos.aristas).map(([clave, arista]) => {
         const [a, b] = segmentoArista(arista.h, arista.d, arista.p);
         const puedeSeleccionar = tipoConstruccion === 'camino' && arista.propietario === '';
         const seleccionado = puedeSeleccionar && esElObjetivo(objetivoSeleccionado, arista.h, arista.d, arista.p);
@@ -154,6 +165,9 @@ function Tablero({
               puedeSeleccionar ? 'tbObjetivoConstruccion' : '',
               seleccionado ? 'tbObjetivoSeleccionado' : '',
             ].filter(Boolean).join(' ')}
+            stroke={arista.propietario === ''
+              ? '#00000018'
+              : colorDeJugador(ordenJugadores, arista.propietario)}
             x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]}
             role={puedeSeleccionar ? 'button' : undefined}
             tabIndex={puedeSeleccionar ? 0 : undefined}
