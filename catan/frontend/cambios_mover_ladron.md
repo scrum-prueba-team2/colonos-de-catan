@@ -60,8 +60,4 @@ Al cambiar la fase, los círculos desaparecen solos.
 
 ## Lo que no se tocó
 
-- El dibujo del ladrón en el tablero sigue usando `hexagono.esLadron`, que el backend nunca
-  actualiza. Por eso, después de moverlo, la figura del ladrón se sigue viendo en el desierto
-  aunque en el backend ya esté en otro hexágono. El círculo sí se oculta en la posición real.
-  Corregir el dibujo es fuera de esta issue.
 - La elección del jugador a robar (fase `ROBO`).
