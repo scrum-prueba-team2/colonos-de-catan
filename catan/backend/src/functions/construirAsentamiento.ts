@@ -111,7 +111,7 @@ export function construirAsentamiento(
 
     return {
         error: false,
-        mensaje: "Asentamiento construido exitosamente!!"
+        mensaje: " ha construido un asentamiento"
     }
 }
 

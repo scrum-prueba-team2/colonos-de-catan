@@ -30,7 +30,7 @@ export function comprarCarta(jugador: Jugador, banca: Banca): {
 
     return {
         error: false,
-        mensaje: "Carta comprada con éxito"
+        mensaje: " ha comprado una carta de desarrollo"
     };
 }
 
@@ -63,4 +63,3 @@ function eliminarRecursos(jugador: Jugador, banca: Banca): void {
     banca.recursos.set("lana", banca.recursos.get("lana") + 1);
     banca.recursos.set("mineral", banca.recursos.get("mineral") + 1);
 }
-

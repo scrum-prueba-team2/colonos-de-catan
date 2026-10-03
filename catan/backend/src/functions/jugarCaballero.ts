@@ -12,7 +12,7 @@ export function jugarCaballero(
     const jugador = jugadores.get(sessionId);
     jugador.cartas_usables.set(
         `${Desarrollo.CABALLERO}`,
-        jugador.cartas_usables.get(`${Desarrollo.CABALLERO}`)  + 1
+        jugador.cartas_usables.get(`${Desarrollo.CABALLERO}`)  - 1
     );
 
     //* Aumentar el conteo de caballeros jugados por el jugaodr
