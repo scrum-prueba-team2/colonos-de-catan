@@ -88,6 +88,19 @@ El dibujo del ladrón y los círculos usan esa misma posición, así que al move
 anterior se repinta sin ladrón y no quedan dos dibujados. También se actualizó el comentario de
 `esLadron` en `frontend/src/common/tablero.ts`.
 
+### Pendiente para el backend (avisar al equipo)
+
+Esto no se puede arreglar del todo desde el frontend:
+
+- Antes del primer movimiento el backend cree que el ladrón está en `(0, 0)`. Si alguien
+  elige ese hexágono, el backend responde "El ladron ya esta en ese hexagono" (los círculos
+  vuelven a aparecer y se puede elegir otro).
+- Hasta el primer 7, el backend no da recursos del hexágono `(0, 0)` y sí los da del
+  desierto (que no produce nada).
+
+La corrección en el backend sería, al generar el tablero, copiar las coordenadas del
+desierto a `tablero.ladron`.
+
 ## Lo que no se tocó
 
 - La elección del jugador a robar (fase `ROBO`).
