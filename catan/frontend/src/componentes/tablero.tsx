@@ -206,10 +206,10 @@ function Tablero({
       })}
 
       {/* Mover al ladron: un circulo en el centro de cada hexagono para elegirlo.
-          No se dibuja donde esta el ladron ahora (tablero.ladron), porque el
+          No se dibuja donde esta el ladron ahora (esLadron), porque el
           backend no deja dejarlo en el mismo hexagono. */}
       {moviendoLadron && Object.entries(datos.hexagonos).map(([clave, hex]) => {
-        if (hex.h === datos.ladron.h && hex.d === datos.ladron.d) return null;
+        if (hex.esLadron) return null;
         const [cx, cy] = centro(hex.h, hex.d);
         const hexagono = { h: hex.h, d: hex.d };
         return (
