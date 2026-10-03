@@ -13,9 +13,9 @@ export interface HexagonoDato {
   d: number;
   terreno: number;
   numero: number;
-  /* OJO: el backend lo pone en true solo en el desierto al crear el tablero y
-     nunca lo cambia (setEsLadro no se llama en ningun lado). La posicion real
-     del ladron es tablero.ladron. No dibujar con este campo. */
+  /* El backend lo actualiza al mover al ladron, pero el desierto se queda en
+     true despues del primer movimiento. Para saber donde esta el ladron usar
+     posicionLadron() de componentes/tablero.tsx, no este campo solo. */
   esLadron: boolean;
 }
 
