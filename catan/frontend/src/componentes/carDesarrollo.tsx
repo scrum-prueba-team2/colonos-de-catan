@@ -27,15 +27,18 @@ function CarDesarrollo({ miJugador, puedeComprar, comprando, onComprar }: Props)
             {CARTAS.map(({ clave, icono }) => {
               const usables = miJugador.cartas_usables[clave];
               const nuevas = miJugador.cartas_inusables[clave];
+              const esPuntoVictoria = clave === CARTA.PUNTOS_VICTORIA;
               return (
                 <ListGroup.Item
                   key={clave}
-                  title={NOMBRE_CARTA[clave]}
+                  title={esPuntoVictoria
+                    ? 'Su efecto es inmediato y no se puede jugar'
+                    : NOMBRE_CARTA[clave]}
                   className="d-flex align-items-center gap-2 py-0"
                 >
                   <img src={icono} alt={NOMBRE_CARTA[clave]} width={24} height={24} />
                   <span className="flex-grow-1 text-truncate">{NOMBRE_CARTA[clave]}</span>
-                  {nuevas > 0 && (
+                  {!esPuntoVictoria && nuevas > 0 && (
                     <Badge
                       bg="secondary"
                       title="Compradas este turno: se podrán usar hasta tu siguiente turno"
@@ -43,7 +46,7 @@ function CarDesarrollo({ miJugador, puedeComprar, comprando, onComprar }: Props)
                       +{nuevas}
                     </Badge>
                   )}
-                  <span className="fw-bold">{usables}</span>
+                  <span className="fw-bold">{esPuntoVictoria ? usables + nuevas : usables}</span>
                 </ListGroup.Item>
               );
             })}
