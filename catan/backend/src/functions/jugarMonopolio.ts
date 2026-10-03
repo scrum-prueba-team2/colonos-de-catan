@@ -46,6 +46,6 @@ export function jugarMonopolio(
 
     return {
         error: false,
-        mensaje: "Carta de monopolio jugada"
+        mensaje: " ha usado la carta de monopolio"
     };
 }

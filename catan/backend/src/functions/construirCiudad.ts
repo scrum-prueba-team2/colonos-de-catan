@@ -79,7 +79,7 @@ export function construirCiudad(
 
     return{
         error: false,
-        mensaje: "Ciudad construida con exito"
+        mensaje: " ha construido una ciudad"
     }
 
     function comprobarRecursos(jugador: Jugador){

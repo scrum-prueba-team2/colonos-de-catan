@@ -4,8 +4,9 @@ import { coordenadasHexagono } from "../common/tablero.js";
 import { mezclar } from "../common/mezclar.js";
 import { Hexagono } from "../schemas/Hexagono.js";
 import { CatanState } from "../states/CatanState.js";
+import { Coordenada } from "../schemas/Coordenada.js";
 
-export function generarHexagonos(hexagonos: MapSchema<Hexagono>){
+export function generarHexagonos(hexagonos: MapSchema<Hexagono>, ladron: Coordenada){
     const terrenos = mezclar([
         Terreno.MADERA,Terreno.MADERA,Terreno.MADERA,Terreno.MADERA,
         Terreno.TRIGO,Terreno.TRIGO,Terreno.TRIGO,Terreno.TRIGO,
@@ -20,6 +21,8 @@ export function generarHexagonos(hexagonos: MapSchema<Hexagono>){
     coordenadasHexagono.forEach((item, index) =>{
         if(terrenos[index] === Terreno.DESIERTO){
             hex = new Hexagono( item[0], item[1], terrenos[index], 0);
+            ladron.h = item[0];
+            ladron.d = item[1];
         }else{
             hex = new Hexagono( item[0], item[1], terrenos[index], nums[indiceNums]);
             indiceNums ++;
