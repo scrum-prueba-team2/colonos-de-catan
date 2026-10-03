@@ -74,6 +74,20 @@ La causa está en la generación inicial del tablero en el backend:
 - En el primer movimiento, `moverLadron` le quita `esLadron` al `(0, 0)` (que no lo tenía) y
   el desierto se queda con `esLadron = true` para siempre.
 
+### La solución (solo frontend)
+
+El backend no se modificó. En `frontend/src/componentes/tablero.tsx` se agregó la función
+`posicionLadron(datos)`, que decide en qué **único** hexágono está el ladrón:
+
+- Si **un solo** hexágono tiene `esLadron = true`, el ladrón está ahí. Es el caso del inicio
+  de la partida (el desierto) y también si el ladrón vuelve al desierto.
+- Si hay **más de uno** (el desierto que quedó marcado y el nuevo), el bueno es el que
+  coincide con `tablero.ladron`.
+
+El dibujo del ladrón y los círculos usan esa misma posición, así que al moverlo el hexágono
+anterior se repinta sin ladrón y no quedan dos dibujados. También se actualizó el comentario de
+`esLadron` en `frontend/src/common/tablero.ts`.
+
 ## Lo que no se tocó
 
 - La elección del jugador a robar (fase `ROBO`).
