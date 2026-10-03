@@ -58,6 +58,22 @@ El frontend no decide nada: el backend valida, mueve al ladrón y cambia la fase
 
 Al cambiar la fase, los círculos desaparecen solos.
 
+## Corrección: el ladrón inicial no se borraba
+
+### El problema
+
+Al mover al ladrón por primera vez quedaban **dos ladrones dibujados**: uno en el desierto
+(donde empezó) y otro en el hexágono elegido. Desde el segundo movimiento ya funcionaba bien.
+
+La causa está en la generación inicial del tablero en el backend:
+
+- `Tablero.ladron` se crea en `(0, 0)` (`schemas/Tablero.ts`).
+- `generarHexagonos` pone el desierto en un lugar al azar y le pone `esLadron = true`, pero
+  **no actualiza `tablero.ladron`**. Al empezar, el desierto tiene `esLadron = true` pero
+  `tablero.ladron` dice `(0, 0)`.
+- En el primer movimiento, `moverLadron` le quita `esLadron` al `(0, 0)` (que no lo tenía) y
+  el desierto se queda con `esLadron = true` para siempre.
+
 ## Lo que no se tocó
 
 - La elección del jugador a robar (fase `ROBO`).
