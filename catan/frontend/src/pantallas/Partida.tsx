@@ -235,6 +235,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       ? 'camino'
       : 'poblado';
 
+  const puedeConstruir = enPreconstruccion || puedePasarTurno;
+
   function pasarTurno() {
     if (!sala || !puedePasarTurno || pasandoTurno) return;
     setPasandoTurno(true);
@@ -326,6 +328,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
           <Construir
             recursos={jugadores[miSessionId]?.recursos ?? recursosPrueba}
             esMiTurno={esMiTurno}
+            puedeConstruir={puedeConstruir}
             tipoPermitido={tipoPermitido}
             seleccion={tipoConstruccion}
             onSeleccionar={seleccionarConstruccion}

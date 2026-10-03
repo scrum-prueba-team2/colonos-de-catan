@@ -73,7 +73,7 @@ export function comerciarBanca(
 
     return{
         error: false,
-        mensaje: "Intercambio realizado con exito"
+        mensaje: " ha realizado un intecambio con la banca"
     }
 }
 

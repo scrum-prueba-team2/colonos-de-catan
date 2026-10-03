@@ -87,7 +87,7 @@ export function construirCamino(
 
     return {
         error: false,
-        mensaje: "Camino construido correctamente"
+        mensaje: " ha construido un camino"
     }
 }
 

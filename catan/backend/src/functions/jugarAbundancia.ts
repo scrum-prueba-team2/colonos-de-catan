@@ -36,6 +36,23 @@ export function jugarAbundancia(
         }
     }
 
-    
-    return null;
+    //* Dar los recursos al jugador
+    jugador.recursos.set(recurso1, jugador.recursos.get(recurso1) + 1);
+    jugador.recursos.set(recurso2, jugador.recursos.get(recurso2) + 1);
+
+    //* Retirar los recursos de la banca
+    banca.recursos.set(recurso1, banca.recursos.get(recurso1) - 1);
+    banca.recursos.set(recurso2, banca.recursos.get(recurso2) - 1);
+
+    //* Eliminar la carta de abundancia
+    jugador.cartas_usables.set(
+        `${Desarrollo.ABUNDANCIA}`,
+        jugador.cartas_usables.get(`${Desarrollo.ABUNDANCIA}`) - 1
+    );
+
+
+    return {
+        error: false,
+        mensaje: " ha usado la carta de abundancia"
+    }
 }

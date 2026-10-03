@@ -18,7 +18,6 @@ import { moverLadron } from "../functions/moverLadron.js";
 import { robarJugador } from "../functions/robarJugador.js";
 import { jugarCaballero } from "../functions/jugarCaballero.js";
 import { activarCartasCompradas } from "../functions/activarCartasCompradas.js";
-import { OfertaIntercambio } from "../schemas/OfertaIntercambio.js";
 import { intercambiarRecursos } from "../functions/intercambiarRecursos.js";
 import { construirCamino } from "../functions/construirCaminos.js";
 import { jugarAbundancia } from "../functions/jugarAbundancia.js";
@@ -39,6 +38,32 @@ export class CatanRoom extends Room {
 
 
   messages = {
+
+    msgChat: (
+      client: Client, 
+      mensaje: { mensaje: string}
+    ) => {
+      //* Verificar que la partida siga en curso
+      if (this.partida.fase === FasePartida.FINALIZADA) {
+        client.send("error", {
+          mensajeError: "La partida ha finalizado"
+        })
+        return;
+      }
+
+      //* Verificar que el mensaje no este vacio
+      if (mensaje.mensaje.trim() === "") {
+        return;
+      }
+
+      //* Enviar el mensaje a todos los jugadores
+      this.broadcast("chat", {
+        jugador: this.jugadores.get(client.sessionId)?.nombre,
+        mensaje: mensaje.mensaje
+      })
+      
+    },
+
     msgIntercambiarBanca: (
       client: Client,
       mensaje: { recursoEntregado: string, recursoRecibido: string }
@@ -74,7 +99,16 @@ export class CatanRoom extends Room {
         return;
       }
 
+      //* Log del intecambio con la banca
+      if(!resultado.error){
+        this.broadcast("log", {
+          jugador: this.jugadores.get(client.sessionId)?.nombre,
+          mensaje: resultado.mensaje
+        })
+      }
+
     },
+
     msgLanzarDados: (client: Client) => {
       //* Verificar que la partida siga en curso
       if (this.partida.fase === FasePartida.FINALIZADA) {
@@ -227,12 +261,19 @@ export class CatanRoom extends Room {
         return;
       }
 
+      //* Log de la construccion de la ciudad
+      if(!resultado.error){
+        this.broadcast("log", {
+          jugador: this.jugadores.get(client.sessionId)?.nombre,
+          mensaje: resultado.mensaje
+        })
+      }
+
       //* Verificar si el jugador ha ganado
       verificarVictoria(this.partida, jugador, client.sessionId);
     },
 
     msgIniciarPartida: (client: Client) => {
-
       //* Verificar que sea el creador de la sala
       if (this.partida.creador !== client.sessionId) {
         client.send("error", {
@@ -280,7 +321,6 @@ export class CatanRoom extends Room {
     },
 
     msgPasarTurno: (client: Client) => {
-
       //* Verificar que la partida siga en curso
       if (this.partida.fase === FasePartida.FINALIZADA) {
         client.send("error", {
@@ -308,6 +348,12 @@ export class CatanRoom extends Room {
         return;
       }
 
+      //* Log de paso de turno
+      this.broadcast("log", {
+        jugador: this.jugadores.get(client.sessionId)?.nombre,
+        mensaje: " ha pasado su turno"
+      })
+
       this.ofertas.clear();
 
       /** Activar las cartas compradas del jugador */
@@ -319,6 +365,7 @@ export class CatanRoom extends Room {
       siguienteTurno(this.partida);
 
     },
+
     msgColocarAsentamiento: (
       client: Client,
       mensaje: { h: number, d: number, p: number }
@@ -371,6 +418,14 @@ export class CatanRoom extends Room {
           return;
         }
 
+        //* Log de la construccion del asentamiento
+        if(!resultado.error){
+          this.broadcast("log", {
+            jugador: this.jugadores.get(client.sessionId)?.nombre,
+            mensaje: resultado.mensaje
+          })
+        }
+
         //* Si estamos en vuelta de regreso de la preconstruccion
         if (this.partida.direccionPreconstruccion === -1) {
           darMaterialInicial(this.tablero.hexagonos, jugador, h, d, p, this.banca);
@@ -410,11 +465,20 @@ export class CatanRoom extends Room {
           return;
         }
 
+        //* Log de la construccion del asentamiento
+        if(!resultado.error){
+          this.broadcast("log", {
+            jugador: this.jugadores.get(client.sessionId)?.nombre,
+            mensaje: resultado.mensaje
+          })
+        }
+
         //* Verificar si el jugador ha ganado
         verificarVictoria(this.partida, jugador, client.sessionId);
       }
 
     },
+
     msgColocarCamino: (
       client: Client,
       mensaje: { h: number, d: number, p: number }
@@ -467,6 +531,14 @@ export class CatanRoom extends Room {
           return;
         }
 
+        //* Log de la construccion del camino
+        if(!resultado.error){
+          this.broadcast("log", {
+            jugador: this.jugadores.get(client.sessionId)?.nombre,
+            mensaje: resultado.mensaje
+          })
+        }
+
         //? Ahora le toca al siguiente jugador poner un asentamiento
         this.partida.fasePreconstruccion = FasePreconstruccion.ASENTAMIENTO;
         siguienteTurnoPreconstruccion(this.partida);
@@ -497,9 +569,17 @@ export class CatanRoom extends Room {
           })
           return;
         }
-        return;
+
+        //* Log de la construccion del camino
+        if(!resultado.error){
+          this.broadcast("log", {
+            jugador: this.jugadores.get(client.sessionId)?.nombre,
+            mensaje: resultado.mensaje
+          })
+        }
       }
     },
+
     msgDescartarRecursos: (
       client: Client,
       mensaje: { recurso: string }
@@ -564,13 +644,23 @@ export class CatanRoom extends Room {
       //* Eliminarlo de la lista si ya no tiene que descartar
       if (this.partida.jugadoresParaDescartar.get(jugadorPorDescartar) === 0) {
         this.partida.jugadoresParaDescartar.delete(jugadorPorDescartar);
+        //* Log de terminacion de descarte
+        this.broadcast("log", {
+          jugador: this.jugadores.get(client.sessionId)?.nombre,
+          mensaje: " ha terminado de descartar"
+        })
       }
 
       //* Verificar si ya no hay jugadores que deben descartar, para pasar a fase de ladron
       if (this.partida.jugadoresParaDescartar.size == 0) {
         this.partida.faseJuego = FaseJuego.LADRON;
+        //* Log de todos descartaron
+        this.broadcast("log", {
+          mensaje: "Todos los jugadores han terminado de descartar"
+        })
       }
     },
+
     msgMoverLadron: (
       client: Client,
       mensaje: { h: number, d: number }
@@ -616,6 +706,13 @@ export class CatanRoom extends Room {
         return;
       }
 
+      //* Log de movimiento del ladron
+      if(!resultado.error){
+        this.broadcast("log", {
+          jugador: this.jugadores.get(client.sessionId)?.nombre,
+          mensaje: resultado.mensaje
+        })
+      }
 
       //*Extraemos los jugadores involucrados en el robo
       const jugadoresinvolucrados = resultado.jugadoresInvolucrados;
@@ -633,6 +730,12 @@ export class CatanRoom extends Room {
           this.jugadores.get(jugadoresinvolucrados[0])
         )
         this.partida.faseJuego = FaseJuego.ACCIONES;
+
+        //* Log del robo automatico
+        this.broadcast("log", {
+          jugador: this.jugadores.get(client.sessionId)?.nombre,
+          mensaje: ` ha robado un recurso a ${this.jugadores.get(jugadoresinvolucrados[0])?.nombre}`
+        })
         return;
       }
 
@@ -643,6 +746,7 @@ export class CatanRoom extends Room {
 
       this.partida.faseJuego = FaseJuego.ROBO
     },
+
     msgCartaCaballero: (
       client: Client,
       mensaje: { h: number, d: number }
@@ -707,8 +811,14 @@ export class CatanRoom extends Room {
         return;
       }
 
+      //* Log del uso de la carta de caballero
+      this.broadcast("log", {
+        jugador: this.jugadores.get(client.sessionId)?.nombre,
+        mensaje: " ha jugado una carta de caballero"
+      })
+
       //* Eliminar la carta de caballero del jugador
-      jugarCaballero(this.jugadores, client.sessionId, this.partida);
+      jugarCaballero(this.jugadores, client.sessionId, this.partida);      
 
       //* Extraemos los jugadores involucrados en el robo
       const jugadoresInvolucrados = resultado.jugadoresInvolucrados;
@@ -740,7 +850,6 @@ export class CatanRoom extends Room {
       //? Entramos a fase especial para decidir a quien robar
 
       this.partida.faseJuego = FaseJuego.ROBO;
-
     },
 
     msgIntercambiarJugador: (
@@ -748,7 +857,7 @@ export class CatanRoom extends Room {
       mensaje: {
         recursoEntregado: string,
         cantidadEntregada: number,
-        recusoRecibido: string,
+        recursoRecibido: string,
         cantidadRecibida: number,
       }
     ) => {
@@ -780,7 +889,7 @@ export class CatanRoom extends Room {
       // * Verificar que los recursos sean validos
       if (
         !jugador.recursos.has(mensaje.recursoEntregado) ||
-        !jugador.recursos.has(mensaje.recusoRecibido)
+        !jugador.recursos.has(mensaje.recursoRecibido)
       ) {
         client.send("error", {
           mensajeError: "Los Recursos seleccionados no son validos"
@@ -797,7 +906,7 @@ export class CatanRoom extends Room {
       }
 
       // * No se permite pedir y dar lo mismo
-      if (mensaje.recursoEntregado === mensaje.recusoRecibido) {
+      if (mensaje.recursoEntregado === mensaje.recursoRecibido) {
         client.send("error", {
           mensajeError: "No puedes pedir y dar el mismo recurso"
         })
@@ -808,8 +917,15 @@ export class CatanRoom extends Room {
       this.partida.ofertaIntercambio.setOferta(
         client.sessionId, this.jugadores,
         mensaje.recursoEntregado, mensaje.cantidadEntregada,
-        mensaje.recusoRecibido, mensaje.cantidadRecibida
+        mensaje.recursoRecibido, mensaje.cantidadRecibida
       );
+
+      //* Log de la oferta de intercambio
+      this.broadcast("log", {
+        jugador: this.jugadores.get(client.sessionId)?.nombre,
+        mensaje: " ha hecho una oferta de intercambio"
+      })
+
     },
 
     msgResponderIntercambio: (
@@ -833,7 +949,7 @@ export class CatanRoom extends Room {
 
       // * Verificar que el jugador aún deba reponder
       if (this.partida.ofertaIntercambio.respuestas.get(client.sessionId) !== 0) {
-        client.send("Error", {
+        client.send("error", {
           mensajeError: "Ya respondiste a esta oferta"
         })
         return;
@@ -841,7 +957,7 @@ export class CatanRoom extends Room {
 
       // * Verificar que sea una respueta valida
       if (mensaje.respuesta !== 1 && mensaje.respuesta !== -1) {
-        client.send("Error", {
+        client.send("error", {
           mensajeError: "Respuesta invalida"
         })
         return;
@@ -854,6 +970,13 @@ export class CatanRoom extends Room {
         if (this.partida.ofertaIntercambio.todosRechazaron()) {
           this.partida.ofertaIntercambio.limpiarOferta();
         }
+
+        //* Log de rechazo de la oferta
+        this.broadcast("log", {
+          jugador: this.jugadores.get(client.sessionId)?.nombre,
+          mensaje: " ha rechazado la oferta de intercambio"
+        })
+
         return;
       }
 
@@ -868,9 +991,10 @@ export class CatanRoom extends Room {
         ) < this.partida.ofertaIntercambio.cantidadOfrecida) {
           this.partida.ofertaIntercambio.limpiarOferta();
 
-          client.send("Error", {
+          client.send("error", {
             mensajeError: "Oferta cancelada por falta de recursos"
           })
+
           return;
         }
 
@@ -895,10 +1019,17 @@ export class CatanRoom extends Room {
           this.partida.ofertaIntercambio
         );
 
+        //* Log del intercambio de recursos
+        this.broadcast("log", {
+          jugador: this.jugadores.get(client.sessionId)?.nombre,
+          mensaje: " ha aceptado la oferta de intercambio"
+        })
+
         // * Destruir la oferta
         this.partida.ofertaIntercambio.limpiarOferta();
       }
     },
+
     msgComprarCarta: (client: Client) => {
         //* Verificar que la partida siga en curso
         if(this.partida.fase === FasePartida.FINALIZADA){
@@ -937,10 +1068,18 @@ export class CatanRoom extends Room {
             return;    
         }
 
+        //* Log de la compra de la carta
+        if(!resultado.error){
+            this.broadcast("log", {
+                jugador: this.jugadores.get(client.sessionId)?.nombre,
+                mensaje: resultado.mensaje
+            })
+        }
+
         //* Verificar si el jugador ha ganado
         verificarVictoria(this.partida, this.jugadores.get(client.sessionId), client.sessionId);
-        
     },
+
     msgCartaCarreteras: (client: Client) => {
       // * Verificar que la partida siga en curso
       if (this.partida.fase === FasePartida.FINALIZADA) {
@@ -987,6 +1126,12 @@ export class CatanRoom extends Room {
 
       // * Desactivar el uso de otra carta este turno
       this.partida.cartaJugable = false;
+
+      //* Log de la carta de carreteras
+      this.broadcast("log", {
+        jugador: this.jugadores.get(client.sessionId)?.nombre,
+        mensaje: " ha jugado una carta de carreteras"
+      })
     },
 
     msgCaminoGratis: (
@@ -1046,6 +1191,7 @@ export class CatanRoom extends Room {
         this.partida.faseJuego = FaseJuego.ACCIONES
       }
     },
+
     msgCartaAbundancia: (
       client: Client,
       mensaje: { recurso1: string, recurso2: string }
@@ -1053,7 +1199,7 @@ export class CatanRoom extends Room {
       //* Verificar que la partida siga en curso
       if (this.partida.fase === FasePartida.FINALIZADA) {
         client.send("error", {
-          mensaejError: "La partida ha finalizado"
+          mensajeError: "La partida ha finalizado"
         })
         return;
       }
@@ -1101,15 +1247,24 @@ export class CatanRoom extends Room {
       //* Si no puede jugar, notificar error
       if (resultado.error) {
         client.send("error", {
-          mensjaeError: resultado.mensaje
+          mensajeError: resultado.mensaje
         })
         return;
+      }
+
+      //* Log de la carta de abundancia
+      if(!resultado.error){
+        this.broadcast("log", {
+          jugador: this.jugadores.get(client.sessionId)?.nombre,
+          mensaje: resultado.mensaje
+        })
       }
 
       //* Marcar que ya se utilizo una carta en este turno
       this.partida.cartaJugable = false;
 
     },
+
     msgCartaMonopolio: (
       client: Client,
       mensaje: { recurso: string }
@@ -1171,9 +1326,18 @@ export class CatanRoom extends Room {
         return;
       }
 
+      //* Log de la carta de monopolio
+      if(!resultado.error){
+        this.broadcast("log", { 
+          jugador: this.jugadores.get(client.sessionId)?.nombre,
+          mensaje: resultado.mensaje
+        })
+      }
+
       //* Marcar que ya se utilizo una carta en este turno
       this.partida.cartaJugable = false;
     },
+
     msgRobarJugador: (
       client: Client,
       mensaje: { jugadorRobado: string}
@@ -1215,12 +1379,17 @@ export class CatanRoom extends Room {
 
       robarJugador(this.jugadores.get(client.sessionId), this.jugadores.get(mensaje.jugadorRobado));
 
+      //* Log del robo
+      this.broadcast("log", {
+        jugador: this.jugadores.get(client.sessionId)?.nombre,
+        mensaje: ` ha robado un recurso a ${this.jugadores.get(mensaje.jugadorRobado)?.nombre}`
+      })
 
       //* Limpiar Lista y volver a acciones
       this.partida.jugadoresParaRobar.clear();
       this.partida.faseJuego = FaseJuego.ACCIONES;
-
     }
+    
   };
 
   onCreate(options: any) {

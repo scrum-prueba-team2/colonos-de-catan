@@ -67,7 +67,7 @@ export function moverLadron(
 
     return {
         error: false,
-        mensaje: "El ladron se ha movido correctamente",
+        mensaje: " ha movido al ladron",
         jugadoresInvolucrados: jugadoresInvolucrados
     }
 }
