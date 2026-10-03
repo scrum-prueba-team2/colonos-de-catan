@@ -94,6 +94,19 @@ function esElObjetivo(
   return objetivo?.h === h && objetivo.d === d && objetivo.p === p;
 }
 
+/* Hexagono donde esta el ladron. Se dibuja en uno solo, asi al moverlo el
+   hexagono anterior se vuelve a pintar sin ladron.
+   El backend arranca con tablero.ladron en (0, 0) aunque el desierto cae en
+   otro lado, y al primer movimiento el desierto se queda con esLadron = true.
+   Por eso:
+   - si solo un hexagono tiene esLadron, el ladron esta ahi (inicio de partida);
+   - si hay mas de uno, el bueno es el que coincide con tablero.ladron. */
+function posicionLadron(datos: DatosTablero): Coordenada {
+  const marcados = Object.values(datos.hexagonos).filter((hex) => hex.esLadron);
+  if (marcados.length === 1) return { h: marcados[0].h, d: marcados[0].d };
+  return datos.ladron;
+}
+
 function tieneAlLadron(ladron: Coordenada, h: number, d: number) {
   return ladron.h === h && ladron.d === d;
 }
@@ -107,6 +120,7 @@ function Tablero({
   moviendoLadron = false,
   onSeleccionarHexagonoLadron,
 }: Props) {
+  const ladron = posicionLadron(datos);
 
   return (
     <svg
@@ -199,7 +213,7 @@ function Tablero({
                 <text x={cx} y={cy} className="tbFichaNumero">{hex.numero}</text>
               </g>
             )}
-            {hex.esLadron && (
+            {tieneAlLadron(ladron, hex.h, hex.d) && (
               <g className="tbLadron">
                 <ellipse cx={cx} cy={cy + S * 0.18} rx={S * 0.2} ry={S * 0.16} />
                 <circle cx={cx} cy={cy - S * 0.1} r={S * 0.13} />
