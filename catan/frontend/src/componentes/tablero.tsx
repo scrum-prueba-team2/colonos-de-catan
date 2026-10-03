@@ -227,7 +227,7 @@ function Tablero({
           No se dibuja donde esta el ladron ahora (tablero.ladron), porque el
           backend no deja dejarlo en el mismo hexagono. */}
       {moviendoLadron && Object.entries(datos.hexagonos).map(([clave, hex]) => {
-        if (tieneAlLadron(datos.ladron, hex.h, hex.d)) return null;
+        if (tieneAlLadron(ladron, hex.h, hex.d)) return null;
         const [cx, cy] = centro(hex.h, hex.d);
         const hexagono = { h: hex.h, d: hex.d };
         return (
