@@ -224,7 +224,7 @@ function Tablero({
       })}
 
       {/* Mover al ladron: un circulo en el centro de cada hexagono para elegirlo.
-          No se dibuja donde esta el ladron ahora (tablero.ladron), porque el
+          No se dibuja donde esta el ladron ahora (posicionLadron), porque el
           backend no deja dejarlo en el mismo hexagono. */}
       {moviendoLadron && Object.entries(datos.hexagonos).map(([clave, hex]) => {
         if (tieneAlLadron(ladron, hex.h, hex.d)) return null;
