@@ -27,9 +27,8 @@ Los demás jugadores no ven los círculos.
   `onSeleccionarHexagonoLadron` (recibe `{ h, d }` del hexágono elegido).
 - Con `moviendoLadron` en `true` se dibuja un `<circle>` SVG en el centro de cada hexágono,
   encima de la ficha del número.
-- **No se dibuja el círculo donde está el ladrón ahora.** Para saber dónde está se usa
-  `tablero.ladron`, no `hexagono.esLadron`, porque el backend nunca actualiza ese campo
-  (ver el comentario en `src/common/tablero.ts`).
+- **No se dibuja el círculo donde está el ladrón ahora.** Para saber dónde está se usa la
+  función `posicionLadron` (ver "Corrección: el ladrón inicial no se borraba").
 - El círculo se puede elegir con clic o con el teclado (Enter o espacio), igual que los
   objetivos de construcción.
 
