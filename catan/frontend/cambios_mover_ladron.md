@@ -27,8 +27,9 @@ Los demás jugadores no ven los círculos.
   `onSeleccionarHexagonoLadron` (recibe `{ h, d }` del hexágono elegido).
 - Con `moviendoLadron` en `true` se dibuja un `<circle>` SVG en el centro de cada hexágono,
   encima de la ficha del número.
-- **No se dibuja el círculo donde está el ladrón ahora.** Para saber dónde está se usa la
-  función `posicionLadron` (ver "Corrección: el ladrón inicial no se borraba").
+- **No se dibuja el círculo donde está el ladrón ahora.** Para saber dónde está se usa
+  `hexagono.esLadron`, que el backend mantiene actualizado (ver "Corrección: el ladrón inicial
+  no se borraba").
 - El círculo se puede elegir con clic o con el teclado (Enter o espacio), igual que los
   objetivos de construcción.
 
@@ -74,29 +75,36 @@ La causa está en la generación inicial del tablero en el backend:
 - En el primer movimiento, `moverLadron` le quita `esLadron` al `(0, 0)` (que no lo tenía) y
   el desierto se queda con `esLadron = true` para siempre.
 
-### La solución (solo frontend)
+### Primera solución (solo frontend, ya retirada)
 
-El backend no se modificó. En `frontend/src/componentes/tablero.tsx` se agregó la función
-`posicionLadron(datos)`, que decide en qué **único** hexágono está el ladrón:
+Mientras el backend tenía el error, en `tablero.tsx` se agregó la función `posicionLadron`
+(con `tieneAlLadron`), que elegía un solo hexágono para dibujar al ladrón: si había un solo
+hexágono con `esLadron` era ese, y si había más de uno, el que coincidía con
+`tablero.ladron`. Así nunca se dibujaban dos ladrones.
 
-- Si **un solo** hexágono tiene `esLadron = true`, el ladrón está ahí. Es el caso del inicio
-  de la partida (el desierto) y también si el ladrón vuelve al desierto.
-- Si hay **más de uno** (el desierto que quedó marcado y el nuevo), el bueno es el que
-  coincide con `tablero.ladron`.
+### Lo que arregló Hengel en el backend
 
-El dibujo del ladrón y los círculos usan esa misma posición, así que al moverlo el hexágono
-anterior se repinta sin ladrón y no quedan dos dibujados. También se actualizó el comentario de
-`esLadron` en `frontend/src/common/tablero.ts`.
+Hengel corrigió la causa en `main` (commit `ee4afd5`, "Feature/chat-log"):
 
-### Resuelto en el backend
+- `backend/src/generators/generarHexagonos.ts`: ahora recibe `tablero.ladron` como segundo
+  parámetro y, al crear el desierto, le copia sus coordenadas (`ladron.h` y `ladron.d`).
+- `backend/src/states/CatanState.ts`: llama a `generarHexagonos(this.tablero.hexagonos,
+  this.tablero.ladron)`.
 
-El compañero encargado del backend corrigió la causa en `main` (commit `3501702`):
-`generarHexagonos` ahora recibe `tablero.ladron` y le pone las coordenadas del desierto, así
-que `tablero.ladron` y `esLadron` coinciden desde el inicio de la partida.
+Con eso, desde el inicio de la partida `tablero.ladron` apunta al desierto y, como
+`moverLadron` ya le quita `esLadron` al hexágono anterior y se lo pone al nuevo, **solo un
+hexágono tiene `esLadron = true` en todo momento**.
 
-Con ese cambio, `posicionLadron` siempre encuentra un solo hexágono con `esLadron` y el
-círculo nunca aparece donde está el ladrón, ni siquiera al inicio. La función se mantiene
-porque también funciona con el backend anterior.
+### Cómo quedó el frontend
+
+Se trajeron los cambios de `main` a esta rama (merge `434e07e`) y, como pidió el coordinador,
+se quitaron las verificaciones que ya hace el backend:
+
+- `tablero.tsx`: se eliminaron `posicionLadron` y `tieneAlLadron`. El ladrón se dibuja con
+  `hexagono.esLadron` y los círculos se ocultan donde `hexagono.esLadron` es `true`. Al
+  moverlo, el backend actualiza los dos hexágonos y el anterior se repinta sin ladrón.
+- `common/tablero.ts`: el comentario de `esLadron` ahora dice que es `true` solo donde está el
+  ladrón y que el backend lo mantiene actualizado.
 
 ## Lo que no se tocó
 
