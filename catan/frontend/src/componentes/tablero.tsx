@@ -77,6 +77,8 @@ interface Props {
   datos: DatosTablero;
   // Para pintar cada pieza del color de su dueño.
   ordenJugadores?: string[];
+  // Solo para resaltar los poblados de el jugador para costruir la Ciudad
+  miSessionId?: string;
   tipoConstruccion?: TipoConstruccion | null;
   objetivoSeleccionado?: ObjetivoConstruccion | null;
   onSeleccionarObjetivo?: (objetivo: ObjetivoConstruccion) => void;
@@ -97,6 +99,7 @@ function esElObjetivo(
 function Tablero({
   datos,
   ordenJugadores = [],
+  miSessionId = '',
   tipoConstruccion = null,
   objetivoSeleccionado,
   onSeleccionarObjetivo,
@@ -235,7 +238,9 @@ function Tablero({
         const [x, y] = puntoVertice(vertice.h, vertice.d, vertice.p);
         const puedeSeleccionar =
           (tipoConstruccion === 'poblado' && vertice.constuccion === 0) ||
-          (tipoConstruccion === 'ciudad' && vertice.constuccion !== 0);
+          (tipoConstruccion === 'ciudad'
+            && vertice.constuccion === 1
+            && vertice.propietario === miSessionId);
         const seleccionado = puedeSeleccionar && esElObjetivo(objetivoSeleccionado, vertice.h, vertice.d, vertice.p);
         const objetivo = { h: vertice.h, d: vertice.d, p: vertice.p };
         // El circulo sigue siendo el area de clic; la pieza se dibuja encima.

@@ -42,6 +42,7 @@ const recursosPrueba: Recursos = {
 const MENSAJE_CONSTRUIR: Partial<Record<TipoConstruccion, string>> = {
   poblado: 'msgColocarAsentamiento',
   camino: 'msgColocarCamino',
+  ciudad: 'msgColocarCiudad',
 };
 
 /* room.state es un Schema de Colyseus: toJSON() lo vuelve objeto plano. Las
@@ -355,6 +356,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
           <Tablero
             datos={datosTablero}
             ordenJugadores={ordenJugadores}
+            miSessionId={miSessionId}
             tipoConstruccion={tipoConstruccion}
             objetivoSeleccionado={objetivoConstruccion}
             onSeleccionarObjetivo={seleccionarObjetivo}
