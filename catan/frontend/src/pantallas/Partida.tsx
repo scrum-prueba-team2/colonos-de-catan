@@ -32,6 +32,7 @@ import "./Partida.css"
 import InfoTurno from '../componentes/infoTurno';
 import ElegirRobo from '../componentes/ElegirRobo';
 import UsarCarta, { type CartaUsable } from '../componentes/UsarCarta';
+import ProponerIntercambio, { type Propuesta } from '../componentes/ProponerIntercambio';
 
 const recursosPrueba: Recursos = {
   madera: 2,
@@ -88,6 +89,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
      elige el hexagono del ladron; un numero = mensaje enviado, guarda cuantos
      caballeros usables tenia para saber cuando el servidor lo confirma. */
   const [caballero, setCaballero] = useState<null | 'eligiendo' | number>(null);
+  // true desde que se envia la propuesta hasta que el servidor la publica.
+  const [propuestaEnEspera, setPropuestaEnEspera] = useState(false);
   // Todo lo que manda el servidor. null = todavia no llega, o no hay sala.
   const [estadoReal, setEstadoReal] = useState<EstadoCatan | null>(null);
 
@@ -143,6 +146,14 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
         return estado.partida.faseJuego === FASE_JUEGO.ACCIONES ? anterior : null;
       });
 
+      // La propuesta se confirma cuando aparece en el estado como mia.
+      if (!estado
+        || estado.partida.ofertaIntercambio.jugador === salaActual.sessionId
+        || estado.partida.turnoActual !== salaActual.sessionId
+        || estado.partida.faseJuego !== FASE_JUEGO.ACCIONES) {
+        setPropuestaEnEspera(false);
+      }
+
     }
 
     actualizarEstado();
@@ -172,6 +183,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       setMoviendoLadron(false);
       setCompraEnEspera(null);
       setRobando(false);
+      setPropuestaEnEspera(false);
       // Si el servidor rechaza el caballero, se puede elegir otro hexagono.
       setCaballero((anterior) => (typeof anterior === 'number' ? 'eligiendo' : anterior));
     });
@@ -259,6 +271,19 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       && caballero === null,
   );
 
+  /* Propuesta de intercambio activa. Solo cuenta si es del jugador en turno:
+     el backend todavia no la borra al pasar el turno, asi que una oferta de
+     un turno anterior se considera vencida. */
+  const oferta = partidaActual?.ofertaIntercambio;
+  const ofertaActiva = oferta && oferta.jugador !== '' && oferta.jugador === turnoActual ? oferta : null;
+  // Mi turno, fase de acciones, sin otra propuesta activa y con algo que ofrecer.
+  const puedeProponer = Boolean(
+    puedePasarTurno
+      && !ofertaActiva
+      && miJugadorReal
+      && Object.values(miJugadorReal.recursos).some((cantidad) => cantidad > 0),
+  );
+
   /* Preconstruccion: el backend solo acepta la pieza de la subfase en curso y
      no cobra recursos.*/
   const enPreconstruccion = Boolean(
@@ -314,6 +339,14 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
     if (!sala || !puedeRobar || robando) return;
     setRobando(true);
     sala.send('msgRobarJugador', { jugadorRobado });
+  }
+
+  function proponerIntercambio(propuesta: Propuesta) {
+    // El backend valida turno, fase y recursos y publica la oferta en
+    // partida.ofertaIntercambio; con eso la ven todos los jugadores.
+    if (!sala || !puedeProponer || propuestaEnEspera) return;
+    setPropuestaEnEspera(true);
+    sala.send('msgIntercambiarJugador', propuesta);
   }
 
   function elegirCarta(carta: CartaUsable) {
@@ -452,7 +485,14 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
           area de cartas especiales 
         </div>
         <div className="negociar">
-            area de negociar   
+          <ProponerIntercambio
+            ofertaActiva={ofertaActiva}
+            jugadores={jugadores}
+            misRecursos={miJugadorReal?.recursos}
+            puedeProponer={puedeProponer}
+            enviando={propuestaEnEspera}
+            onProponer={proponerIntercambio}
+          />
         </div>
         <div className="tirDado">
           <TirarDados
