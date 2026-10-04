@@ -818,7 +818,10 @@ export class CatanRoom extends Room {
       })
 
       //* Eliminar la carta de caballero del jugador
-      jugarCaballero(this.jugadores, client.sessionId, this.partida);      
+      jugarCaballero(this.jugadores, client.sessionId, this.partida); 
+      
+      //* Deshabilitar el uso de otra carta este turno
+      this.partida.cartaJugable = false;     
 
       //* Extraemos los jugadores involucrados en el robo
       const jugadoresInvolucrados = resultado.jugadoresInvolucrados;
@@ -843,9 +846,6 @@ export class CatanRoom extends Room {
       this.partida.jugadoresParaRobar.clear();
       this.partida.jugadoresParaRobar.push(...jugadoresInvolucrados);
 
-
-      //* Deshabilitar el uso de otra carta este turno
-      this.partida.cartaJugable = false;
 
       //? Entramos a fase especial para decidir a quien robar
 
