@@ -362,6 +362,9 @@ export class CatanRoom extends Room {
       /** Permitir usar una carta en el siguiente turno */
       this.partida.cartaJugable = true;
 
+      //* Cancelar ofertas de intercambio activas
+      this.partida.ofertaIntercambio.limpiarOferta()
+
       siguienteTurno(this.partida);
 
     },
@@ -878,11 +881,12 @@ export class CatanRoom extends Room {
       }
 
       // * Verificar que no exista una oferta activa
-      if (this.partida.ofertaIntercambio.jugador !== "") (
+      if (this.partida.ofertaIntercambio.jugador !== "") {
         client.send("error", {
           mensajeError: "Ya existe una oferta activa"
         })
-      )
+        return; 
+      }
 
       const jugador = this.jugadores.get(client.sessionId);
 
