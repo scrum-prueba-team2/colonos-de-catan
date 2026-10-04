@@ -11,6 +11,7 @@ import { tableroPrueba } from '../datos/tableroPrueba'
 import TablaCostes from '../componentes/tablaCostes';
 import Tablero from '../componentes/tablero';
 import type { Recurso, Recursos } from '../common/jugador';
+import { CARTA } from '../common/jugador';
 import type { EstadoCatan } from '../common/estado';
 import type { Coordenada } from '../common/tablero';
 import CarRecursos from '../componentes/carRecursos';
@@ -29,6 +30,7 @@ import Typography from '@mui/material/Typography';
 import "./Partida.css"
 import InfoTurno from '../componentes/infoTurno';
 import ElegirRobo from '../componentes/ElegirRobo';
+import UsarCarta from '../componentes/UsarCarta';
 
 const recursosPrueba: Recursos = {
   madera: 2,
@@ -79,6 +81,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const [moviendoLadron, setMoviendoLadron] = useState(false);
   const [compraEnEspera, setCompraEnEspera] = useState<number | null>(null);
   const [robando, setRobando] = useState(false);
+  const [menuCartasAbierto, setMenuCartasAbierto] = useState(false);
   // Todo lo que manda el servidor. null = todavia no llega, o no hay sala.
   const [estadoReal, setEstadoReal] = useState<EstadoCatan | null>(null);
 
@@ -222,6 +225,19 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       && (miJugadorReal?.recursos.trigo ?? 0) >= 1
       && (miJugadorReal?.recursos.lana ?? 0) >= 1
       && (miJugadorReal?.recursos.mineral ?? 0) >= 1,
+  );
+
+  // Las 4 cartas que se pueden jugar (el punto de victoria no se juega).
+  const cartasUsables = miJugadorReal?.cartas_usables;
+  const tieneCartaUsable = Boolean(cartasUsables && (
+    cartasUsables[CARTA.CABALLERO] + cartasUsables[CARTA.CARRETERAS]
+      + cartasUsables[CARTA.ABUNDANCIA] + cartasUsables[CARTA.MONOPOLIO] > 0
+  ));
+  // El backend permite una carta por turno y solo en la fase de acciones.
+  const puedeUsarCarta = Boolean(
+    puedePasarTurno
+      && partidaActual?.cartaJugable
+      && tieneCartaUsable,
   );
 
   /* Preconstruccion: el backend solo acepta la pieza de la subfase en curso y
@@ -371,6 +387,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             puedeComprar={puedeComprarCarta}
             comprando={compraEnEspera !== null}
             onComprar={comprarCarta}
+            puedeUsarCarta={puedeUsarCarta}
+            onUsarCarta={() => setMenuCartasAbierto(true)}
           />
         </div>
         <div className="carEspeciales">
@@ -417,6 +435,12 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
           jugadores={jugadores}
           enviando={robando}
           onRobar={robarJugador}
+        />
+        <UsarCarta
+          abierto={menuCartasAbierto && puedeUsarCarta}
+          cartasUsables={cartasUsables}
+          onElegir={() => setMenuCartasAbierto(false)}
+          onCerrar={() => setMenuCartasAbierto(false)}
         />
 
     </div>

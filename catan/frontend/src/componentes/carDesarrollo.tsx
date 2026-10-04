@@ -15,9 +15,12 @@ interface Props {
   puedeComprar: boolean;
   comprando: boolean;
   onComprar: () => void;
+  // Abre el menu para elegir que carta usar (componentes/UsarCarta.tsx).
+  puedeUsarCarta: boolean;
+  onUsarCarta: () => void;
 }
 
-function CarDesarrollo({ miJugador, puedeComprar, comprando, onComprar }: Props) {
+function CarDesarrollo({ miJugador, puedeComprar, comprando, onComprar, puedeUsarCarta, onUsarCarta }: Props) {
   return (
     <Card className="h-100 w-100 overflow-hidden d-flex flex-column">
       <h3 className="text-center fs-6 fw-bold border-bottom mb-0 py-1">Mis cartas</h3>
@@ -62,8 +65,14 @@ function CarDesarrollo({ miJugador, puedeComprar, comprando, onComprar }: Props)
             >
               {comprando ? 'Comprando…' : 'Comprar carta'}
             </Button>
-            <Button variant="outline-secondary" size="sm" disabled className="flex-fill m-0">
-              {/* usar este botón para desplegar la descripción y uso de las cartas de desarrollo */}
+            <Button
+              variant="outline-secondary"
+              size="sm"
+              disabled={!puedeUsarCarta}
+              onClick={onUsarCarta}
+              title="Solo una carta por turno, en la fase de acciones"
+              className="flex-fill m-0"
+            >
               Usar carta
             </Button>
           </div>
