@@ -11,6 +11,7 @@ import { tableroPrueba } from '../datos/tableroPrueba'
 import TablaCostes from '../componentes/tablaCostes';
 import Tablero from '../componentes/tablero';
 import type { Recurso, Recursos } from '../common/jugador';
+import { CARTA } from '../common/jugador';
 import type { EstadoCatan } from '../common/estado';
 import type { Coordenada } from '../common/tablero';
 import CarRecursos from '../componentes/carRecursos';
@@ -23,12 +24,14 @@ import Construir, {
   type TipoConstruccion,
 } from '../componentes/construir';
 import { FASE_JUEGO, FASE_PARTIDA, FASE_PRECONSTRUCCION } from '../common/fases';
+import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
 import "./Partida.css"
 import InfoTurno from '../componentes/infoTurno';
 import ElegirRobo from '../componentes/ElegirRobo';
+import UsarCarta, { type CartaUsable } from '../componentes/UsarCarta';
 
 const recursosPrueba: Recursos = {
   madera: 2,
@@ -80,6 +83,11 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const [moviendoLadron, setMoviendoLadron] = useState(false);
   const [compraEnEspera, setCompraEnEspera] = useState<number | null>(null);
   const [robando, setRobando] = useState(false);
+  const [menuCartasAbierto, setMenuCartasAbierto] = useState(false);
+  /* Carta de caballero: null = no se esta usando; 'eligiendo' = el jugador
+     elige el hexagono del ladron; un numero = mensaje enviado, guarda cuantos
+     caballeros usables tenia para saber cuando el servidor lo confirma. */
+  const [caballero, setCaballero] = useState<null | 'eligiendo' | number>(null);
   // Todo lo que manda el servidor. null = todavia no llega, o no hay sala.
   const [estadoReal, setEstadoReal] = useState<EstadoCatan | null>(null);
 
@@ -125,6 +133,16 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
         setRobando(false);
       }
 
+      // El caballero se confirma cuando el servidor le resta la carta al
+      // jugador. Si cambia el turno o la fase, se cancela.
+      setCaballero((anterior) => {
+        if (anterior === null) return null;
+        const usables = estado?.jugadores[salaActual.sessionId]?.cartas_usables[CARTA.CABALLERO] ?? 0;
+        if (!estado || estado.partida.turnoActual !== salaActual.sessionId) return null;
+        if (typeof anterior === 'number') return usables < anterior ? null : anterior;
+        return estado.partida.faseJuego === FASE_JUEGO.ACCIONES ? anterior : null;
+      });
+
     }
 
     actualizarEstado();
@@ -154,6 +172,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       setMoviendoLadron(false);
       setCompraEnEspera(null);
       setRobando(false);
+      // Si el servidor rechaza el caballero, se puede elegir otro hexagono.
+      setCaballero((anterior) => (typeof anterior === 'number' ? 'eligiendo' : anterior));
     });
 
     return () => {
@@ -225,6 +245,20 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       && (miJugadorReal?.recursos.mineral ?? 0) >= 1,
   );
 
+  // Las 4 cartas que se pueden jugar (el punto de victoria no se juega).
+  const cartasUsables = miJugadorReal?.cartas_usables;
+  const tieneCartaUsable = Boolean(cartasUsables && (
+    cartasUsables[CARTA.CABALLERO] + cartasUsables[CARTA.CARRETERAS]
+      + cartasUsables[CARTA.ABUNDANCIA] + cartasUsables[CARTA.MONOPOLIO] > 0
+  ));
+  // El backend permite una carta por turno y solo en la fase de acciones.
+  const puedeUsarCarta = Boolean(
+    puedePasarTurno
+      && partidaActual?.cartaJugable
+      && tieneCartaUsable
+      && caballero === null,
+  );
+
   /* Preconstruccion: el backend solo acepta la pieza de la subfase en curso y
      no cobra recursos.*/
   const enPreconstruccion = Boolean(
@@ -280,6 +314,28 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
     if (!sala || !puedeRobar || robando) return;
     setRobando(true);
     sala.send('msgRobarJugador', { jugadorRobado });
+  }
+
+  function elegirCarta(carta: CartaUsable) {
+    setMenuCartasAbierto(false);
+    if (carta === CARTA.CABALLERO) {
+      // Se reutilizan los circulos de mover al ladron para elegir el hexagono.
+      setTipoConstruccion(null);
+      setCaballero('eligiendo');
+    }
+  }
+
+  function jugarCaballero(hexagono: Coordenada) {
+    // El backend valida turno, fase, la carta y el hexagono. Si hay 2 o mas
+    // jugadores para robar pasa a la fase de Robo y se abre ElegirRobo.
+    if (!sala || caballero !== 'eligiendo') return;
+    setCaballero(cartasUsables?.[CARTA.CABALLERO] ?? 0);
+    sala.send('msgCartaCaballero', { h: hexagono.h, d: hexagono.d });
+  }
+
+  function seleccionarHexagonoLadron(hexagono: Coordenada) {
+    if (caballero === 'eligiendo') jugarCaballero(hexagono);
+    else moverLadron(hexagono);
   }
 
   function seleccionarConstruccion(tipo: TipoConstruccion | null) {
@@ -352,7 +408,22 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
           {/*INFORMACION DE LA PARTIDA*/}
             <InfoTurno sessionIdTurno={turnoActual} jugadores={jugadores} />
         </div>
-        <div className="tablero">
+        <div className="tablero" style={{ position: 'relative' }}>
+          {caballero !== null && (
+            <Alert
+              severity="info"
+              sx={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}
+              action={caballero === 'eligiendo' && (
+                <Button color="inherit" size="small" onClick={() => setCaballero(null)}>
+                  Cancelar
+                </Button>
+              )}
+            >
+              {caballero === 'eligiendo'
+                ? 'Caballero: elige a qué hexágono mover al ladrón.'
+                : 'Usando caballero…'}
+            </Alert>
+          )}
           <Tablero
             datos={datosTablero}
             ordenJugadores={ordenJugadores}
@@ -360,8 +431,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             tipoConstruccion={tipoConstruccion}
             objetivoSeleccionado={objetivoConstruccion}
             onSeleccionarObjetivo={seleccionarObjetivo}
-            moviendoLadron={puedeMoverLadron && !moviendoLadron}
-            onSeleccionarHexagonoLadron={moverLadron}
+            moviendoLadron={(puedeMoverLadron && !moviendoLadron) || caballero === 'eligiendo'}
+            onSeleccionarHexagonoLadron={seleccionarHexagonoLadron}
           />
         </div>
         <div className="carRecursos">
@@ -373,6 +444,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             puedeComprar={puedeComprarCarta}
             comprando={compraEnEspera !== null}
             onComprar={comprarCarta}
+            puedeUsarCarta={puedeUsarCarta}
+            onUsarCarta={() => setMenuCartasAbierto(true)}
           />
         </div>
         <div className="carEspeciales">
@@ -419,6 +492,12 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
           jugadores={jugadores}
           enviando={robando}
           onRobar={robarJugador}
+        />
+        <UsarCarta
+          abierto={menuCartasAbierto && puedeUsarCarta}
+          cartasUsables={cartasUsables}
+          onElegir={elegirCarta}
+          onCerrar={() => setMenuCartasAbierto(false)}
         />
 
     </div>
