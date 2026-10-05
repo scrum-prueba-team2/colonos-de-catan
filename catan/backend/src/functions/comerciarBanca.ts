@@ -57,16 +57,22 @@ export function comerciarBanca(
         }
     }
 
-    //* Realizar el intercambio
+    //* Quitar del jugador la tasa del recurso ofrecido
     jugador.recursos.set(
         recursoEntregado, jugador.recursos.get(recursoEntregado) - tasa 
     );
+
+    //* Agregar a la banca la tasa del recurso ofrecido
     banca.recursos.set(
-        recursoRecibido, jugador.recursos.get(recursoRecibido) + tasa
+        recursoEntregado, banca.recursos.get(recursoEntregado) + tasa
     );
+    
+    //* Agregar al jugador el recurso que pidio
     jugador.recursos.set(
         recursoRecibido, jugador.recursos.get(recursoRecibido) + 1
     );
+
+    //* Quitarle a la banca el recurso que el jugador pidio
     banca.recursos.set(
         recursoRecibido, banca.recursos.get(recursoRecibido) - 1
     );
