@@ -11,21 +11,25 @@ export function intercambiarRecursos(
     const oferente = jugadores.get(jugadorOferente);
     const aceptante = jugadores.get(jugadorAceptante);
 
+    //* Restar los recursos ofrecidos al que ofrece
     oferente.recursos.set(
         oferta.recursoOfrecido,
         oferente.recursos.get(oferta.recursoOfrecido) - oferta.cantidadOfrecida   
     );
 
+    //* Restar los recursos solicitados al que acepta
     aceptante.recursos.set(
-        oferta.recursoOfrecido,
+        oferta.recursoSolicitado,
         aceptante.recursos.get(oferta.recursoSolicitado) - oferta.cantidadSolicitada
     );
 
+    //* Sumar los recursos solicitados al que ofrece
     oferente.recursos.set(
         oferta.recursoSolicitado,
         oferente.recursos.get(oferta.recursoSolicitado) + oferta.cantidadSolicitada
     );
 
+    //* Sumar los recursos ofrecidos al que acepta
     aceptante.recursos.set(
         oferta.recursoOfrecido,
         aceptante.recursos.get(oferta.recursoOfrecido) + oferta.cantidadOfrecida
