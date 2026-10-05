@@ -16,7 +16,8 @@ interface Props {
 //* Se muestra a los jugadores que todavia no respondieron la propuesta activa
 
 function ResponderIntercambio({ oferta, nombreOferente, misRecursos, enviando, onResponder }: Props) {
-    // El backend cambia un "si" a "no" si no se tiene lo que se pide; se avisa antes.
+    /* Sin lo que se pide, aceptar no sirve: el backend lo cambia a "no". Por eso
+       en ese caso solo se deja rechazar. */
     const tengo = misRecursos?.[oferta.recursoSolicitado as Recurso] ?? 0;
     const alcanza = tengo >= oferta.cantidadSolicitada;
 
@@ -32,7 +33,7 @@ function ResponderIntercambio({ oferta, nombreOferente, misRecursos, enviando, o
                 </Typography>
                 {!alcanza && (
                     <small className="text-danger">
-                        Tienes {tengo} {oferta.recursoSolicitado}: si aceptas contará como rechazo.
+                        Tienes {tengo} {oferta.recursoSolicitado}: no te alcanza para aceptar.
                     </small>
                 )}
 
@@ -47,7 +48,7 @@ function ResponderIntercambio({ oferta, nombreOferente, misRecursos, enviando, o
                     </Button>
                     <Button
                         variant="contained" color="success" size="small"
-                        disabled={enviando}
+                        disabled={enviando || !alcanza}
                         onClick={() => onResponder(1)}
                         aria-label="Aceptar la propuesta"
                     >

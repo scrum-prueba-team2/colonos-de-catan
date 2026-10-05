@@ -33,10 +33,11 @@ Se muestra en el recuadro **"Negociar"**, en lugar del de proponer, solo al juga
 en `respuestas`. No es un modal, para no tapar el tablero.
 
 - Texto: "**Caro** te ofrece **1 trigo** a cambio de **1 madera**."
-- Si el jugador no tiene lo que se pide, un aviso en rojo: "Tienes 0 madera: si aceptas contará
-  como rechazo." (el backend no manda error en ese caso, así el jugador sabe qué pasó).
 - Dos botones pequeños: **❌ Rechazar** y **✅ Aceptar**. Mientras el servidor responde se
   desactivan.
+- Si el jugador no tiene lo que se pide, **✅ Aceptar queda desactivado** y aparece un aviso en
+  rojo: "Tienes 0 madera: no te alcanza para aceptar." Solo puede rechazar. (Observación del
+  product owner en la revisión: aceptar sin recursos no sirve porque el backend lo cambia a "no".)
 
 ### `src/pantallas/Partida.tsx`
 
@@ -49,31 +50,30 @@ en `respuestas`. No es un modal, para no tapar el tablero.
   desaparece solo.
 - Se actualizó el comentario de `ofertaActiva`: el backend ya borra la oferta al pasar el turno.
 
-## Avisos para el backend (no se tocaron)
+## Errores del backend encontrados en la prueba (ya corregidos)
 
-1. **El que acepta no entrega sus recursos.** En `functions/intercambiarRecursos.ts`, el bloque
-   que le descuenta al aceptante usa la clave equivocada:
+El frontend no tocó el backend. Estos errores se reportaron y Angel Jiménez los corrigió en esta
+misma rama con el commit `b2a91a4` ("fix: error de propuestas corregido"):
 
-   ```ts
-   aceptante.recursos.set(
-       oferta.recursoOfrecido,                                                   // debería ser recursoSolicitado
-       aceptante.recursos.get(oferta.recursoSolicitado) - oferta.cantidadSolicitada
-   );
-   ```
+1. **El que acepta no entregaba sus recursos.** En `functions/intercambiarRecursos.ts`, el
+   bloque que le descuenta al aceptante usaba la clave equivocada (`oferta.recursoOfrecido`
+   en vez de `oferta.recursoSolicitado`). Al que aceptaba nunca se le restaba lo que daba. En la
+   prueba, Beto tenía 1 madera y 0 trigo, aceptó dar 1 madera por 1 trigo y terminó con 1 madera
+   y 1 trigo. **Corregido:** ahora usa `oferta.recursoSolicitado`.
+2. En `msgResponderIntercambio`, el chequeo "No hay una oferta activa" no tenía `return` y el
+   jugador recibía dos errores. **Corregido:** se agregó el `return`.
 
-   Resultado: al que acepta nunca se le resta lo que da y además se le pisa la cantidad del
-   recurso que recibe. Se vio en la prueba: Beto tenía 1 madera y 0 trigo, aceptó dar 1 madera
-   por 1 trigo y terminó con 1 madera y 1 trigo (debía quedar con 0 madera y 1 trigo).
-2. En `msgResponderIntercambio`, el chequeo "No hay una oferta activa" no tiene `return`. No
-   rompe nada porque el siguiente chequeo corta, pero el jugador recibe dos errores.
+También se cambió el mensaje "Oferta cancelada por falta de recursos" por "Oferta cancelada, el
+negociante no tiene ya recursos".
 
 Ya corregidos por el backend desde la issue anterior: la oferta se borra al pasar el turno y el
-chequeo "Ya existe una oferta activa" ahora tiene su `return`.
+chequeo "Ya existe una oferta activa" tiene su `return`.
 
 ## Cómo se probó
 
-Partida real con backend y frontend corriendo y **4 jugadores**, cada uno en su pestaña. Caro
-propuso 1 trigo por 1 madera:
+Primera prueba (antes del arreglo del backend y antes de desactivar ✅ sin recursos). Partida real
+con backend y frontend corriendo y **4 jugadores**, cada uno en su pestaña. Caro propuso 1 trigo
+por 1 madera:
 
 1. Elias, Beto y Dani vieron la propuesta con ❌ y ✅; Caro (la que propuso) no.
 2. Elias no tenía madera: vio el aviso en rojo, pulsó ✅ y el backend lo tomó como rechazo. Su
@@ -82,3 +82,14 @@ propuso 1 trigo por 1 madera:
 4. Beto (con 1 madera) pulsó ✅: se hizo el intercambio y el panel desapareció para todos. Caro
    pasó de 0 madera y 3 trigo a 1 madera y 2 trigo. (A Beto no se le restó la madera: ver aviso 1.)
 5. Sin errores en la consola ni avisos del juego.
+
+Segunda prueba (con el arreglo del backend `b2a91a4` y con ✅ desactivado sin recursos), también
+con 4 jugadores. Dani propuso 1 madera por 1 trigo:
+
+1. Caro no tenía trigo: vio ✅ Aceptar **desactivado** y el aviso "Tienes 0 trigo: no te alcanza
+   para aceptar." Pulsó ❌ y su panel desapareció.
+2. Beto pulsó ❌: su panel desapareció.
+3. Elias (con 2 trigo) pulsó ✅: el panel desapareció para todos y el intercambio cuadró para los
+   dos. Dani pasó de 1 madera y 0 trigo a 0 madera y 1 trigo; Elias, de 0 madera y 2 trigo a
+   1 madera y 1 trigo.
+4. Sin errores en la consola ni avisos del juego.
