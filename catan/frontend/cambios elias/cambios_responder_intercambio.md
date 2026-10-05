@@ -50,6 +50,43 @@ en `respuestas`. No es un modal, para no tapar el tablero.
   desaparece solo.
 - Se actualizó el comentario de `ofertaActiva`: el backend ya borra la oferta al pasar el turno.
 
+## Bug corregido: los botones se quedaban desactivados (frontend)
+
+**Síntoma (reportado en la revisión):** la primera propuesta funcionaba, pero en las siguientes
+**❌ Rechazar y ✅ Aceptar aparecían desactivados**, incluso teniendo los recursos pedidos.
+
+**Causa (frontend, no backend):** el estado `respuestaEnEspera` de `Partida.tsx` se queda en
+`true` al responder y se debía liberar cuando el backend deja de tener al jugador en `0`. La
+condición era:
+
+```ts
+if (!estado || (estado.partida.ofertaIntercambio.respuestas[miId] ?? 0) !== 0) { ... }
+```
+
+Cuando la oferta **se cierra en el mismo momento en que respondes** (eres el último en responder
+y todos rechazaron, o aceptas y se hace el intercambio), el backend llama a `limpiarOferta()` y
+vacía `respuestas`. Entonces `respuestas[miId]` es `undefined`, el `?? 0` lo convertía en `0` y
+la condición nunca se cumplía: `respuestaEnEspera` quedaba en `true` para siempre. En la
+siguiente propuesta el panel se mostraba con `enviando = true` y los dos botones desactivados.
+Con 2 jugadores pasaba siempre, porque el único que responde es siempre el último.
+
+**Arreglo:** se quitó el `?? 0`. Ahora "no estar en `respuestas`" (oferta borrada) también libera
+el estado:
+
+```ts
+if (!estado || estado.partida.ofertaIntercambio.respuestas[miId] !== 0) { ... }
+```
+
+La regla de desactivar ✅ Aceptar sin recursos no cambió: esa parte siempre funcionó bien.
+
+**Verificación:** 2 jugadores y 3 propuestas seguidas (B siempre es el último en responder):
+
+| Ronda | Propuesta | Antes del arreglo | Después del arreglo |
+|---|---|---|---|
+| 1 | B no tiene lo pedido | Rechazar activo, Aceptar desactivado (bien) | Igual (bien) |
+| 2 | B sí tiene lo pedido | **Los dos desactivados** (el bug) | Los dos activos; B aceptó y el intercambio cuadró |
+| 3 | Tras cerrarse por aceptación | — | Los dos activos; B rechazó |
+
 ## Errores del backend encontrados en la prueba (ya corregidos)
 
 El frontend no tocó el backend. Estos errores se reportaron y Angel Jiménez los corrigió en esta

@@ -183,9 +183,11 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
         setPropuestaEnEspera(false);
       }
 
-      // La respuesta se confirma cuando el backend deja de tenerme como
-      // pendiente (1, -1) o cuando borra la oferta.
-      if (!estado || (estado.partida.ofertaIntercambio.respuestas[salaActual.sessionId] ?? 0) !== 0) {
+      /* La respuesta se confirma cuando el backend deja de tenerme como
+         pendiente: respondi (1 o -1) o borro la oferta. Al borrarla vacia
+         "respuestas", asi que mi clave no existe (undefined) y tambien libera.
+         Ojo: no usar "?? 0", porque undefined pasaria a 0 y nunca se liberaria. */
+      if (!estado || estado.partida.ofertaIntercambio.respuestas[salaActual.sessionId] !== 0) {
         setRespuestaEnEspera(false);
       }
 
