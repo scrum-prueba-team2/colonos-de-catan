@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import {
     Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Stack, TextField, Typography,
 } from "@mui/material";
@@ -20,7 +20,6 @@ const MAXIMO_PEDIR = 19;
 const numeros = (hasta: number) => Array.from({ length: hasta }, (_, i) => i + 1);
 
 interface Props {
-    children?: ReactNode;
     // La oferta que esta sobre la mesa, o null si no hay ninguna activa.
     ofertaActiva: Oferta | null;
     jugadores: Jugadores;
@@ -32,7 +31,7 @@ interface Props {
 
 //* Area de negociar: proponer un intercambio a los demas jugadores y ver el activo
 
-function ProponerIntercambio({ children, ofertaActiva, jugadores, misRecursos, puedeProponer, enviando, onProponer }: Props) {
+function ProponerIntercambio({ ofertaActiva, jugadores, misRecursos, puedeProponer, enviando, onProponer }: Props) {
     const [abierto, setAbierto] = useState(false);
     const [entregado, setEntregado] = useState<Recurso | ''>('');
     const [cantidadEntregada, setCantidadEntregada] = useState(1);
@@ -79,7 +78,6 @@ function ProponerIntercambio({ children, ofertaActiva, jugadores, misRecursos, p
                 <Button variant="outlined" size="small" disabled={!puedeProponer || enviando} onClick={abrir}>
                     {enviando ? 'Enviando propuesta…' : 'Proponer intercambio'}
                 </Button>
-                {children}
             </div>
 
             <Dialog open={abierto} onClose={() => setAbierto(false)} fullWidth maxWidth="xs" aria-labelledby="proponer-titulo">

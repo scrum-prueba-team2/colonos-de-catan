@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Room } from '@colyseus/sdk';
 import {
   jugadoresPrueba, ordenJugadoresPrueba, turnoActualPrueba, miSessionIdPrueba,
@@ -16,7 +16,6 @@ import type { EstadoCatan } from '../common/estado';
 import type { Coordenada } from '../common/tablero';
 import CarRecursos from '../componentes/carRecursos';
 import CarDesarrollo from '../componentes/carDesarrollo';
-import IntercambioBanca from '../componentes/intercambioBanca';
 import DescartarRecursos from '../componentes/descartarRecursos';
 import TirarDados, { type ResultadoDados } from '../componentes/tirarDados';
 import Construir, {
@@ -92,14 +91,6 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const [caballero, setCaballero] = useState<null | 'eligiendo' | number>(null);
   // true desde que se envia la propuesta hasta que el servidor la publica.
   const [propuestaEnEspera, setPropuestaEnEspera] = useState(false);
-  const [intercambioAbierto, setIntercambioAbierto] = useState(false);
-  const [intercambioEnEspera, setIntercambioEnEspera] = useState(false);
-  const intercambioPendiente = useRef<{
-    entregado: Recurso;
-    recibido: Recurso;
-    cantidadEntregada: number;
-    cantidadRecibida: number;
-  } | null>(null);
   // Todo lo que manda el servidor. null = todavia no llega, o no hay sala.
   const [estadoReal, setEstadoReal] = useState<EstadoCatan | null>(null);
 
@@ -110,23 +101,6 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
     function actualizarEstado() {
       const estado = leerEstado(salaActual);
       setEstadoReal(estado);
-      // El intercambio no tiene confirmacion propia: se refleja en los recursos.
-      const pendiente = intercambioPendiente.current;
-      if (pendiente) {
-        const recursos = estado?.jugadores[salaActual.sessionId]?.recursos;
-        const intercambioConfirmado = recursos
-          && recursos[pendiente.entregado] < pendiente.cantidadEntregada
-          && recursos[pendiente.recibido] > pendiente.cantidadRecibida;
-        const fueraDeAcciones = !estado
-          || estado.partida.turnoActual !== salaActual.sessionId
-          || estado.partida.fase !== FASE_PARTIDA.JUEGO
-          || estado.partida.faseJuego !== FASE_JUEGO.ACCIONES;
-        if (intercambioConfirmado || fueraDeAcciones) {
-          intercambioPendiente.current = null;
-          setIntercambioEnEspera(false);
-          setIntercambioAbierto(false);
-        }
-      }
       // Cada descarte aceptado reduce la cuenta publicada por el servidor.
       setDescarteEnEspera((cantidadAnterior) => {
         if (cantidadAnterior === null) return null;
@@ -212,9 +186,6 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       setPropuestaEnEspera(false);
       // Si el servidor rechaza el caballero, se puede elegir otro hexagono.
       setCaballero((anterior) => (typeof anterior === 'number' ? 'eligiendo' : anterior));
-      intercambioPendiente.current = null;
-      setIntercambioEnEspera(false);
-      setIntercambioAbierto(false);
     });
 
     return () => {
@@ -275,7 +246,6 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       && estadoReal?.partida.fase === FASE_PARTIDA.JUEGO
       && estadoReal.partida.faseJuego === FASE_JUEGO.ACCIONES,
   );
-  const puedeIntercambiarBanca = puedePasarTurno && !pasandoTurno;
   const puedeComprarCarta = Boolean(
     sala
       && esMiTurno
@@ -338,20 +308,6 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
     if (!sala || !puedeComprarCarta || compraEnEspera !== null) return;
     setCompraEnEspera(estadoReal?.banca.cartas.length ?? 0);
     sala.send('msgComprarCarta');
-  }
-
-  function intercambiarBanca(entregado: Recurso, recibido: Recurso) {
-    const recursos = miJugadorReal?.recursos;
-    if (!sala || !puedeIntercambiarBanca || intercambioPendiente.current
-      || !recursos || entregado === recibido) return;
-    intercambioPendiente.current = {
-      entregado,
-      recibido,
-      cantidadEntregada: recursos[entregado],
-      cantidadRecibida: recursos[recibido],
-    };
-    setIntercambioEnEspera(true);
-    sala.send('msgIntercambiarBanca', { recursoEntregado: entregado, recursoRecibido: recibido });
   }
 
   function descartarRecurso(recurso: Recurso) {
@@ -536,18 +492,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             puedeProponer={puedeProponer}
             enviando={propuestaEnEspera}
             onProponer={proponerIntercambio}
-          >
-            <IntercambioBanca
-              abierto={intercambioAbierto}
-              puedeIntercambiar={puedeIntercambiarBanca}
-              enviando={intercambioEnEspera}
-              recursosJugador={jugadores[miSessionId]?.recursos ?? recursosPrueba}
-              recursosBanca={banca.recursos}
-              onAbrir={() => setIntercambioAbierto(true)}
-              onCerrar={() => setIntercambioAbierto(false)}
-              onConfirmar={intercambiarBanca}
-            />
-          </ProponerIntercambio>
+          />
         </div>
         <div className="tirDado">
           <TirarDados
