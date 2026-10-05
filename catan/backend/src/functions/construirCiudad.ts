@@ -90,7 +90,7 @@ export function construirCiudad(
 
     function eliminarRecursos(jugador: Jugador, banca: Banca){
         jugador.recursos.set("trigo", jugador.recursos.get("trigo") - 2);
-        jugador.recursos.set("mineral", jugador.recursos.get("minelra") - 3);
+        jugador.recursos.set("mineral", jugador.recursos.get("mineral") - 3);
 
         banca.recursos.set("trigo", banca.recursos.get("trigo") + 2);
         banca.recursos.set("mineral", banca.recursos.get("mineral") + 3);
