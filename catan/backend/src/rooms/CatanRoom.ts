@@ -941,6 +941,7 @@ export class CatanRoom extends Room {
         client.send("error", {
           mensajeError: "No hay una oferta activa"
         })
+        return;
       }
 
       // * Verificar que no sea el jugador que la propuso
@@ -996,7 +997,7 @@ export class CatanRoom extends Room {
           this.partida.ofertaIntercambio.limpiarOferta();
 
           client.send("error", {
-            mensajeError: "Oferta cancelada por falta de recursos"
+            mensajeError: "Oferta cancelada, el negociante no tiene ya recursos"
           })
 
           return;
