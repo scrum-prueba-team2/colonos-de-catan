@@ -24,6 +24,7 @@ import { jugarAbundancia } from "../functions/jugarAbundancia.js";
 import { jugarMonopolio } from "../functions/jugarMonopolio.js";
 import { siguienteTurnoPreconstruccion } from "../functions/siguienteTurnoPreconstruccion.js";
 import { comprarCarta } from "../functions/comprarCarta.js";
+import { sacarJugador } from "../functions/sacarJugador.js";
 
 
 export class CatanRoom extends Room {
@@ -1473,10 +1474,26 @@ export class CatanRoom extends Room {
       const eraCreador = this.partida.creador === client.sessionId;
       
       //* Avisar del abandono
+      this.broadcast("log", {
+        jugador: this.jugadores.get(client.sessionId)?.nombre,
+        mensaje: " ha abandonado la partida"
+      })
+
+      sacarJugador(this.partida, this.tablero, this.banca, this.jugadores, client.sessionId);
+
+      //* Actualizar el creador si era el que abandono
       if(eraCreador){
         this.setMetadata({
           ...this.metadata,
           anfitrion: this.jugadores.get(this.partida.creador)?.nombre ?? ""
+        })
+      }
+
+      //* Si al sacarlo se gana avisar
+      if (this.partida.fase === FasePartida.FINALIZADA){
+        this.broadcast("log", {
+          jugador: "Sistema: ",
+          mensaje: `${this.jugadores.get(this.partida.ganador)?.nombre} gana por abandono...`
         })
       }
     }
