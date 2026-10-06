@@ -318,6 +318,9 @@ export class CatanRoom extends Room {
         ...this.metadata,
         estado: "EN JUEGO"
       });
+
+      //* Cerar la sala para que nadie pueda entrar
+      this.lock();
     },
 
     msgPasarTurno: (client: Client) => {
