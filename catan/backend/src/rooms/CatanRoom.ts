@@ -1421,7 +1421,10 @@ export class CatanRoom extends Room {
   }
 
   onJoin(client: Client, options: any) {
-    //* todo: issue fase del juego
+
+    if(this.partida.fase !== FasePartida.LOBBY){
+      throw new Error("La partida ya ha comenzado, no puedes unirte");
+    }
     if (this.codigoAcceso !== "") {
       if (options.codigoAcceso !== this.codigoAcceso) {
         throw new Error("Codigo de acceso incorrecto");
