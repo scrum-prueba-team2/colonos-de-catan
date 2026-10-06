@@ -4,7 +4,7 @@ import {
   jugadoresPrueba, ordenJugadoresPrueba, turnoActualPrueba, miSessionIdPrueba,
 } from '../datos/jugadoresPrueba';
 import InfoJugadores from '../componentes/infoJugadores';
-
+import Chat, { type MensajeRegistro } from '../componentes/chat';
 import { bancaPrueba } from '../datos/bancaPruebas';
 import Existencias from '../componentes/existencias';
 import { tableroPrueba } from '../datos/tableroPrueba'
@@ -105,6 +105,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   } | null>(null);
   // Todo lo que manda el servidor. null = todavia no llega, o no hay sala.
   const [estadoReal, setEstadoReal] = useState<EstadoCatan | null>(null);
+  const [registro, setRegistro] = useState<string[]>([]);
 
   useEffect(() => {
     if (!sala) return;
@@ -229,9 +230,24 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       setIntercambioAbierto(false);
     });
 
+    const agregar = (linea: string) =>
+      setRegistro((anterior) => [...anterior, linea].slice(-100));
+
+    const dejarDeEscucharChat = sala.onMessage(
+      'chat',
+      ({ jugador, mensaje }: MensajeRegistro) => agregar(`${jugador}: ${mensaje}`),
+    );
+
+    const dejarDeEscucharLog = sala.onMessage(
+      'log',
+      ({ jugador, mensaje }: MensajeRegistro) => agregar(`${jugador}${mensaje}`),
+    );
+
     return () => {
       dejarDeEscucharDados();
       dejarDeEscucharErrores();
+      dejarDeEscucharChat();
+      dejarDeEscucharLog();
     };
   }, [sala]);
 
@@ -479,7 +495,10 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             <TablaCostes />
         </div>
         <div className="chat">
-          area de chat
+          <Chat
+            registro={registro}
+            onEnviar={sala ? (mensaje) => sala.send('msgChat', { mensaje }) : undefined}
+          />
         </div>
         <div className="construir">
           <Construir
