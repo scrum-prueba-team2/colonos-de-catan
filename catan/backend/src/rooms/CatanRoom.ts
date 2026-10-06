@@ -270,7 +270,7 @@ export class CatanRoom extends Room {
       }
 
       //* Verificar si el jugador ha ganado
-      verificarVictoria(this.partida, jugador, client.sessionId);
+      verificarVictoria(this.partida, jugador, client.sessionId, this);
     },
 
     msgIniciarPartida: (client: Client) => {
@@ -477,7 +477,7 @@ export class CatanRoom extends Room {
         }
 
         //* Verificar si el jugador ha ganado
-        verificarVictoria(this.partida, jugador, client.sessionId);
+        verificarVictoria(this.partida, jugador, client.sessionId, this);
       }
 
     },
@@ -1088,7 +1088,7 @@ export class CatanRoom extends Room {
         }
 
         //* Verificar si el jugador ha ganado
-        verificarVictoria(this.partida, this.jugadores.get(client.sessionId), client.sessionId);
+        verificarVictoria(this.partida, this.jugadores.get(client.sessionId), client.sessionId, this);
     },
 
     msgCartaCarreteras: (client: Client) => {
