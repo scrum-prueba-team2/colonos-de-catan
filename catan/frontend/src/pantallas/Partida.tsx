@@ -33,6 +33,7 @@ import "./Partida.css"
 import InfoTurno from '../componentes/infoTurno';
 import ElegirRobo from '../componentes/ElegirRobo';
 import UsarCarta, { type CartaUsable } from '../componentes/UsarCarta';
+import ElegirAbundancia from '../componentes/ElegirAbundancia';
 import ProponerIntercambio, { type Propuesta } from '../componentes/ProponerIntercambio';
 import ResponderIntercambio, { type Respuesta } from '../componentes/ResponderIntercambio';
 
@@ -91,6 +92,10 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
      elige el hexagono del ladron; un numero = mensaje enviado, guarda cuantos
      caballeros usables tenia para saber cuando el servidor lo confirma. */
   const [caballero, setCaballero] = useState<null | 'eligiendo' | number>(null);
+  /* Carta de abundancia, igual que el caballero: null = no se usa; 'eligiendo'
+     = dialogo abierto para elegir los 2 recursos; un numero = mensaje enviado,
+     guarda cuantas abundancias usables tenia para saber cuando se confirma. */
+  const [abundancia, setAbundancia] = useState<null | 'eligiendo' | number>(null);
   // true desde que se envia la propuesta hasta que el servidor la publica.
   const [propuestaEnEspera, setPropuestaEnEspera] = useState(false);
   // true desde que se responde la propuesta hasta que el servidor lo registra.
@@ -192,6 +197,16 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
         setRespuestaEnEspera(false);
       }
 
+      // La abundancia se confirma cuando el servidor le resta la carta al
+      // jugador. Si cambia el turno o la fase, se cancela.
+      setAbundancia((anterior) => {
+        if (anterior === null) return null;
+        if (!estado || estado.partida.turnoActual !== salaActual.sessionId) return null;
+        const usables = estado.jugadores[salaActual.sessionId]?.cartas_usables[CARTA.ABUNDANCIA] ?? 0;
+        if (typeof anterior === 'number') return usables < anterior ? null : anterior;
+        return estado.partida.faseJuego === FASE_JUEGO.ACCIONES ? anterior : null;
+      });
+
     }
 
     actualizarEstado();
@@ -225,6 +240,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       setRespuestaEnEspera(false);
       // Si el servidor rechaza el caballero, se puede elegir otro hexagono.
       setCaballero((anterior) => (typeof anterior === 'number' ? 'eligiendo' : anterior));
+      // Si el servidor rechaza la abundancia, el dialogo sigue abierto para corregir.
+      setAbundancia((anterior) => (typeof anterior === 'number' ? 'eligiendo' : anterior));
       intercambioPendiente.current = null;
       setIntercambioEnEspera(false);
       setIntercambioAbierto(false);
@@ -326,7 +343,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
     puedePasarTurno
       && partidaActual?.cartaJugable
       && tieneCartaUsable
-      && caballero === null,
+      && caballero === null
+      && abundancia === null,
   );
 
   /* Propuesta de intercambio activa. Solo cuenta si es del jugador en turno
@@ -438,7 +456,16 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       // Se reutilizan los circulos de mover al ladron para elegir el hexagono.
       setTipoConstruccion(null);
       setCaballero('eligiendo');
+    } else if (carta === CARTA.ABUNDANCIA) {
+      setAbundancia('eligiendo');
     }
+  }
+
+  function jugarAbundancia(recurso1: Recurso, recurso2: Recurso) {
+    // El backend valida turno, fase, la carta y que la banca tenga los recursos.
+    if (!sala || abundancia !== 'eligiendo') return;
+    setAbundancia(cartasUsables?.[CARTA.ABUNDANCIA] ?? 0);
+    sala.send('msgCartaAbundancia', { recurso1, recurso2 });
   }
 
   function jugarCaballero(hexagono: Coordenada) {
@@ -648,6 +675,16 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
           onElegir={elegirCarta}
           onCerrar={() => setMenuCartasAbierto(false)}
         />
+        {/* Se monta al elegir la carta, asi cada uso empieza con el dialogo vacio. */}
+        {abundancia !== null && (
+          <ElegirAbundancia
+            abierto
+            enviando={typeof abundancia === 'number'}
+            recursosBanca={banca.recursos}
+            onCerrar={() => setAbundancia(null)}
+            onConfirmar={jugarAbundancia}
+          />
+        )}
 
     </div>
   );

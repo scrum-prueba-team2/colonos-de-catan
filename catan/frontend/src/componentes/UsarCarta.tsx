@@ -16,7 +16,7 @@ const CARTAS_USABLES: { clave: CartaUsable; icono: string; efecto: string }[] = 
 
 /* Cartas que ya se pueden jugar desde este menu. Las demas se muestran pero
    quedan desactivadas: su uso es parte de otras issues. */
-const CARTAS_IMPLEMENTADAS: CartaUsable[] = [CARTA.CABALLERO];
+const CARTAS_IMPLEMENTADAS: CartaUsable[] = [CARTA.CABALLERO, CARTA.ABUNDANCIA];
 
 interface Props {
     abierto: boolean;
