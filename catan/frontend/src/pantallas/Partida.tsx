@@ -103,6 +103,11 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
      se esta activando; un numero = mensaje enviado, guarda cuantas cartas de
      carreteras usables tenia para saber cuando el servidor lo confirma. */
   const [carreterasEnEspera, setCarreterasEnEspera] = useState<number | null>(null);
+  /* Caminos gratis (fase CARRETERAS): numero de caminos gratis que quedaban al
+     enviar msgCaminoGratis; se libera cuando el servidor lo descuenta. */
+  const [caminoGratisEnEspera, setCaminoGratisEnEspera] = useState<number | null>(null);
+  // true mientras se esta en la fase CARRETERAS en mi turno (modo camino activo).
+  const modoCaminosGratis = useRef(false);
   // true desde que se envia la propuesta hasta que el servidor la publica.
   const [propuestaEnEspera, setPropuestaEnEspera] = useState(false);
   // true desde que se responde la propuesta hasta que el servidor lo registra.
@@ -232,6 +237,25 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
         return estado.partida.faseJuego === FASE_JUEGO.CARRETERAS || usables < anterior ? null : anterior;
       });
 
+      /* Caminos gratis: al entrar a la fase CARRETERAS en mi turno se activa
+         solo el modo "camino" (se ven las aristas para elegir); al salir (el
+         backend vuelve a ACCIONES tras el ultimo camino) se desactiva. */
+      const colocandoGratis = Boolean(estado
+        && estado.partida.turnoActual === salaActual.sessionId
+        && estado.partida.fase === FASE_PARTIDA.JUEGO
+        && estado.partida.faseJuego === FASE_JUEGO.CARRETERAS);
+      if (colocandoGratis !== modoCaminosGratis.current) {
+        modoCaminosGratis.current = colocandoGratis;
+        setTipoConstruccion(colocandoGratis ? 'camino' : null);
+        setObjetivoConstruccion(null);
+      }
+      // Cada camino gratis se confirma cuando el servidor descuenta uno.
+      setCaminoGratisEnEspera((anterior) => {
+        if (anterior === null) return null;
+        if (!colocandoGratis || !estado || estado.partida.carreterasGratis < anterior) return null;
+        return anterior;
+      });
+
     }
 
     actualizarEstado();
@@ -270,6 +294,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       // Igual con el monopolio: el dialogo sigue abierto para elegir otro recurso.
       setMonopolio((anterior) => (typeof anterior === 'number' ? 'eligiendo' : anterior));
       setCarreterasEnEspera(null);
+      setCaminoGratisEnEspera(null);
       intercambioPendiente.current = null;
       setIntercambioEnEspera(false);
       setIntercambioAbierto(false);
@@ -409,13 +434,18 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const enPreconstruccion = Boolean(
     sala && esMiTurno && estadoReal?.partida.fase === FASE_PARTIDA.PRECONSTRUCCION,
   );
-  const tipoPermitido: TipoConstruccion | null = !enPreconstruccion
-    ? null
-    : estadoReal?.partida.fasePreconstruccion === FASE_PRECONSTRUCCION.CAMINO
-      ? 'camino'
-      : 'poblado';
+  /* Fase CARRETERAS en mi turno: igual que en la preconstruccion, solo se
+     permite el camino y no se cobran recursos (lo valida el backend). */
+  const colocandoCaminosGratis = enFaseCarreteras && esMiTurno;
+  const tipoPermitido: TipoConstruccion | null = colocandoCaminosGratis
+    ? 'camino'
+    : !enPreconstruccion
+      ? null
+      : estadoReal?.partida.fasePreconstruccion === FASE_PRECONSTRUCCION.CAMINO
+        ? 'camino'
+        : 'poblado';
 
-  const puedeConstruir = enPreconstruccion || puedePasarTurno;
+  const puedeConstruir = enPreconstruccion || puedePasarTurno || colocandoCaminosGratis;
 
   function pasarTurno() {
     if (!sala || !puedePasarTurno || pasandoTurno) return;
@@ -554,6 +584,18 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   function seleccionarObjetivo(objetivo: ObjetivoConstruccion) {
     if (!tipoConstruccion) return;
 
+    /* Camino gratis: misma eleccion de arista, pero con msgCaminoGratis y el
+       mismo JSON { h, d, p }. El modo camino sigue activo para el siguiente;
+       el backend vuelve a ACCIONES al terminar los caminos gratis. */
+    if (sala && colocandoCaminosGratis && tipoConstruccion === 'camino') {
+      if (caminoGratisEnEspera !== null) return;
+      setObjetivoConstruccion(objetivo);
+      setCaminoGratisEnEspera(partidaActual?.carreterasGratis ?? 0);
+      sala.send('msgCaminoGratis', objetivo);
+      setEstadoConstruccion('Enviado al servidor: camino gratis.');
+      return;
+    }
+
     setObjetivoConstruccion(objetivo);
 
     // El backend valida turno, fase, recursos y posicion, y confirma por el
@@ -640,7 +682,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
               sx={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}
             >
               {esMiTurno
-                ? `Construcción de carreteras: tienes ${partidaActual?.carreterasGratis ?? 0} camino(s) gratis. El resto de acciones está bloqueado.`
+                ? `Construcción de carreteras: elige una arista para colocar un camino gratis (te quedan ${partidaActual?.carreterasGratis ?? 0}). El resto de acciones está bloqueado.`
                 : `${jugadores[turnoActual]?.nombre ?? 'El jugador en turno'} está usando Construcción de carreteras.`}
             </Alert>
           )}
@@ -648,7 +690,9 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             datos={datosTablero}
             ordenJugadores={ordenJugadores}
             miSessionId={miSessionId}
-            tipoConstruccion={tipoConstruccion}
+            // Mientras se envia un camino gratis se ocultan las aristas: evita
+            // mandar dos y gastar los dos caminos con un doble clic.
+            tipoConstruccion={caminoGratisEnEspera !== null ? null : tipoConstruccion}
             objetivoSeleccionado={objetivoConstruccion}
             onSeleccionarObjetivo={seleccionarObjetivo}
             moviendoLadron={(puedeMoverLadron && !moviendoLadron) || caballero === 'eligiendo'}
