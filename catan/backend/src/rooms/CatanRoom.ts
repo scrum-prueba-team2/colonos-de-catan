@@ -1505,12 +1505,26 @@ export class CatanRoom extends Room {
 
   //* Si un cliente se desconecta tiene 30 segundos para reconectarse
   onDrop(client: Client, code: CloseCode) {
-    //* todo: issue fase del juego
+    
     console.log(`${client.sessionId} droppef with code ${code}`);
+    //* Avisar en el log que alguient tuvo una caida de conexion
+    if(this.partida.fase !== FasePartida.LOBBY){
+      this.broadcast("log", {
+        jugador: this.jugadores.get(client.sessionId)?.nombre,
+        mensaje: " perdio la conexion, tiene 1 minuto para reconectarse"
+      })
+    }
+
+    //*Activar la espera de reconexion por 60 segundos
     this.allowReconnection(client, 30);
   }
 
   onReconnect(client: Client) {
     console.log(`${client.sessionId} reconnected`);
+    //* Avisar que logro reconectarse
+    this.broadcast("log", {
+      jugador: "Sistema: ",
+      mensaje: `${this.jugadores.get(client.sessionId)?.nombre} se ha reconectado`
+    })
   }
 }
