@@ -99,6 +99,10 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const [abundancia, setAbundancia] = useState<null | 'eligiendo' | number>(null);
   // Carta de monopolio: mismos estados que la abundancia.
   const [monopolio, setMonopolio] = useState<null | 'eligiendo' | number>(null);
+  /* Carta de carreteras: no tiene dialogo, se activa al elegirla. null = no
+     se esta activando; un numero = mensaje enviado, guarda cuantas cartas de
+     carreteras usables tenia para saber cuando el servidor lo confirma. */
+  const [carreterasEnEspera, setCarreterasEnEspera] = useState<number | null>(null);
   // true desde que se envia la propuesta hasta que el servidor la publica.
   const [propuestaEnEspera, setPropuestaEnEspera] = useState(false);
   // true desde que se responde la propuesta hasta que el servidor lo registra.
@@ -219,6 +223,15 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
         return estado.partida.faseJuego === FASE_JUEGO.ACCIONES ? anterior : null;
       });
 
+      // La carta de carreteras se confirma cuando el servidor la resta y pasa
+      // la fase a CARRETERAS. Si cambia el turno, se olvida.
+      setCarreterasEnEspera((anterior) => {
+        if (anterior === null) return null;
+        if (!estado || estado.partida.turnoActual !== salaActual.sessionId) return null;
+        const usables = estado.jugadores[salaActual.sessionId]?.cartas_usables[CARTA.CARRETERAS] ?? 0;
+        return estado.partida.faseJuego === FASE_JUEGO.CARRETERAS || usables < anterior ? null : anterior;
+      });
+
     }
 
     actualizarEstado();
@@ -256,6 +269,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       setAbundancia((anterior) => (typeof anterior === 'number' ? 'eligiendo' : anterior));
       // Igual con el monopolio: el dialogo sigue abierto para elegir otro recurso.
       setMonopolio((anterior) => (typeof anterior === 'number' ? 'eligiendo' : anterior));
+      setCarreterasEnEspera(null);
       intercambioPendiente.current = null;
       setIntercambioEnEspera(false);
       setIntercambioAbierto(false);
@@ -359,7 +373,18 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       && tieneCartaUsable
       && caballero === null
       && abundancia === null
-      && monopolio === null,
+      && monopolio === null
+      && carreterasEnEspera === null,
+  );
+
+  /* Fase CARRETERAS (carta de construccion de carreteras). Todas las acciones
+     de la vista dependen de la fase ACCIONES (o DADOS), asi que en esta fase
+     quedan bloqueadas solas; aqui solo se avisa en que fase esta la partida.
+     Colocar los caminos gratis es la siguiente issue (msgCaminoGratis). */
+  const enFaseCarreteras = Boolean(
+    sala
+      && partidaActual?.fase === FASE_PARTIDA.JUEGO
+      && partidaActual.faseJuego === FASE_JUEGO.CARRETERAS,
   );
 
   /* Propuesta de intercambio activa. Solo cuenta si es del jugador en turno
@@ -475,7 +500,20 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       setAbundancia('eligiendo');
     } else if (carta === CARTA.MONOPOLIO) {
       setMonopolio('eligiendo');
+    } else if (carta === CARTA.CARRETERAS) {
+      activarCarreteras();
     }
+  }
+
+  function activarCarreteras() {
+    // No pide datos: el backend valida, resta la carta, da 2 caminos gratis y
+    // pasa la fase a CARRETERAS. Se quita cualquier construccion elegida para
+    // que no queden aristas o vertices activos en el tablero.
+    if (!sala || carreterasEnEspera !== null) return;
+    setTipoConstruccion(null);
+    setObjetivoConstruccion(null);
+    setCarreterasEnEspera(cartasUsables?.[CARTA.CARRETERAS] ?? 0);
+    sala.send('msgCartaCarreteras');
   }
 
   function jugarMonopolio(recurso: Recurso) {
@@ -593,6 +631,17 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
               {caballero === 'eligiendo'
                 ? 'Caballero: elige a qué hexágono mover al ladrón.'
                 : 'Usando caballero…'}
+            </Alert>
+          )}
+          {/* Aviso de la fase CARRETERAS para todos los jugadores. */}
+          {enFaseCarreteras && (
+            <Alert
+              severity="warning"
+              sx={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}
+            >
+              {esMiTurno
+                ? `Construcción de carreteras: tienes ${partidaActual?.carreterasGratis ?? 0} camino(s) gratis. El resto de acciones está bloqueado.`
+                : `${jugadores[turnoActual]?.nombre ?? 'El jugador en turno'} está usando Construcción de carreteras.`}
             </Alert>
           )}
           <Tablero
