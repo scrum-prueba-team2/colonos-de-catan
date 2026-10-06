@@ -1095,20 +1095,28 @@ export class CatanRoom extends Room {
       // * Verificar que la partida siga en curso
       if (this.partida.fase === FasePartida.FINALIZADA) {
         client.send("error", {
+          mensajeError: "La partida ha finalizado"
+        })
+        return;
+      }
+
+      //* Verificar que sea el turno del jugador
+      if (this.partida.turnoActual !== client.sessionId) {
+        client.send("error", {
           mensajeError: "No es tu turno"
         })
         return;
       }
 
-      // * Verificar que estemos en fase de acciones
-      if (this.partida.faseJuego !== FaseJuego.ACCIONES) {
+      //* Verificar que se permita usar carta
+      if(!this.partida.cartaJugable){
         client.send("error", {
-          mensajeError: "Termina de lanzar los dados primero"
+          mensajeError: "Solo una carta por turno"
         })
         return;
       }
 
-      // * Verificar que estamos en fase de acciones
+      // * Verificar que estemos en fase de acciones
       if (this.partida.faseJuego !== FaseJuego.ACCIONES) {
         client.send("error", {
           mensajeError: "Termina de lanzar los dados primero"
