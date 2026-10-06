@@ -1442,7 +1442,7 @@ export class CatanRoom extends Room {
   }
 
   onLeave(client: Client, code: CloseCode) {
-    //* todo: issue fase del juego
+
     console.log(`${client.sessionId} left the room`);
 
     //* Primero revisamos si estamos en la fase de lobby
@@ -1463,6 +1463,21 @@ export class CatanRoom extends Room {
           ...this.metadata,
           anfitrion: this.jugadores.get(this.partida.creador)?.nombre ?? ""
         });
+      }
+      return;
+    }
+
+    //* Si ya se estaba jugando se debe eliminar completamente
+    if(this.partida.fase === FasePartida.JUEGO || FasePartida.PRECONSTRUCCION){
+      //* Ver si era el creador de la sala
+      const eraCreador = this.partida.creador === client.sessionId;
+      
+      //* Avisar del abandono
+      if(eraCreador){
+        this.setMetadata({
+          ...this.metadata,
+          anfitrion: this.jugadores.get(this.partida.creador)?.nombre ?? ""
+        })
       }
     }
   }
