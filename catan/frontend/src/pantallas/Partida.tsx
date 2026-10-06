@@ -34,6 +34,7 @@ import InfoTurno from '../componentes/infoTurno';
 import ElegirRobo from '../componentes/ElegirRobo';
 import UsarCarta, { type CartaUsable } from '../componentes/UsarCarta';
 import ElegirAbundancia from '../componentes/ElegirAbundancia';
+import ElegirMonopolio from '../componentes/ElegirMonopolio';
 import ProponerIntercambio, { type Propuesta } from '../componentes/ProponerIntercambio';
 import ResponderIntercambio, { type Respuesta } from '../componentes/ResponderIntercambio';
 
@@ -96,6 +97,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
      = dialogo abierto para elegir los 2 recursos; un numero = mensaje enviado,
      guarda cuantas abundancias usables tenia para saber cuando se confirma. */
   const [abundancia, setAbundancia] = useState<null | 'eligiendo' | number>(null);
+  // Carta de monopolio: mismos estados que la abundancia.
+  const [monopolio, setMonopolio] = useState<null | 'eligiendo' | number>(null);
   // true desde que se envia la propuesta hasta que el servidor la publica.
   const [propuestaEnEspera, setPropuestaEnEspera] = useState(false);
   // true desde que se responde la propuesta hasta que el servidor lo registra.
@@ -207,6 +210,15 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
         return estado.partida.faseJuego === FASE_JUEGO.ACCIONES ? anterior : null;
       });
 
+      // El monopolio se confirma igual: cuando el servidor le resta la carta.
+      setMonopolio((anterior) => {
+        if (anterior === null) return null;
+        if (!estado || estado.partida.turnoActual !== salaActual.sessionId) return null;
+        const usables = estado.jugadores[salaActual.sessionId]?.cartas_usables[CARTA.MONOPOLIO] ?? 0;
+        if (typeof anterior === 'number') return usables < anterior ? null : anterior;
+        return estado.partida.faseJuego === FASE_JUEGO.ACCIONES ? anterior : null;
+      });
+
     }
 
     actualizarEstado();
@@ -242,6 +254,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       setCaballero((anterior) => (typeof anterior === 'number' ? 'eligiendo' : anterior));
       // Si el servidor rechaza la abundancia, el dialogo sigue abierto para corregir.
       setAbundancia((anterior) => (typeof anterior === 'number' ? 'eligiendo' : anterior));
+      // Igual con el monopolio: el dialogo sigue abierto para elegir otro recurso.
+      setMonopolio((anterior) => (typeof anterior === 'number' ? 'eligiendo' : anterior));
       intercambioPendiente.current = null;
       setIntercambioEnEspera(false);
       setIntercambioAbierto(false);
@@ -344,7 +358,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       && partidaActual?.cartaJugable
       && tieneCartaUsable
       && caballero === null
-      && abundancia === null,
+      && abundancia === null
+      && monopolio === null,
   );
 
   /* Propuesta de intercambio activa. Solo cuenta si es del jugador en turno
@@ -458,7 +473,17 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       setCaballero('eligiendo');
     } else if (carta === CARTA.ABUNDANCIA) {
       setAbundancia('eligiendo');
+    } else if (carta === CARTA.MONOPOLIO) {
+      setMonopolio('eligiendo');
     }
+  }
+
+  function jugarMonopolio(recurso: Recurso) {
+    // El backend valida turno, fase, la carta y el recurso, y le pasa al
+    // jugador todo lo que los demas tengan de ese recurso.
+    if (!sala || monopolio !== 'eligiendo') return;
+    setMonopolio(cartasUsables?.[CARTA.MONOPOLIO] ?? 0);
+    sala.send('msgCartaMonopolio', { recurso });
   }
 
   function jugarAbundancia(recurso1: Recurso, recurso2: Recurso) {
@@ -683,6 +708,15 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             recursosBanca={banca.recursos}
             onCerrar={() => setAbundancia(null)}
             onConfirmar={jugarAbundancia}
+          />
+        )}
+        {monopolio !== null && (
+          <ElegirMonopolio
+            abierto
+            enviando={typeof monopolio === 'number'}
+            misRecursos={jugadores[miSessionId]?.recursos ?? recursosPrueba}
+            onCerrar={() => setMonopolio(null)}
+            onConfirmar={jugarMonopolio}
           />
         )}
 
