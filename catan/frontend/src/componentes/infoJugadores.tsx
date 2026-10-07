@@ -1,5 +1,5 @@
 import type { Jugadores } from '../common/jugador';
-import { totalEnMano, totalRecursos, enRiesgoDeDescarte, colorDeJugador } from '../common/jugador';
+import { totalCartas, totalRecursos, enRiesgoDeDescarte, colorDeJugador } from '../common/jugador';
 
 interface Props {
   jugadores: Jugadores;
@@ -24,12 +24,15 @@ function InfoJugadores({ jugadores, ordenJugadores, turnoActual, miSessionId }: 
         return (
           <div
             key={id}
-            style={turno
-              ? { backgroundColor: color, borderColor: color, borderLeft: `0.5rem solid ${color}` }
-              : { borderLeft: `0.5rem solid ${color}` }}
-            className={`flex-fill min-w-0 overflow-hidden rounded border py-1 px-2
-                        d-flex flex-column justify-content-center small
-                        ${turno ? 'text-white' : ''}`}
+            style={{
+              backgroundColor: color,
+              borderStyle: 'solid',
+              borderWidth: 3,
+              borderColor: turno ? '#fefefe' : 'transparent',
+              borderRadius: 12,
+            }}
+            className="flex-fill min-w-0 overflow-hidden py-1 px-2
+                       d-flex flex-column justify-content-center small text-dark"
           >
             <div className="d-flex align-items-center gap-1 min-w-0">
               <span className={`flex-grow-1 text-truncate fw-semibold ${yo ? 'fw-bold' : ''}`}>
@@ -39,13 +42,18 @@ function InfoJugadores({ jugadores, ordenJugadores, turnoActual, miSessionId }: 
                 {j.puntuacion}/10
               </span>
             </div>
-            <div className={`d-flex justify-content-between ${turno ? 'text-white-50' : 'text-muted'}`}>
-              <span title="Cartas en la mano">{totalEnMano(j)} cartas</span>
+            <div className="d-flex justify-content-between text-muted">
+              <span title="Cartas de desarrollo en la mano, usables mas inusables">
+                {totalCartas(j)} cartas
+              </span>
+              <span title="Caballeros jugados. Decide el ejercito mas grande">
+                {j.caballerosJugados} caballeros
+              </span>
               <span
-                title="De esas, cuántas son de recurso"
+                title="Cartas de recurso en la mano"
                 className={enRiesgoDeDescarte(j) ? 'text-warning fw-bold' : ''}
               >
-                {totalRecursos(j)} rec.
+                {totalRecursos(j)} recursos
               </span>
             </div>
           </div>
