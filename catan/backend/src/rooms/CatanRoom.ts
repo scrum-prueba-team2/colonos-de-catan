@@ -1200,6 +1200,7 @@ export class CatanRoom extends Room {
         client.send("error", {
           mensajeError: resultado.mensaje
         })
+        return;
       }
 
       // * Reducir la cantidad de caminos gratis restantes
