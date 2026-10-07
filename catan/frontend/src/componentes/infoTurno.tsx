@@ -1,25 +1,29 @@
-import type { CSSProperties } from "@mui/material";
-import type { Jugadores } from "../common/jugador";
+import type { Jugadores } from '../common/jugador';
+import { colorDeJugador } from '../common/jugador';
 
 interface Props {
   sessionIdTurno: string;
-  jugadores: Jugadores  
+  jugadores: Jugadores;
+  ordenJugadores: string[];
 }
 
-function getNombreTurno(sessionId:string, jugadores:Jugadores){
+function InfoTurno({ sessionIdTurno, jugadores, ordenJugadores }: Props) {
+  const lista = ordenJugadores.length > 0 ? ordenJugadores : Object.keys(jugadores);
+  const nombre = jugadores[sessionIdTurno]?.nombre;
+  const color = colorDeJugador(lista, sessionIdTurno);
 
-  return jugadores[sessionId].nombre;
-}
-
-function InfoTurno({sessionIdTurno, jugadores}: Props){
-  const estilo = { "--color-jugador": '#f2e7d5' } as CSSProperties;
   return (
-    <div className="ijFicha ijTurno" style={estilo} role="status" aria-live="polite">
-      {/* Cabecera: nombre y puntuación. */}
-      <div className="ijCabecera">
-        <span className="ijNombre" style={{ color: '#000000' }}>Turno de: {getNombreTurno(sessionIdTurno, jugadores)}</span>
-      </div>
+    <div
+      className="flex-fill w-100 rounded overflow-hidden text-white
+                 d-flex flex-column justify-content-center align-items-center"
+      style={{ backgroundColor: color }}
+      role="status"
+      aria-live="polite"
+    >
+      <span className="small">Turno de</span>
+      <span className="fw-bold text-truncate mw-100 px-2">{nombre ?? '—'}</span>
     </div>
   );
 }
-export default InfoTurno
+
+export default InfoTurno;

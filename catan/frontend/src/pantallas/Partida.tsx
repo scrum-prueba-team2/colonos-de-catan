@@ -4,6 +4,7 @@ import {
   jugadoresPrueba, ordenJugadoresPrueba, turnoActualPrueba, miSessionIdPrueba,
 } from '../datos/jugadoresPrueba';
 import InfoJugadores from '../componentes/infoJugadores';
+import InfoTurno from '../componentes/infoTurno';
 import Chat, { type MensajeRegistro } from '../componentes/chat';
 import { bancaPrueba } from '../datos/bancaPruebas';
 import Existencias from '../componentes/existencias';
@@ -751,8 +752,14 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             onLanzar={lanzarDados}
           />
         </div>
-        <div className="finTurno">
+        <div className="finTurno d-flex flex-column gap-1 p-1">
+          <InfoTurno
+            sessionIdTurno={turnoActual}
+            jugadores={jugadores}
+            ordenJugadores={ordenJugadores}
+          />
           <Button
+            className="flex-fill"
             type="button"
             variant="contained"
             fullWidth
