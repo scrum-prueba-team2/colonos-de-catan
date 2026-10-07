@@ -1,15 +1,14 @@
 import type { Jugadores } from '../common/jugador';
-import { totalEnMano, totalRecursos, enRiesgoDeDescarte, colorDeJugador } from '../common/jugador';
+import { totalCartas, totalRecursos, enRiesgoDeDescarte, colorDeJugador } from '../common/jugador';
 
 interface Props {
   jugadores: Jugadores;
   ordenJugadores: string[];
-  turnoActual: string;
   miSessionId: string;
 }
 
-function InfoJugadores({ jugadores, ordenJugadores, turnoActual, miSessionId }: Props) {
-  const lista = ordenJugadores.length > 0 ? ordenJugadores : Object.keys(jugadores);
+function InfoJugadores({ jugadores, ordenJugadores, miSessionId }: Props) {
+  const lista = ordenJugadores.length ? ordenJugadores : Object.keys(jugadores);
 
   return (
     <div className="d-flex gap-1 w-100 h-100">
@@ -17,35 +16,32 @@ function InfoJugadores({ jugadores, ordenJugadores, turnoActual, miSessionId }: 
         const j = jugadores[id];
         if (!j) return null;
 
-        const color = colorDeJugador(lista, id);
-        const turno = id === turnoActual;
         const yo = id === miSessionId;
 
         return (
           <div
             key={id}
-            style={turno
-              ? { backgroundColor: color, borderColor: color, borderLeft: `0.5rem solid ${color}` }
-              : { borderLeft: `0.5rem solid ${color}` }}
-            className={`flex-fill min-w-0 overflow-hidden rounded border py-1 px-2
-                        d-flex flex-column justify-content-center small
-                        ${turno ? 'text-white' : ''}`}
+            style={{ backgroundColor: colorDeJugador(lista, id) }}
+            className="flex-fill min-w-0 overflow-hidden p-1 px-2 rounded-3 d-flex flex-column justify-content-center text-white border-0"
           >
             <div className="d-flex align-items-center gap-1 min-w-0">
-              <span className={`flex-grow-1 text-truncate fw-semibold ${yo ? 'fw-bold' : ''}`}>
-                {yo && '(Yo)'}{j.nombre}
+              <span className="flex-grow-1 text-truncate text-white fw-semibold">
+                {yo && '(Yo) '}{j.nombre}
               </span>
-              <span className="fw-bold flex-shrink-0">
-                {j.puntuacion}/10
-              </span>
+              <span className="fw-bold flex-shrink-0 text-white">{j.puntuacion}/10</span>
             </div>
-            <div className={`d-flex justify-content-between ${turno ? 'text-white-50' : 'text-muted'}`}>
-              <span title="Cartas en la mano">{totalEnMano(j)} cartas</span>
+            <div className="d-flex justify-content-between text-white">
+              <span title="Cartas de desarrollo en la mano, usables mas inusables">
+                {totalCartas(j)} cartas
+              </span>
+              <span title="Caballeros jugados. Decide el ejercito mas grande">
+                {j.caballerosJugados} caballeros
+              </span>
               <span
-                title="De esas, cuántas son de recurso"
-                className={enRiesgoDeDescarte(j) ? 'text-warning fw-bold' : ''}
+                title="Cartas de recurso en la mano"
+                className={enRiesgoDeDescarte(j) ? 'text-warning fw-bold' : 'text-white'}
               >
-                {totalRecursos(j)} rec.
+                {totalRecursos(j)} recursos
               </span>
             </div>
           </div>

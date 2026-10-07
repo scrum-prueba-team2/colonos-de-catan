@@ -4,7 +4,8 @@ import {
   jugadoresPrueba, ordenJugadoresPrueba, turnoActualPrueba, miSessionIdPrueba,
 } from '../datos/jugadoresPrueba';
 import InfoJugadores from '../componentes/infoJugadores';
-import Chat, { type MensajeRegistro } from '../componentes/chat';
+import InfoTurno from '../componentes/infoTurno';
+import Chat, { type LineaRegistro, type MensajeRegistro } from '../componentes/chat';
 import { bancaPrueba } from '../datos/bancaPruebas';
 import Existencias from '../componentes/existencias';
 import { tableroPrueba } from '../datos/tableroPrueba'
@@ -30,7 +31,6 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
 import "./Partida.css"
-import InfoTurno from '../componentes/infoTurno';
 import ElegirRobo from '../componentes/ElegirRobo';
 import UsarCarta, { type CartaUsable } from '../componentes/UsarCarta';
 import ElegirAbundancia from '../componentes/ElegirAbundancia';
@@ -125,7 +125,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   } | null>(null);
   // Todo lo que manda el servidor. null = todavia no llega, o no hay sala.
   const [estadoReal, setEstadoReal] = useState<EstadoCatan | null>(null);
-  const [registro, setRegistro] = useState<string[]>([]);
+  const [registro, setRegistro] = useState<LineaRegistro[]>([]);
 
   useEffect(() => {
     if (!sala) return;
@@ -303,17 +303,19 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       setIntercambioAbierto(false);
     });
 
-    const agregar = (linea: string) =>
+    const agregar = (linea: LineaRegistro) =>
       setRegistro((anterior) => [...anterior, linea].slice(-100));
 
     const dejarDeEscucharChat = sala.onMessage(
       'chat',
-      ({ jugador, mensaje }: MensajeRegistro) => agregar(`${jugador}: ${mensaje}`),
+      ({ jugador, mensaje }: MensajeRegistro) =>
+        agregar({ tipo: 'chat', jugador, mensaje }),
     );
 
     const dejarDeEscucharLog = sala.onMessage(
       'log',
-      ({ jugador, mensaje }: MensajeRegistro) => agregar(`${jugador}${mensaje}`),
+      ({ jugador, mensaje }: MensajeRegistro) =>
+        agregar({ tipo: 'log', jugador, mensaje }),
     );
 
     return () => {
@@ -662,13 +664,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
           <InfoJugadores
             jugadores={jugadores}
             ordenJugadores={ordenJugadores}
-            turnoActual={turnoActual}
             miSessionId={miSessionId}
           />
-        </div>
-        <div className="infoPartida">
-          {/*INFORMACION DE LA PARTIDA*/}
-            <InfoTurno sessionIdTurno={turnoActual} jugadores={jugadores} />
         </div>
         <div className="tablero" style={{ position: 'relative' }}>
           {caballero !== null && (
@@ -732,9 +729,6 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             onUsarCarta={() => setMenuCartasAbierto(true)}
           />
         </div>
-        <div className="carEspeciales">
-          area de cartas especiales 
-        </div>
         <div className="negociar">
           {/* A quien le falta responder ve la propuesta con ❌ y ✅; al responder
               vuelve el recuadro normal de proponer (con el intercambio con la banca). */}
@@ -776,8 +770,14 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             onLanzar={lanzarDados}
           />
         </div>
-        <div className="finTurno">
+        <div className="finTurno d-flex flex-column gap-1 p-1">
+          <InfoTurno
+            sessionIdTurno={turnoActual}
+            jugadores={jugadores}
+            ordenJugadores={ordenJugadores}
+          />
           <Button
+            className="flex-fill"
             type="button"
             variant="contained"
             fullWidth
