@@ -3,10 +3,11 @@ import { Button, Card, Form, InputGroup } from 'react-bootstrap';
 
 // "chat" y "log", broadcast("chat", ...) y broadcast("log", ...). 
 export type MensajeRegistro = { jugador: string; mensaje: string };
+export type LineaRegistro = { tipo: 'chat' | 'log' } & MensajeRegistro;
 
 type Props = {
   /* Ya convertidos a texto plano: esta lista es lo unico que se pinta. */
-  registro: string[];
+    registro: LineaRegistro[];
   /* Sin sala no hay a donde enviar, asi que la caja se deshabilita. */
   onEnviar?: (texto: string) => void;
 };
@@ -30,7 +31,18 @@ function Chat({ registro, onEnviar }: Props) {
     <Card className="h-100">
       <Card.Body className="d-flex flex-column p-2 overflow-hidden">
         <div className="flex-grow-1 overflow-auto small" role="log">
-          {registro.map((linea, i) => <div key={i}>{linea}</div>)}
+          {registro.map((linea, i) => (linea.tipo === 'chat' ? (
+            <div
+              key={i}
+              className="px-2 rounded bg-primary-subtle border-primary"
+            >
+              <span className="fw-bold">{linea.jugador}</span>: {linea.mensaje}
+            </div>
+          ) : (
+            <div key={i} className="mb-1 text-secondary fst-italic lh-sm" style={{ fontSize: '0.9rem' }}>
+              {linea.jugador}{linea.mensaje}
+            </div>
+          )))}
           <div ref={finDeLista} />
         </div>
         <Form onSubmit={enviar} className="mt-2">

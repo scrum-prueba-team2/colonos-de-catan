@@ -5,7 +5,7 @@ import {
 } from '../datos/jugadoresPrueba';
 import InfoJugadores from '../componentes/infoJugadores';
 import InfoTurno from '../componentes/infoTurno';
-import Chat, { type MensajeRegistro } from '../componentes/chat';
+import Chat, { type LineaRegistro, type MensajeRegistro } from '../componentes/chat';
 import { bancaPrueba } from '../datos/bancaPruebas';
 import Existencias from '../componentes/existencias';
 import { tableroPrueba } from '../datos/tableroPrueba'
@@ -122,7 +122,7 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   } | null>(null);
   // Todo lo que manda el servidor. null = todavia no llega, o no hay sala.
   const [estadoReal, setEstadoReal] = useState<EstadoCatan | null>(null);
-  const [registro, setRegistro] = useState<string[]>([]);
+  const [registro, setRegistro] = useState<LineaRegistro[]>([]);
 
   useEffect(() => {
     if (!sala) return;
@@ -300,17 +300,19 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
       setIntercambioAbierto(false);
     });
 
-    const agregar = (linea: string) =>
+    const agregar = (linea: LineaRegistro) =>
       setRegistro((anterior) => [...anterior, linea].slice(-100));
 
     const dejarDeEscucharChat = sala.onMessage(
       'chat',
-      ({ jugador, mensaje }: MensajeRegistro) => agregar(`${jugador}: ${mensaje}`),
+      ({ jugador, mensaje }: MensajeRegistro) =>
+        agregar({ tipo: 'chat', jugador, mensaje }),
     );
 
     const dejarDeEscucharLog = sala.onMessage(
       'log',
-      ({ jugador, mensaje }: MensajeRegistro) => agregar(`${jugador}${mensaje}`),
+      ({ jugador, mensaje }: MensajeRegistro) =>
+        agregar({ tipo: 'log', jugador, mensaje }),
     );
 
     return () => {
