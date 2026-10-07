@@ -4,19 +4,21 @@
     display: grid;
     grid-template-columns: 1.2fr repeat(4, 1.25fr) 1fr;
     grid-template-rows: 0.8fr 3.5fr 4fr 3fr;
-    grid-column-gap: 0px;
-    grid-row-gap: 0px;
+    grid-column-gap: 5px;
+    grid-row-gap: 5px;
+    padding: 10px;
     min-height: 0;
     overflow: hidden;
+    background-color: #BFD8E8; 
 }
 .marcoPartida > div {
     overflow: hidden;
     min-height: 0;
 }
 
-/*solo para diferenciar los componentes, se eliminara en vercion final*/
-.marcoPartida > div, .marcoPartida > div > div  {
-    border: 2px solid red;
+.marcoPartida > div:not(.tablero):not(.infoJugadores) {
+    background-color: #ffffff; 
+    border-radius: 0.5rem;
 }
 
 .salir { grid-area: 1 / 1 / 2 / 2; }
@@ -30,4 +32,7 @@
 .finTurno { grid-area: 4 / 6 / 5 / 7; }
 .existencias { grid-area: 3 / 1 / 4 / 2; }
 .infoJugadores { grid-area: 1 / 2 / 2 / 7; }
-.tablero { grid-area: 2 / 2 / 4 / 6; }
+.tablero { 
+    grid-area: 2 / 2 / 4 / 6; 
+    border: 5px solid white;
+}

@@ -651,7 +651,6 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
           <InfoJugadores
             jugadores={jugadores}
             ordenJugadores={ordenJugadores}
-            turnoActual={turnoActual}
             miSessionId={miSessionId}
           />
         </div>
