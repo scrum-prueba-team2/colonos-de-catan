@@ -35,6 +35,7 @@ import ElegirRobo from '../componentes/ElegirRobo';
 import UsarCarta, { type CartaUsable } from '../componentes/UsarCarta';
 import ElegirAbundancia from '../componentes/ElegirAbundancia';
 import ElegirMonopolio from '../componentes/ElegirMonopolio';
+import FinPartida from '../componentes/FinPartida';
 import ProponerIntercambio, { type Propuesta } from '../componentes/ProponerIntercambio';
 import ResponderIntercambio, { type Respuesta } from '../componentes/ResponderIntercambio';
 
@@ -89,6 +90,8 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const [compraEnEspera, setCompraEnEspera] = useState<number | null>(null);
   const [robando, setRobando] = useState(false);
   const [menuCartasAbierto, setMenuCartasAbierto] = useState(false);
+  // true cuando el jugador cierra el modal de fin de partida con "Ver tablero".
+  const [verTableroFinal, setVerTableroFinal] = useState(false);
   /* Carta de caballero: null = no se esta usando; 'eligiendo' = el jugador
      elige el hexagono del ladron; un numero = mensaje enviado, guarda cuantos
      caballeros usables tenia para saber cuando el servidor lo confirma. */
@@ -335,16 +338,12 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const partidaActual = estadoReal?.partida;
   const miJugadorReal = estadoReal?.jugadores[miSessionId];
   const descartesPendientes = partidaActual?.jugadoresParaDescartar[miSessionId] ?? 0;
-  // El backend procesa primero al jugador pendiente que aparece en ordenJugadores.
-  const siguienteDescartador = partidaActual?.ordenJugadores.find(
-    (id) => (partidaActual.jugadoresParaDescartar[id] ?? 0) > 0,
-  );
+  
   const esSuTurnoDeDescartar = Boolean(
     sala
       && partidaActual?.fase === FASE_PARTIDA.JUEGO
       && partidaActual.faseJuego === FASE_JUEGO.DESCARTE
-      && descartesPendientes > 0
-      && siguienteDescartador === miSessionId,
+      && descartesPendientes > 0,
   );
   const puedeLanzarDados = Boolean(
     sala
@@ -406,6 +405,18 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
      de la vista dependen de la fase ACCIONES (o DADOS), asi que en esta fase
      quedan bloqueadas solas; aqui solo se avisa en que fase esta la partida.
      Colocar los caminos gratis es la siguiente issue (msgCaminoGratis). */
+  /* Fin del juego: el backend pone partida.ganador y la fase FINALIZADA.
+     Todas las acciones dependen de la fase JUEGO, asi que ya quedan
+     bloqueadas; solo sigue funcionando el boton Salir. */
+  const partidaFinalizada = Boolean(
+    sala
+      && partidaActual?.fase === FASE_PARTIDA.FINALIZADA
+      && partidaActual.ganador !== '',
+  );
+  const nombreGanador = partidaActual?.ganador
+    ? (jugadores[partidaActual.ganador]?.nombre ?? 'Un jugador')
+    : '';
+
   const enFaseCarreteras = Boolean(
     sala
       && partidaActual?.fase === FASE_PARTIDA.JUEGO
@@ -675,6 +686,15 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
                 : 'Usando caballero…'}
             </Alert>
           )}
+          {/* Tras "Ver tablero": aviso fijo de que la partida termino. */}
+          {partidaFinalizada && verTableroFinal && (
+            <Alert
+              severity="success"
+              sx={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}
+            >
+              Partida finalizada: ganó <strong>{nombreGanador}</strong>. Usa "Salir" para dejar la sala.
+            </Alert>
+          )}
           {/* Aviso de la fase CARRETERAS para todos los jugadores. */}
           {enFaseCarreteras && (
             <Alert
@@ -812,6 +832,13 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             onConfirmar={jugarMonopolio}
           />
         )}
+        <FinPartida
+          abierto={partidaFinalizada && !verTableroFinal}
+          nombreGanador={nombreGanador}
+          soyElGanador={partidaActual?.ganador === miSessionId}
+          onSalir={() => onSalir?.()}
+          onVerTablero={() => setVerTableroFinal(true)}
+        />
 
     </div>
   );

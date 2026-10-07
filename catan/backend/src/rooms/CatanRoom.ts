@@ -608,22 +608,7 @@ export class CatanRoom extends Room {
       }
 
       //* Encontrar al jugador que debe descartar
-      let jugadorPorDescartar = "";
-      for (const sessionId of this.partida.ordenJugadores) {
-        if (this.partida.jugadoresParaDescartar.has(sessionId)) {
-          jugadorPorDescartar = sessionId;
-          break;
-        }
-
-      }
-
-      //* Si no es el turno del jugador que debe descartar, enviar error
-      if (client.sessionId !== jugadorPorDescartar) {
-        client.send("error", {
-          mensajeError: "No es tu turno para descartar"
-        })
-        return;
-      }
+      const jugadorPorDescartar = client.sessionId;
 
       //* Intentar descartar
       const resultado = descartarRecurso(
@@ -827,7 +812,10 @@ export class CatanRoom extends Room {
       })
 
       //* Eliminar la carta de caballero del jugador
-      jugarCaballero(this.jugadores, client.sessionId, this.partida); 
+      jugarCaballero(this.jugadores, client.sessionId, this.partida, this); 
+
+      //* Verificar si el jugador ha ganado
+      verificarVictoria(this.partida, jugador, client.sessionId, this);
       
       //* Deshabilitar el uso de otra carta este turno
       this.partida.cartaJugable = false;     
