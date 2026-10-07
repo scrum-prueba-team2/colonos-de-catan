@@ -30,7 +30,6 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
 import "./Partida.css"
-import InfoTurno from '../componentes/infoTurno';
 import ElegirRobo from '../componentes/ElegirRobo';
 import UsarCarta, { type CartaUsable } from '../componentes/UsarCarta';
 import ElegirAbundancia from '../componentes/ElegirAbundancia';
@@ -654,10 +653,6 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             turnoActual={turnoActual}
             miSessionId={miSessionId}
           />
-        </div>
-        <div className="infoPartida">
-          {/*INFORMACION DE LA PARTIDA*/}
-            <InfoTurno sessionIdTurno={turnoActual} jugadores={jugadores} />
         </div>
         <div className="tablero" style={{ position: 'relative' }}>
           {caballero !== null && (
