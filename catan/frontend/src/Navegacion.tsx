@@ -225,7 +225,11 @@ function Navegacion() {
     borrarSesion();
     salidaVoluntaria.current = true;
     // consented = true: el servidor no guarda el asiento para reconectar.
-    room.leave(true);
+    if(room.connection?.isOpen){
+      room.leave(true);
+    }else{
+      room.onLeave.invoke(4000);
+    }
   }
 
   function abrirCrearSala(origen: "elegir" | "lobby") {

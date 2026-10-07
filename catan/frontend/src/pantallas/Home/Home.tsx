@@ -17,8 +17,8 @@ interface MiembroEquipo {
 }
 
 const LIDERAZGO: MiembroEquipo[] = [
+  { nombre: "Angel Jiménez", rol: "Product owner" },
   { nombre: "Oscar Menéndez", rol: "Scrum master" },
-  { nombre: "Ángel Jiménez", rol: "Product owner" },
 ];
 
 const DESARROLLADORES: string[] = [
@@ -122,7 +122,7 @@ function Home({ onAbrirMenu }: HomeProps) {
       </nav>
 
       <header className="container text-center mb-5">
-        <Chip label="En desarrollo · versión de prueba" color="primary" variant="outlined" size="small" />
+        <Chip label="Beta 1.0 · version jugable" color="primary" variant="outlined" size="small" />
         <div className="my-3">
           <HexIsla />
         </div>
