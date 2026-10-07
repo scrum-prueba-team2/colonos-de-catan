@@ -24,6 +24,7 @@ import { jugarAbundancia } from "../functions/jugarAbundancia.js";
 import { jugarMonopolio } from "../functions/jugarMonopolio.js";
 import { siguienteTurnoPreconstruccion } from "../functions/siguienteTurnoPreconstruccion.js";
 import { comprarCarta } from "../functions/comprarCarta.js";
+import { sacarJugador } from "../functions/sacarJugador.js";
 
 
 export class CatanRoom extends Room {
@@ -318,6 +319,9 @@ export class CatanRoom extends Room {
         ...this.metadata,
         estado: "EN JUEGO"
       });
+
+      //* Cerar la sala para que nadie pueda entrar
+      this.lock();
     },
 
     msgPasarTurno: (client: Client) => {
@@ -1427,7 +1431,10 @@ export class CatanRoom extends Room {
   }
 
   onJoin(client: Client, options: any) {
-    //* todo: issue fase del juego
+
+    if(this.partida.fase !== FasePartida.LOBBY){
+      throw new Error("La partida ya ha comenzado, no puedes unirte");
+    }
     if (this.codigoAcceso !== "") {
       if (options.codigoAcceso !== this.codigoAcceso) {
         throw new Error("Codigo de acceso incorrecto");
@@ -1445,7 +1452,7 @@ export class CatanRoom extends Room {
   }
 
   onLeave(client: Client, code: CloseCode) {
-    //* todo: issue fase del juego
+
     console.log(`${client.sessionId} left the room`);
 
     //* Primero revisamos si estamos en la fase de lobby
@@ -1467,6 +1474,37 @@ export class CatanRoom extends Room {
           anfitrion: this.jugadores.get(this.partida.creador)?.nombre ?? ""
         });
       }
+      return;
+    }
+
+    //* Si ya se estaba jugando se debe eliminar completamente
+    if(this.partida.fase === FasePartida.JUEGO || FasePartida.PRECONSTRUCCION){
+      //* Ver si era el creador de la sala
+      const eraCreador = this.partida.creador === client.sessionId;
+      
+      //* Avisar del abandono
+      this.broadcast("log", {
+        jugador: this.jugadores.get(client.sessionId)?.nombre,
+        mensaje: " ha abandonado la partida"
+      })
+
+      sacarJugador(this.partida, this.tablero, this.banca, this.jugadores, client.sessionId);
+
+      //* Actualizar el creador si era el que abandono
+      if(eraCreador){
+        this.setMetadata({
+          ...this.metadata,
+          anfitrion: this.jugadores.get(this.partida.creador)?.nombre ?? ""
+        })
+      }
+
+      //* Si al sacarlo se gana avisar
+      if (this.partida.fase === FasePartida.FINALIZADA){
+        this.broadcast("log", {
+          jugador: "Sistema: ",
+          mensaje: `${this.jugadores.get(this.partida.ganador)?.nombre} gana por abandono...`
+        })
+      }
     }
   }
 
@@ -1476,12 +1514,26 @@ export class CatanRoom extends Room {
 
   //* Si un cliente se desconecta tiene 30 segundos para reconectarse
   onDrop(client: Client, code: CloseCode) {
-    //* todo: issue fase del juego
+    
     console.log(`${client.sessionId} droppef with code ${code}`);
+    //* Avisar en el log que alguient tuvo una caida de conexion
+    if(this.partida.fase !== FasePartida.LOBBY){
+      this.broadcast("log", {
+        jugador: this.jugadores.get(client.sessionId)?.nombre,
+        mensaje: " perdio la conexion, tiene 1 minuto para reconectarse"
+      })
+    }
+
+    //*Activar la espera de reconexion por 60 segundos
     this.allowReconnection(client, 30);
   }
 
   onReconnect(client: Client) {
     console.log(`${client.sessionId} reconnected`);
+    //* Avisar que logro reconectarse
+    this.broadcast("log", {
+      jugador: "Sistema: ",
+      mensaje: `${this.jugadores.get(client.sessionId)?.nombre} se ha reconectado`
+    })
   }
 }
