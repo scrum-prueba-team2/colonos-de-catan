@@ -338,16 +338,12 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
   const partidaActual = estadoReal?.partida;
   const miJugadorReal = estadoReal?.jugadores[miSessionId];
   const descartesPendientes = partidaActual?.jugadoresParaDescartar[miSessionId] ?? 0;
-  // El backend procesa primero al jugador pendiente que aparece en ordenJugadores.
-  const siguienteDescartador = partidaActual?.ordenJugadores.find(
-    (id) => (partidaActual.jugadoresParaDescartar[id] ?? 0) > 0,
-  );
+  
   const esSuTurnoDeDescartar = Boolean(
     sala
       && partidaActual?.fase === FASE_PARTIDA.JUEGO
       && partidaActual.faseJuego === FASE_JUEGO.DESCARTE
-      && descartesPendientes > 0
-      && siguienteDescartador === miSessionId,
+      && descartesPendientes > 0,
   );
   const puedeLanzarDados = Boolean(
     sala
