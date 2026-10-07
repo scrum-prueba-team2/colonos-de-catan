@@ -708,9 +708,6 @@ function Partida({ sala, onSolicitarConstruccion, onSalir }: Props) {
             onUsarCarta={() => setMenuCartasAbierto(true)}
           />
         </div>
-        <div className="carEspeciales">
-          area de cartas especiales 
-        </div>
         <div className="negociar">
           {/* A quien le falta responder ve la propuesta con ❌ y ✅; al responder
               vuelve el recuadro normal de proponer (con el intercambio con la banca). */}
